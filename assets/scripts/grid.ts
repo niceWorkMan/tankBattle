@@ -5,6 +5,8 @@ const { ccclass, property } = _decorator;
 export class grid extends Component {
     private _sprite;
     private _indexLabel;
+    private _cellX;
+    private _cellY;
 
 
     start() {
@@ -41,10 +43,13 @@ export class grid extends Component {
     setIndexLabel(x, y) {
         x = x + "";
         y = y + "";
+        this._cellX=x;
+        this._cellY=y;
         var indexLabelNode = this.node.getChildByName("indexLabel");
         this._indexLabel = indexLabelNode.getComponent(Label);
         this._indexLabel.string = "[" + x + "," + y + "]";
     }
+
 
 
     public test() {
