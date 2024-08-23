@@ -6,8 +6,8 @@ const { ccclass, property } = _decorator;
 export class grid extends Component {
     private _sprite;
     private _indexLabel;
-    private _cellX;
-    private _cellY;
+    private _cellX:number;
+    private _cellY:number;
     private _gridManager;
     //是否是障碍物
     private _isObstacle: boolean;
@@ -50,14 +50,18 @@ export class grid extends Component {
     /**
      * 设置方格索引
      */
-    setIndexLabel(x, y) {
-        x = x + "";
-        y = y + "";
+    setIndexLabel(x:number, y:number) {
+        var xLabel = x + "";
+        var yLable = y + "";
         this._cellX = x;
         this._cellY = y;
         var indexLabelNode = this.node.getChildByName("indexLabel");
         this._indexLabel = indexLabelNode.getComponent(Label);
-        this._indexLabel.string = "[" + x + "," + y + "]";
+        this._indexLabel.string = "[" + xLabel + "," + yLable + "]";
+    }
+
+    setLabel(str){
+        this._indexLabel.string =str;
     }
 
     //障碍物
@@ -65,7 +69,7 @@ export class grid extends Component {
         this._isObstacle = isObstacle;
         this._sprite = this.getComponent(Sprite)
         if (isObstacle) {
-            this._sprite.color = { r: 120, g: 241, b: 103, a: 255 };
+            this._sprite.color = { r: 216, g: 47, b: 47, a: 255 };
         }
         else {
             this._sprite.color = { r: 230, g: 241, b: 103, a: 255 };

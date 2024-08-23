@@ -1,4 +1,11 @@
-import { _decorator, Component, EventKeyboard, ImageAsset, Input, input, instantiate, JsonAsset, KeyCode, loader, math, Node, Prefab, resources, Sprite, SpriteFrame, SystemEvent, Vec2, Vec3 } from 'cc';
+
+/*
+*create date 2024-08-23 update date 2024-08-23
+*auth by PengTao
+*/
+
+
+import { _decorator, Component, EventKeyboard, ImageAsset, Input, input, instantiate, JsonAsset, KeyCode, loader, math, Node, Prefab, random, resources, Sprite, SpriteFrame, SystemEvent, Vec2, Vec3 } from 'cc';
 import { grid } from './grid';
 import { tank } from './tank';
 import { aStar } from './core/aStar';
@@ -61,16 +68,16 @@ export class gridManager extends Component {
                 _grid.setPosition(new Vec3(this.gridStartPos.x + i * 60, this.gridStartPos.y + j * 60));
                 var gScript = _grid.getComponent(grid)
 
-                //加入数组
+                //加入一维数组
                 _gridArr_ins.push(_grid);
                 if (gScript) {
                     gScript.setGridManager(this);
                     gScript.setIndexLabel(i, j);
-
-                    var random = Math.random();
-                    gScript.setObstacle(random < 0.2);
+                    //默认无障碍物
+                    gScript.setObstacle(false);
                 }
             }
+            //加入二维数组
             this._gridNodeArr.push(_gridArr_ins);
         }
         this._astar.setGridNodeArr(this._gridNodeArr);
@@ -84,15 +91,14 @@ export class gridManager extends Component {
                 //     var y = Math.ceil(Math.random() * 9)
                 //     this.generateTankByCellIndex(x, y);
                 // }
-
-
-
                 //this._astar.caculate(this._gridNodeArr[3][4].getComponent(grid),this._gridNodeArr[10][8].getComponent(grid))
-              
-              this.testNeighbor();
-              
-              
-               
+
+
+
+                this.testSetObstacle();
+                this.testAstarPath(new Vec2(0, 0), new Vec2(23, 9));
+
+
                 break;
 
 
@@ -155,15 +161,22 @@ export class gridManager extends Component {
     }
 
 
-    testNeighbor(){
-        var target=new Vec2(10, 0)
-        var limitMatrix: Vec2[] = this._astar.getNeighborMitrax(target);
-        for (var j = limitMatrix[0].x; j <= limitMatrix[0].y; j++) {
-            for (var k = limitMatrix[1].x; k <= limitMatrix[1].y; k++) {
-                var newIndex: Vec2 = new Vec2(j, k);
-                //var gObj: grid = this._gridNodeArr[newIndex.x][newIndex.y].getComponent(grid);
-                if (newIndex.x !=target.x||newIndex.y!=target.y ) {
-                    this._gridNodeArr[newIndex.x][newIndex.y].getComponent(grid).setSpriteColor({ r: 200, g: 100, b: 100, a: 255 });
+    testAstarPath(startPos: Vec2, endPos: Vec2) {
+        this._astar.clearList();
+        var start: grid = this._gridNodeArr[startPos.x][startPos.y].getComponent(grid);
+        var end: grid = this._gridNodeArr[endPos.x][endPos.y].getComponent(grid);
+        start.setSpriteColor({ r: 25, g: 88, b: 219, a: 255 })
+        end.setSpriteColor({ r: 25, g: 88, b: 219, a: 255 })
+        this._astar.getPriceMixNeighborGrid(end, start);
+    }
+
+    testSetObstacle(){
+
+
+        for(var i=1;i<22;i++){
+            for(var j=0;j<=9;j++){
+                if(Math.random()>0.8){
+                  this._gridNodeArr[i][j].getComponent(grid).setObstacle(true);
                 }
             }
         }
