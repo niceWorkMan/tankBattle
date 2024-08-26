@@ -92,10 +92,8 @@ export class gridManager extends Component {
                 //     this.generateTankByCellIndex(x, y);
                 // }
                 //this._astar.caculate(this._gridNodeArr[3][4].getComponent(grid),this._gridNodeArr[10][8].getComponent(grid))
-
                 this.testSetObstacle();
-                this.testAstarPath(new Vec2(0, 5), new Vec2(20, 9));
-
+                this.testAstarPath(new Vec2(0, 5), new Vec2(23, 9));
                 break;
 
 
@@ -163,25 +161,27 @@ export class gridManager extends Component {
         var end: grid = this._gridNodeArr[endPos.x][endPos.y].getComponent(grid);
         start.setSpriteColor({ r: 25, g: 88, b: 219, a: 255 })
         end.setSpriteColor({ r: 25, g: 88, b: 219, a: 255 })
-        this._astar.getPriceMixNeighborGrid(start, end);
+        this._astar.getPriceMixNeighborGrid(end, start);
     }
 
     testSetObstacle() {
-
-
         for (var i = 1; i < 22; i++) {
             for (var j = 0; j <= 9; j++) {
-                if (Math.random() > 0.8) {
+                if (Math.random() > 0.7) {
                     this._gridNodeArr[i][j].getComponent(grid).setObstacle(true);
                 }
             }
         }
-        this._gridNodeArr[12][9].getComponent(grid).setObstacle(true);
 
-        this._gridNodeArr[12][8].getComponent(grid).setObstacle(true);
-        this._gridNodeArr[13][8].getComponent(grid).setObstacle(true);
-        this._gridNodeArr[14][8].getComponent(grid).setObstacle(true);
-        this._gridNodeArr[15][8].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[12][9].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[12][8].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[13][8].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[14][8].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[15][8].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[16][8].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[17][8].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[18][8].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[19][8].getComponent(grid).setObstacle(true);
     }
 
 

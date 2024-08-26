@@ -26,7 +26,6 @@ export class aStar extends Component {
     update(deltaTime: number) {
 
     }
-
     //获取相邻可用的格子
     getNeighborGrid(currentGrid: grid) {
         var mIdx = currentGrid.getCellIndex();
@@ -60,9 +59,9 @@ export class aStar extends Component {
                 var gObj: grid = this._gridNodeArr[newIndex.x][newIndex.y].getComponent(grid);
                 if ((newIndex.x != mIdx.x || newIndex.y != mIdx.y) && !(newIndex.x != mIdx.x && newIndex.y != mIdx.y) && gObj.backCheck == false && gObj.getObstacle() == false) {
                     if (this._closeList.indexOf(gObj) == -1) {
-                        gObj.setSpriteColor({ r: 100, g: 100, b: 103, a: 255 })
+                        //检索搜索格
+                        // gObj.setSpriteColor({ r: 100, g: 100, b: 103, a: 255 })
                     }
-
                     var price = this.getGridPrice(gObj, startGrid, endGrid);
                     gObj.price = price;
                     gObj.setLabel(price + "")
@@ -85,13 +84,13 @@ export class aStar extends Component {
             startGrid.neighorGrid = gridUsedMaxtri;
             if (!this.compareIndexOfGrid(gridUsedMaxtri[0], endGrid)) {
                 console.log("取得是1：", gridUsedMaxtri[0].price);
-
+                gridUsedMaxtri[0].parent = startGrid;
+                startGrid.next = gridUsedMaxtri[0];
                 this.delayLoopSearch(gridUsedMaxtri[0], endGrid);
-                this._closeList.push(gridUsedMaxtri[0])
+                this.closeListAdd(gridUsedMaxtri[0])
             } else {
-                for (var i = 0; i < this._closeList.length; i++) {
-                    this._closeList[i].setSpriteColor({ r: 55, g: 206, b: 73, a: 255 });
-                }
+                //
+                this.showPath();
             }
             //设置Parent
             var usedGrid = this._gridNodeArr[gridUsedMaxtri[0].cellX][gridUsedMaxtri[0].cellY].getComponent(grid);
@@ -102,74 +101,96 @@ export class aStar extends Component {
         else {
             //找父节点
             var collection: grid[] = this.checkParentGrid(startGrid)
-
-            //计算代价
-            for (var i = 0; i < collection.length; i++) {
-                collection[i].price = this.getGridPrice(collection[i], startGrid, endGrid);
-            }
-            //排序优先使用代价最小的
-            collection = this.sortPriceOfGrid(collection);
-            //移除回溯路线
-            var rgDex = this._closeList.indexOf(startGrid);
-            this._closeList.splice(rgDex, 1);
-            //设置颜色
-            startGrid.setSpriteColor({ r: 0, g: 0, b: 0, a: 255 })
-
-            //移除回溯路线2
-            var rgDex2 = this._closeList.indexOf(startGrid.parent);
-            this._closeList.splice(rgDex2, 1);
-            //设置颜色
-            startGrid.parent.setSpriteColor({ r: 0, g: 0, b: 0, a: 255 })
-
-            if (!this.compareIndexOfGrid(collection[0], endGrid)) {
-                console.log("取得是2：", collection[0].price);
-                collection[0].parent = startGrid;
-                this.delayLoopSearch(collection[0], endGrid);
-                this._closeList.push(collection[0])
+            if (collection) {
+                //计算代价
+                for (var i = 0; i < collection.length; i++) {
+                    collection[i].price = this.getGridPrice(collection[i], startGrid, endGrid);
+                }
+                //排序优先使用代价最小的
+                collection = this.sortPriceOfGrid(collection);
+                //进入下个循环
+                if (!this.compareIndexOfGrid(collection[0], endGrid)) {
+                    collection[0].parent = startGrid;
+                    startGrid.next = collection[0];
+                    this.delayLoopSearch(collection[0], endGrid);
+                    this.closeListAdd(collection[0])
+                } else {
+                    this.showPath();
+                }
             } else {
-                // for (var i = 0; i < this._closeList.length; i++) {
-                //     this._closeList[i].setSpriteColor({ r: 55, g: 206, b: 73, a: 255 });
-                // }
+                //结束
+                console.error("cuGrid.neighorGrid 不存在");
+                this.showPath();
             }
-
-
 
         }
     }
 
+    //显示路径
+    showPath() {
+        for (var i = 0; i < this._closeList.length; i++) {
+            this._closeList[i].setLabel("路:" + i)
+            this._closeList[i].setSpriteColor({ r: 55, g: 206, b: 73, a: 255 });
+        }
+    }
+
+
+    closeListAdd(g: grid) {
+        var index = this._closeList.indexOf(g)
+        if (index == -1) {
+            this._closeList.push(g)
+        }
+    }
+
+    //移除回溯路线点
+    removeBackGrid(startGrid: grid) {
+        var rgDex = this._closeList.indexOf(startGrid);
+        if (rgDex != -1) {
+            this._closeList.splice(rgDex, 1);
+            //设置颜色
+            startGrid.setSpriteColor({ r: 0, g: 0, b: 0, a: 255 })
+        }
+    }
+
+
     //检查回退父节点Neighbor
     checkParentGrid(cuGrid: grid): grid[] {
         //检查父级有没有Neigbor
-        var grids = this.caculteParentNeighborGrids(cuGrid.parent);
+        var grids = [];
+        if (cuGrid.parent)
+            grids = this.caculteParentNeighborGrids(cuGrid.parent);
         //没有
-        if (grids.length == 0) {
+        if (grids) {
+            if (grids.length == 0) {
+                //移除在闭表里的对象
+                this.removeBackGrid(cuGrid);
+                //回溯检查标记 标记之后不再检查
+                cuGrid.backCheck = true;
+                //继续向腹肌查询
+                if (cuGrid.parent != null) {
+                    var searchGrids: grid[] = this.checkParentGrid(cuGrid.parent);
+                    return searchGrids;
+                } else {
+                    //内部结束
+                    console.log("结束");
+                    return grid[0];
+                }
+            } else {
+                console.log("查询失败 结束");
+            }
             //移除在闭表里的对象
-            var dex = this._closeList.indexOf(cuGrid);
-            this._closeList.splice(dex, 1);
-            cuGrid.setSpriteColor({ r: 0, g: 0, b: 0, a: 255 });
+            this.removeBackGrid(cuGrid);
             //回溯检查标记 标记之后不再检查
             cuGrid.backCheck = true;
-            //继续向腹肌查询
-            if (cuGrid.parent != null) {
-                var searchGrids: grid[] = this.checkParentGrid(cuGrid.parent);
-                return searchGrids;
-            } else {
-                //内部结束
-                console.log("结束");
-                return grid[0];
-            }
-
-        } else {
-            return grids;
         }
+        return grids;
     }
 
 
     caculteParentNeighborGrids(cuGrid: grid): grid[] {
         var collectionGrids: grid[] = [];
-        if (cuGrid.neighorGrid) {
+        if (cuGrid.neighorGrid != null) {
             var parentSearchGrids: grid[] = cuGrid.neighorGrid;
-
             console.log("检索neighorGrid长度:", cuGrid.neighorGrid.length);
             for (var i = 0; i < parentSearchGrids.length; i++) {
                 if (parentSearchGrids[i].isSearch == false) {
@@ -180,7 +201,6 @@ export class aStar extends Component {
         }
         else {
             console.error("cuGrid.neighorGrid 不存在");
-
             return collectionGrids;
         }
     }
@@ -189,7 +209,8 @@ export class aStar extends Component {
         setTimeout(() => {
             cuGrid.setSpriteColor({ r: 55, g: 206, b: 73, a: 255 });
             this.getPriceMixNeighborGrid(cuGrid, endGrid)
-        }, 100);
+        }, 50);
+
     }
 
     //冒泡排序代价

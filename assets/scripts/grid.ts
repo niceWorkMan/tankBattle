@@ -44,15 +44,26 @@ export class grid extends Component {
         return this._isSearch;
     }
 
-
+    //上一个
     public _parent: grid;
-
     public set parent(v: grid) {
         this._parent = v;
     }
 
     public get parent(): grid {
         return this._parent;
+    }
+
+
+   
+ //下一个
+    public _next: grid;
+    public set next(v: grid) {
+        this._next = v;
+    }
+
+    public get next(): grid {
+        return this._next;
     }
 
 
