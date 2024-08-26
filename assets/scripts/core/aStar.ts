@@ -186,7 +186,7 @@ export class aStar extends Component {
         return grids;
     }
 
-
+    //计算父节点的neighbor
     caculteParentNeighborGrids(cuGrid: grid): grid[] {
         var collectionGrids: grid[] = [];
         if (cuGrid.neighorGrid != null) {
@@ -204,13 +204,15 @@ export class aStar extends Component {
             return collectionGrids;
         }
     }
+    
 
+
+    //递归循环查找
     delayLoopSearch(cuGrid: grid, endGrid: grid) {
         setTimeout(() => {
             cuGrid.setSpriteColor({ r: 55, g: 206, b: 73, a: 255 });
             this.getPriceMixNeighborGrid(cuGrid, endGrid)
         }, 50);
-
     }
 
     //冒泡排序代价
@@ -227,34 +229,17 @@ export class aStar extends Component {
         return gArr;
     }
 
-    //是否周围有可用的格子
-    isVaildGrid(startGrid: grid) {
-        var isVaild = false;
-        var mIdx = startGrid.getCellIndex();
-        var limitMatrix: Vec2[] = this.getNeighborMitrax(mIdx);
-        for (var j = limitMatrix[0].x; j <= limitMatrix[0].y; j++) {
-            for (var k = limitMatrix[1].x; k <= limitMatrix[1].y; k++) {
-                var newIndex: Vec2 = new Vec2(j, k);
-                var gObj: grid = this._gridNodeArr[newIndex.x][newIndex.y].getComponent(grid);
-                if ((newIndex.x != mIdx.x || newIndex.y != mIdx.y) && !(newIndex.x != mIdx.x && newIndex.y != mIdx.y) && gObj.getObstacle() == false && gObj.isSearch == false) {
-                    isVaild = true;
-                    break;
-                }
-            }
-        }
-        return isVaild;
-    }
-
     //获取格子的代价
     getGridPrice(currentGrid: grid, startGrid: grid, endGrid: grid) {
         //公式 h=f+g;
         var f = Math.abs(currentGrid.getCellIndex().x - startGrid.getCellIndex().x) + Math.abs(currentGrid.getCellIndex().y - startGrid.getCellIndex().y);
         var g = Math.abs(endGrid.getCellIndex().x - currentGrid.getCellIndex().x) + Math.abs(endGrid.getCellIndex().y - currentGrid.getCellIndex().y);
         var h = f + g;
-
-        var x2 = Math.pow(Math.abs(endGrid.getCellIndex().x - currentGrid.getCellIndex().x), 2);
-        var y2 = Math.pow(Math.abs(endGrid.getCellIndex().y - currentGrid.getCellIndex().y), 2);
-        h = Math.sqrt(x2 + y2);
+        
+        //斜边算法
+        // var x2 = Math.pow(Math.abs(endGrid.getCellIndex().x - currentGrid.getCellIndex().x), 2);
+        // var y2 = Math.pow(Math.abs(endGrid.getCellIndex().y - currentGrid.getCellIndex().y), 2);
+        // h = Math.sqrt(x2 + y2);
         return Math.floor(h);
     }
 
@@ -303,12 +288,6 @@ export class aStar extends Component {
             yMax = mIdx.y + 1;
         }
         return [new Vec2(xMin, xMax), new Vec2(yMin, yMax)];
-    }
-
-
-
-    clearList() {
-        this._closeList = [];
     }
 }
 

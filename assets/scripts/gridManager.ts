@@ -93,7 +93,7 @@ export class gridManager extends Component {
                 // }
                 //this._astar.caculate(this._gridNodeArr[3][4].getComponent(grid),this._gridNodeArr[10][8].getComponent(grid))
                 this.testSetObstacle();
-                this.testAstarPath(new Vec2(0, 5), new Vec2(23, 9));
+                this.testAstarPath(new Vec2(0, 9), new Vec2(23, 9));
                 break;
 
 
@@ -156,7 +156,6 @@ export class gridManager extends Component {
 
 
     testAstarPath(startPos: Vec2, endPos: Vec2) {
-        this._astar.clearList();
         var start: grid = this._gridNodeArr[startPos.x][startPos.y].getComponent(grid);
         var end: grid = this._gridNodeArr[endPos.x][endPos.y].getComponent(grid);
         start.setSpriteColor({ r: 25, g: 88, b: 219, a: 255 })
@@ -178,7 +177,7 @@ export class gridManager extends Component {
         // this._gridNodeArr[13][8].getComponent(grid).setObstacle(true);
         // this._gridNodeArr[14][8].getComponent(grid).setObstacle(true);
         // this._gridNodeArr[15][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[16][8].getComponent(grid).setObstacle(true);
+        // this._gridNodeArr[16][8].getComponent(grid).setObstacle(true); 
         // this._gridNodeArr[17][8].getComponent(grid).setObstacle(true);
         // this._gridNodeArr[18][8].getComponent(grid).setObstacle(true);
         // this._gridNodeArr[19][8].getComponent(grid).setObstacle(true);
