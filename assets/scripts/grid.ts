@@ -6,13 +6,92 @@ const { ccclass, property } = _decorator;
 export class grid extends Component {
     private _sprite;
     private _indexLabel;
-    private _cellX:number;
-    private _cellY:number;
+
+    private _cellX: number;
+
+    public set cellX(v: number) {
+        this._cellX = v;
+    }
+    public get cellX(): number {
+        return this._cellX;
+    }
+
+
+    private _cellY: number;
+
+    public set cellY(v: number) {
+        this._cellY = v;
+    }
+    public get cellY(): number {
+        return this._cellY;
+    }
+
     private _gridManager;
     //是否是障碍物
     private _isObstacle: boolean;
     //父节点
     public _aStarParent: grid = null;
+
+
+    private _isSearch: boolean = false;
+
+
+    public set isSearch(v: boolean) {
+        this._isSearch = v;
+    }
+
+    public get isSearch(): boolean {
+        return this._isSearch;
+    }
+
+
+    public _parent: grid;
+
+    public set parent(v: grid) {
+        this._parent = v;
+    }
+
+    public get parent(): grid {
+        return this._parent;
+    }
+
+
+
+    //邻居格子
+    private _neighorGrid: grid[];
+
+    public set neighorGrid(v: grid[]) {
+        this._neighorGrid = v;
+    }
+
+    public get neighorGrid(): grid[] {
+        return this._neighorGrid;
+    }
+
+
+    //是否回溯过
+    private _backCheck:boolean=false;
+
+    public set backCheck(v: boolean) {
+        this._backCheck = v;
+    }
+
+    public get backCheck(): boolean {
+        return this._backCheck;
+    }
+
+
+
+    //代价
+    private _price: number;
+
+    public set price(v: number) {
+        this._price = v;
+    }
+
+    public get price(): number {
+        return this._price;
+    }
 
 
 
@@ -50,7 +129,7 @@ export class grid extends Component {
     /**
      * 设置方格索引
      */
-    setIndexLabel(x:number, y:number) {
+    setIndexLabel(x: number, y: number) {
         var xLabel = x + "";
         var yLable = y + "";
         this._cellX = x;
@@ -60,8 +139,8 @@ export class grid extends Component {
         this._indexLabel.string = "[" + xLabel + "," + yLable + "]";
     }
 
-    setLabel(str){
-        this._indexLabel.string =str;
+    setLabel(str) {
+        this._indexLabel.string = str;
     }
 
     //障碍物
@@ -77,12 +156,12 @@ export class grid extends Component {
     }
 
 
-    setSpriteColor(c){
+    setSpriteColor(c) {
         this._sprite.color = c;
     }
 
-    getObstacle():boolean{
-        return this._isObstacle ;
+    getObstacle(): boolean {
+        return this._isObstacle;
     }
 
     setGridManager(gridManager: gridManager) {
@@ -90,7 +169,7 @@ export class grid extends Component {
     }
 
     //获取索引位置
-    getCellIndex() {
+    public getCellIndex() {
         return new Vec2(this._cellX, this._cellY);
     }
 
