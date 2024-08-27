@@ -224,7 +224,6 @@ export class gridManager extends Component {
 
         //tank寻路数据赋值
         var tankCom: tank = tankNode.getComponent(tank);
-        tankCom.aStar = newAStar;
     }
 
 

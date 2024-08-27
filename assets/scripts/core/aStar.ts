@@ -1,6 +1,7 @@
 import { _decorator, Component, log, math, Node, Vec2 } from 'cc';
 import { grid } from '../grid';
 import { gridManager } from '../gridManager';
+import { tank } from '../tank';
 const { ccclass, property } = _decorator;
 
 @ccclass('aStar')
@@ -9,7 +10,12 @@ export class aStar extends Component {
     private _gridNodeArr: grid[][] = [];
     //查询路径结果
     private _closeList: grid[] = [];
-
+    public get closeList(): grid[] {
+        return this._closeList;
+    }
+    public set closeList(v: grid[]) {
+        this._closeList = v;
+    }
 
 
     //格子矩阵
@@ -27,6 +33,18 @@ export class aStar extends Component {
     public setGridNodeArr(_gridNodeArr: grid[][]) {
         this._gridNodeArr = _gridNodeArr;
     }
+
+
+    //坦克对象
+    private _tk:tank
+    public set tk(v : tank) {
+        this._tk = v;
+    }
+    public get tk() : tank {
+        return this._tk;
+    }
+    
+    
 
 
 
@@ -146,7 +164,8 @@ export class aStar extends Component {
             this._closeList[i].isSearch = false;
             this._closeList[i].backCheck = false;
         };
-        //寻路结束todo
+        //寻路结束 tank CallBack
+        this.tk.navigation(this._closeList);
     }
 
 
