@@ -32,14 +32,12 @@ export class grid extends Component {
     //父节点
     public _aStarParent: grid = null;
 
-
+   
+    //是否被搜索过该格子
     private _isSearch: boolean = false;
-
-
     public set isSearch(v: boolean) {
         this._isSearch = v;
     }
-
     public get isSearch(): boolean {
         return this._isSearch;
     }
@@ -82,7 +80,6 @@ export class grid extends Component {
 
     //是否回溯过
     private _backCheck:boolean=false;
-
     public set backCheck(v: boolean) {
         this._backCheck = v;
     }
@@ -95,7 +92,6 @@ export class grid extends Component {
 
     //代价
     private _price: number;
-
     public set price(v: number) {
         this._price = v;
     }
@@ -151,6 +147,7 @@ export class grid extends Component {
     }
 
     setLabel(str) {
+        this._indexLabel.color={ r: 255, g: 255, b: 255, a: 255 }
         this._indexLabel.string = str;
     }
 
