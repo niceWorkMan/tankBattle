@@ -29,6 +29,14 @@ export class grid extends Component {
     private _gridManager;
     //是否是障碍物
     private _isObstacle: boolean;
+    public set isObstacle(v : boolean) {
+        this._isObstacle = v;
+    }
+    public get isObstacle() : boolean {
+        return this._isObstacle
+    }
+    
+    
     //父节点
     public _aStarParent: grid = null;
 

@@ -51,6 +51,7 @@ export class tankManager extends Component {
         var tankNode: Node = instantiate(this.tankBase);
         this.node.addChild(tankNode);
         var tk: tank = tankNode.getComponent(tank);
+        tk.tankManager=this;
         //设置起始位置结束位置
         tk.startGrid = this._gManager.getGridByCellIndex(0, 9);
         tk.endGrid = this._gManager.getGridByCellIndex(23, 9);
@@ -66,6 +67,7 @@ export class tankManager extends Component {
         var tankNode: Node = instantiate(this.tankBase);
         this.node.addChild(tankNode);
         var tk: tank = tankNode.getComponent(tank);
+        tk.tankManager=this;
         //设置起始位置结束位置
         tk.startGrid = this._gManager.getGridByCellIndex(0, 0);
         tk.endGrid = this._gManager.getGridByCellIndex(23, 0);
@@ -81,6 +83,7 @@ export class tankManager extends Component {
         var tankNode: Node = instantiate(this.tankBase);
         this.node.addChild(tankNode);
         var tk: tank = tankNode.getComponent(tank);
+        tk.tankManager=this;
         //设置起始位置结束位置
         tk.startGrid = this._gManager.getGridByCellIndex(0, 5);
         tk.endGrid = this._gManager.getGridByCellIndex(23, 5);
