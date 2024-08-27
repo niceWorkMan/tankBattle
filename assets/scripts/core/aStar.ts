@@ -2,10 +2,22 @@ import { _decorator, Component, log, math, Node, Vec2 } from 'cc';
 import { grid } from '../grid';
 import { gridManager } from '../gridManager';
 import { tank } from '../tank';
+import { tankManager } from '../tankManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('aStar')
 export class aStar extends Component {
+
+    //坦克管理类
+    private _tankManager: tankManager
+    public set tankManager(v: tankManager) {
+        this._tankManager = v;
+    }
+    public get tankManager(): tankManager {
+        return this._tankManager
+    }
+
+
     //copy from gridManager 格子对象数组
     private _gridNodeArr: grid[][] = [];
     //查询路径结果
@@ -36,16 +48,13 @@ export class aStar extends Component {
 
 
     //坦克对象
-    private _tk:tank
-    public set tk(v : tank) {
+    private _tk: tank
+    public set tk(v: tank) {
         this._tk = v;
     }
-    public get tk() : tank {
+    public get tk(): tank {
         return this._tk;
     }
-    
-    
-
 
 
 
@@ -151,21 +160,41 @@ export class aStar extends Component {
 
     //显示路径（绿色是已经粗算的路径）
     showPath() {
+        //复位closeList 放在远点过滤前面
+        for (var i = 0; i < this._closeList.length; i++) {
+            this._closeList[i].isSearch = false;
+            this._closeList[i].backCheck = false;
+        };
         //远点过滤
         this.removefarGrid(this._closeList);
+
         //显示路径
         for (var i = 0; i < this._closeList.length; i++) {
             this._closeList[i].setLabel("路:" + i)
             this._closeList[i].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
         }
 
-        //复位closeList
-        for (var i = 0; i < this._closeList.length; i++) {
-            this._closeList[i].isSearch = false;
-            this._closeList[i].backCheck = false;
-        };
+
+
+        //队列查询------------------------------------------
+        if (this._tankManager) {
+            var tqIndex = this._tankManager.tankQueue.indexOf(this.tk);
+            if (tqIndex != -1) {
+                this.tk.navigation(this._closeList);
+                this._tankManager.tankQueue.splice(tqIndex, 1);
+            }
+
+
+            this._tankManager.checkQueue();
+        }
+
+
+
+        //------------------------------------------------
+
+
         //寻路结束 tank CallBack
-        this.tk.navigation(this._closeList);
+        //this.tk.navigation(this._closeList);
     }
 
 

@@ -9,7 +9,23 @@ export class tank extends Component {
 
     }
 
-
+    //起始点
+    private _startGrid;
+    public get startGrid() : grid {
+        return this._startGrid
+    }
+    public set startGrid(v : grid) {
+        this._startGrid = v;
+    }
+    
+    //结束点
+    private _endGrid;
+    public get endGrid() : grid {
+        return this._endGrid
+    }
+    public set endGrid(v : grid) {
+        this._endGrid = v;
+    }
 
 
 
@@ -17,7 +33,7 @@ export class tank extends Component {
         //从第0个点开始移动
         var moveIndex = 0;
         this.tweenMove(moveIndex, closeList);
-
+       
         console.log("导航结束:", closeList.length);
     }
 

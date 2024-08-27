@@ -113,6 +113,10 @@ export class gridManager extends Component {
         var originPos = this._gridComponentArr[x][y].node.getPosition();
         return originPos;
     }
+    //通过ID获取Grid对象
+    getGridByCellIndex(x, y){
+        return this._gridComponentArr[x][y].getComponent(grid); 
+    }
 
     checkXY(x, y) {
         var isVaildIndex = (x >= 0 && x <= 23) && (y >= 0 && y <= 9);
