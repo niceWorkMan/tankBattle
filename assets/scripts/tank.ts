@@ -1,4 +1,4 @@
-import { _decorator, Component, log, math, Node, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Color, Component, log, math, Node, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { grid } from './grid';
 import { aStar } from './core/aStar';
 import { tankManager } from './tankManager';
@@ -9,6 +9,17 @@ export class tank extends Component {
     start() {
 
     }
+    //坦克移动单元格时间
+    private moveSpeed = 0.2;
+    //坦克转向时间
+    private rotateSpeed = 0.3;
+    //等待障碍物时间 单位/秒
+    private _waitObsTime = 0.5;
+    public get waitObsTime(): number {
+        return this._waitObsTime;
+    }
+
+
 
     //坦克管理类
     private _tankManager: tankManager
@@ -47,11 +58,31 @@ export class tank extends Component {
     public set endGrid(v: grid) {
         this._endGrid = v;
     }
+    //开始导航
+    startNav() {
+        this.getComponent(Sprite).color=new Color(50,50,50,255)
+        if (!this.aaStar) {
+            //生成导航网格
+            this.aaStar = new aStar(this.tankManager.gManager);
+            this.aaStar.tk = this;
+            this.aaStar.tankManager=this.tankManager;
+            //添加至导航集合
+            var dex = this.tankManager.aStartCollection.indexOf(this.aaStar);
+            if (dex == -1) {
+                this.tankManager.aStartCollection.push(this.aaStar);
+            }
+            //tk赋值
+        } else {
+            //同步基础网格状态
 
-
-
-
-
+            this.aaStar.synGridState(this.tankManager.gManager);
+            
+        }
+        this.aaStar.tk = this;
+        //寻路
+        if (this.aaStar)
+            this.aaStar.getPriceMixNeighborGrid(this.aaStar.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.aaStar.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY]);
+    }
 
     //移动
     public navigationMove(closeList: grid[]) {
@@ -64,6 +95,11 @@ export class tank extends Component {
 
 
     tweenMove(nextIndex: number, closeList: grid[]) {
+        this.node.getComponent(Sprite).color = new Color(230, 241, 103, 255);
+
+        if (closeList.length == 0) {
+            alert("错误的closeList长度")
+        }
         //更新属性
         var refreshState = () => {
             //设置障碍属性--------------------------------------------
@@ -84,29 +120,26 @@ export class tank extends Component {
         //如果下一个目标点是障碍
         if (closeList[nextIndex].isObstacle) {
             //重新寻路
-            if (nextIndex > 0) {
-                //等待重新寻路
-                setTimeout(() => {
-                    // this.startGrid = closeList[nextIndex];
-                    // this._tankManager.startNav(this);
-                    this.tweenMove(nextIndex, closeList);
-                }, 500);
-            }
+            //等待障碍离开继续前进
+            setTimeout(() => {
+                // this.startGrid = closeList[nextIndex];
+                // this._tankManager.startNav(this);
+                this.tweenMove(nextIndex, closeList);
+            }, this._waitObsTime * 1000);
         }
         else {
-            if (nextIndex + 1 <= closeList.length-1) {
-                var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
-                var targetRot = radian * (180 / Math.PI);
-
+            if (nextIndex + 1 <= closeList.length - 1) {
                 //位移
-                tween(this.node).to(0.2, { position: closeList[nextIndex].node.getPosition() }, {
+                tween(this.node).to(this.moveSpeed, { position: closeList[nextIndex].getPosition() }, {
                     onUpdate: () => {
                     },
                     onComplete: () => {
                         if (nextIndex <= closeList.length - 1) {
                             //转弯
+                            var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
+                            var targetRot = radian * (180 / Math.PI);
                             if (this.node.eulerAngles.z !== targetRot) {
-                                tween(this.node).to(0.5, { eulerAngles: new Vec3(0, 0, targetRot) }, {
+                                tween(this.node).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot) }, {
                                     onComplete: () => {
                                         nextIndex++;
                                         this.tweenMove(nextIndex, closeList);
@@ -129,15 +162,29 @@ export class tank extends Component {
                 }).start();
             }
             else {
-                tween(this.node).to(0.2, { position: closeList[closeList.length - 1].node.getPosition() }, {
+                //最后一步特殊处理
+                tween(this.node).to(this.moveSpeed, { position: closeList[closeList.length - 1].getPosition() }, {
                     onComplete: () => {
-                        console.log("该路线移动完毕");alert("最后一步")
+                        console.log("该路线移动完毕");
+                        //更新网格属性
+                        closeList[nextIndex].isObstacle = false;
+                        this._tankManager.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = false;
+                        //同步所有状态
+                        this._tankManager.synGridCollectionState();
+
+                        //test 销毁
+                        this.destorySelf();
                     },
-                });
+                }).start();
             }
 
         }
 
+    }
+
+    destorySelf() {
+        //this.aaStar = null;
+        this.node.destroy()
     }
 
 

@@ -8,12 +8,11 @@ const { ccclass, property } = _decorator;
 @ccclass('aStar')
 export class aStar extends Component {
 
-    constructor(gManager:gridManager){
+    constructor(gManager: gridManager) {
         super();
-        if(gManager)
-        {
-            this.gManager=gManager;
-            this._gridMatrix=gManager.gridMatrix;
+        if (gManager) {
+            this.gManager = gManager;
+            this._gridMatrix = gManager.gridMatrix;
             //生成网格
             this.tankNaviGrid(gManager);
             //更新网格
@@ -21,14 +20,14 @@ export class aStar extends Component {
         }
     }
 
-  
+
     //同步网格状态
-    synGridState(gManager:gridManager){
-        var originGridArr=gManager.gridComponentArr;
-        for(var i=0;i<this._gridMatrix.row;i++){
-           for(var j=0;j<this._gridMatrix.colum;j++){
-               this._gridNodeArr[i][j].isObstacle=originGridArr[i][j].isObstacle;
-           }
+    synGridState(gManager: gridManager) {
+        var originGridArr = gManager.gridComponentArr;
+        for (var i = 0; i < this._gridMatrix.row; i++) {
+            for (var j = 0; j < this._gridMatrix.colum; j++) {
+                this._gridNodeArr[i][j].isObstacle = originGridArr[i][j].isObstacle;
+            }
         }
 
     }
@@ -43,26 +42,26 @@ export class aStar extends Component {
     }
 
     //网格管理
-    private _gridManager:gridManager;
-    public set gManager(v : gridManager) {
+    private _gridManager: gridManager;
+    public set gManager(v: gridManager) {
         this._gridManager = v;
     }
-    
-    public get gManager() : gridManager {
+
+    public get gManager(): gridManager {
         return this._gridManager
     }
-    
+
 
     //初始化导航网格
-    tankNaviGrid(gManager:gridManager) {
+    tankNaviGrid(gManager: gridManager) {
         for (var i = 0; i < this._gridMatrix.row; i++) {
             var _compArr_ins: grid[] = [];
             for (var j = 0; j < this._gridMatrix.colum; j++) {
                 var _grid: Node = instantiate(this.gManager.gridPrefab);
-                this.gManager.node.getChildByName("mapLayer").addChild(_grid);
-                var _gridSprite = _grid.getComponent(Sprite);
-                _gridSprite.spriteFrame = gManager.gridSpriteFrame;
-                _grid.setPosition(new Vec3(this.gManager.gridStartPos.x + i * 60, this.gManager.gridStartPos.y + j * 60));
+                //this.gManager.node.getChildByName("mapLayer").addChild(_grid);
+                //var _gridSprite = _grid.getComponent(Sprite);
+                //_gridSprite.spriteFrame = gManager.gridSpriteFrame;
+                //_grid.setPosition(new Vec3(this.gManager.gridStartPos.x + i * 60, this.gManager.gridStartPos.y + j * 60));
                 var gScript = _grid.getComponent(grid)
 
                 //加入一维数组
@@ -71,7 +70,7 @@ export class aStar extends Component {
                     gScript.setGridManager(this.gManager);
                     gScript.setIndexLabel(i, j);
                     //不显示网格
-                    gScript.setSpriteColor({ r: 0, g: 0, b: 0, a: 0 })
+                    //gScript.setSpriteColor({ r: 0, g: 0, b: 0, a: 0 })
                     //获得原始Map的网格状态
                     gScript.setObstacle(gManager.gridComponentArr[i][j].isObstacle);
                 }
@@ -83,10 +82,10 @@ export class aStar extends Component {
 
     //copy from gridManager 格子对象数组
     private _gridNodeArr: grid[][] = [];
-    public get gridNodeArr() : grid[][] {
+    public get gridNodeArr(): grid[][] {
         return this._gridNodeArr
     }
-    
+
     //查询路径结果
     private _closeList: grid[] = [];
     public get closeList(): grid[] {
@@ -211,7 +210,7 @@ export class aStar extends Component {
                 }
             } else {
                 //结束
-                console.error("cuGrid.neighorGrid 不存在");
+                console.error("cuGrid.neighorGrid 不存在", this._closeList.length);
                 this.showPath();
             }
 
@@ -237,16 +236,25 @@ export class aStar extends Component {
             this.closeList.unshift(this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY])
             this.closeList.push(this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY])
         }
-        else{
-           console.error("当前路径无法到达终点");
-           this.closeList=[];
-           return;
+        else {
+            console.error("当前路径无法到达终点");
+            this.closeList = [];
+            //重新寻路  ***未修复
+            this.getPriceMixNeighborGrid(this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY], this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY]);
+            // setTimeout(() => {
+            //     //同步当前网格状态
+            //    // this.tankManager.synCurrentState(this);
+            //     //导航
+            // }, this.tk.waitObsTime * 500);
+            return;
         }
         //重新设置Parent和Next
         //显示路径
         for (var i = 0; i < this._closeList.length; i++) {
-            this._closeList[i].setLabel("路:" + i)
-            this._closeList[i].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
+            //this._closeList[i].setLabel("路:" + i)
+            this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setLabel("路:" + i);
+            //this._closeList[i].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
+            this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
             if (i > 0) {
                 this._closeList[i].parent = this._closeList[i - 1];
             }
@@ -256,7 +264,8 @@ export class aStar extends Component {
         }
 
         //开始导航
-         this.tk.navigationMove( this._closeList);
+        if (this.tk)
+            this.tk.navigationMove(this._closeList);
     }
 
 

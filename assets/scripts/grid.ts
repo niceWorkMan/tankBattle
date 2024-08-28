@@ -187,9 +187,16 @@ export class grid extends Component {
         this._gridManager = gridManager;
     }
 
+
+
     //获取索引位置
     public getCellIndex() {
         return new Vec2(this._cellX, this._cellY);
+    }
+    
+    //获取位置
+    public getPosition(){
+      return   this._gridManager.gridComponentArr[this._cellX][this._cellY].node.getPosition();
     }
 
 

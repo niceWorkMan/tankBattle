@@ -4,7 +4,7 @@ import { aStar } from './core/aStar';
 import { grid } from './grid';
 import { tank } from './tank';
 const { ccclass, property } = _decorator;
-enum tankTeam{
+enum tankTeam {
     tRed,//左侧红方
     tBlue//右侧蓝方
 }
@@ -15,19 +15,23 @@ export class tankManager extends Component {
 
     @property(Prefab) tankBase: Prefab;
     private _gManager: gridManager;
-    public get gManager() : gridManager {
+    public get gManager(): gridManager {
         return this._gManager
     }
-    
+
     //导航集合
-    private aStartCollection: aStar[] = [];
+    private _aStartCollection: aStar[] = [];
+    public get aStartCollection(): aStar[] {
+        return this._aStartCollection;
+    }
+
 
 
     //寻路tank队列
     tankQueue: tank[] = [];
 
 
-    
+
 
 
     start() {
@@ -39,14 +43,19 @@ export class tankManager extends Component {
             case KeyCode.KEY_A:
                 console.log("TankManagerKeyDownA");
                 //生成tank
-                //this.spawnTankByCellPos(new Vec2(0, 9), new Vec2(23, 9))
+                // this.spawnActor(new Vec2(0,9),new Vec2(23,9));
+                // this.spawnActor(new Vec2(0,0),new Vec2(23,0));
+                // this.spawnActor(new Vec2(0,3),new Vec2(23,5));
+                // this.spawnActor(new Vec2(0,5),new Vec2(23,3));
+                // this.spawnActor(new Vec2(0,6),new Vec2(23,6));
 
-                //this.spawnRotate();
-
-                this.spawnActor(new Vec2(0,9),new Vec2(23,9));
-                this.spawnActor(new Vec2(0,0),new Vec2(23,0));
-                this.spawnActor(new Vec2(0,3),new Vec2(23,5));
-                this.spawnActor(new Vec2(0,5),new Vec2(23,5));
+                setInterval(() => {
+                    var pos0 = new Vec2(0, Math.ceil(Math.random() * 9));
+                    var pos1 = new Vec2(23, Math.ceil(Math.random() * 9));
+                    var isFree = (this.gManager.gridComponentArr[pos0.x][pos0.y].isObstacle == false) && (this.gManager.gridComponentArr[pos1.x][pos1.y].isObstacle == false)
+                    if (isFree)
+                        this.spawnActor(pos0, pos1);
+                }, 500);
                 break;
 
 
@@ -80,60 +89,39 @@ export class tankManager extends Component {
     }
 
     //测试--------------------------------------------------------------------------
-    spawnActor(start:Vec2,end:Vec2) {
-
-        //生成实例
-        var tankNode: Node = instantiate(this.tankBase);
-        this.node.getChildByName("tankLayer").addChild(tankNode);
-        var tk: tank = tankNode.getComponent(tank);
-        tk.tankManager = this;
+    spawnActor(start: Vec2, end: Vec2) {
         //设置起始位置结束位置
-        tk.startGrid = this._gManager.getGridByCellIndex(start.x, start.y);
-        tk.endGrid = this._gManager.getGridByCellIndex(end.x, end.y);
-        tk.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
-        this.startNav(tk);
-    }
+        var startGrid = this._gManager.getGridByCellIndex(start.x, start.y);
+        var endGrid = this._gManager.getGridByCellIndex(end.x, end.y);
 
-
-
-    //开始导航
-    startNav(t: tank) {
-        if (!t.aaStar) {
-            //生成导航网格
-            t.aaStar = new aStar(this._gManager);
-            //添加至导航集合
-            var dex = this.aStartCollection.indexOf(t.aaStar);
-            if (dex == -1) {
-                this.aStartCollection.push(t.aaStar);
-            }
-            //tk赋值
-            t.aaStar.tk=t;
-        } else {
-            //同步基础网格状态
-            t.aaStar.synGridState(this._gManager);
+        //过滤当前位置是否被占用
+        if (startGrid.isObstacle == false) {
+            //生成实例
+            var tankNode: Node = instantiate(this.tankBase);
+            this.node.getChildByName("tankLayer").addChild(tankNode);
+            var tk: tank = tankNode.getComponent(tank);
+            //赋值
+            tk.startGrid = startGrid;
+            tk.endGrid = endGrid;
+            tk.tankManager = this;
+            tk.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
+            //开始导航
+            tk.startNav();
         }
-        //寻路
-        t.aaStar.getPriceMixNeighborGrid(t.aaStar.gridNodeArr[t.startGrid.cellX][t.startGrid.cellY], t.aaStar.gridNodeArr[t.endGrid.cellX][t.endGrid.cellY]);
     }
+
+
 
     //生成障碍物
     private exampleSetObstacle() {
         for (var i = 2; i < 22; i++) {
             for (var j = 0; j <= 9; j++) {
-                if (Math.random() > 0.7) {
+                if (Math.random() > 0.8) {
                     this._gManager.gridComponentArr[i][j].setObstacle(true);
                 }
             }
         }
-        // this._gridNodeArr[12][9].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[12][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[13][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[14][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[15][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[16][8].getComponent(grid).setObstacle(true); 
-        // this._gridNodeArr[17][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[18][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[19][8].getComponent(grid).setObstacle(true);
+        //同步所有导航网格的障碍
         this.synGridCollectionState();
     }
 
@@ -148,6 +136,15 @@ export class tankManager extends Component {
         }
     }
 
+
+    //同步当前网格状态
+    public synCurrentState(astar:aStar) {
+            for (var x = 0; x < this._gManager.gridMatrix.row; x++) {
+                for (var y = 0; y < this._gManager.gridMatrix.colum; y++) {
+                    astar.gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
+                }
+            }
+    }
 
 
 
