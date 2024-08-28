@@ -20,15 +20,15 @@ export class tank extends Component {
     }
 
     //aStart;
-    private _aStar:aStar;
-    public set aaStar (v : aStar) {
+    private _aStar: aStar;
+    public set aaStar(v: aStar) {
         this._aStar = v;
     }
-    public get aaStar() : aStar {
+    public get aaStar(): aStar {
         return this._aStar
     }
-    
-    
+
+
 
     //起始点
     private _startGrid;
@@ -49,6 +49,10 @@ export class tank extends Component {
     }
 
 
+
+
+
+
     //移动
     public navigationMove(closeList: grid[]) {
         //从第0个点开始移动
@@ -60,44 +64,80 @@ export class tank extends Component {
 
 
     tweenMove(nextIndex: number, closeList: grid[]) {
-        this.node.rotation
-        var self = this;
+        //更新属性
+        var refreshState = () => {
+            //设置障碍属性--------------------------------------------
+            if (closeList[nextIndex].parent) {
+                //当前map状态
+                closeList[nextIndex].parent.isObstacle = false;
+                //原始map状态
+                this._tankManager.gManager.gridComponentArr[closeList[nextIndex].parent.cellX][closeList[nextIndex].parent.cellY].isObstacle = false;
+            }
+            closeList[nextIndex].isObstacle = true;
+            this._tankManager.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = true;
+            //同步所有状态
+            this._tankManager.synGridCollectionState();
+            //-------------------------------------------------------
+        }
+
+
         //如果下一个目标点是障碍
         if (closeList[nextIndex].isObstacle) {
             //重新寻路
             if (nextIndex > 0) {
-                this.startGrid = closeList[nextIndex];
-                this._tankManager.startNav(this);
+                //等待重新寻路
+                setTimeout(() => {
+                    // this.startGrid = closeList[nextIndex];
+                    // this._tankManager.startNav(this);
+                    this.tweenMove(nextIndex, closeList);
+                }, 500);
             }
-            return;
+        }
+        else {
+            if (nextIndex + 1 <= closeList.length-1) {
+                var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
+                var targetRot = radian * (180 / Math.PI);
+
+                //位移
+                tween(this.node).to(0.2, { position: closeList[nextIndex].node.getPosition() }, {
+                    onUpdate: () => {
+                    },
+                    onComplete: () => {
+                        if (nextIndex <= closeList.length - 1) {
+                            //转弯
+                            if (this.node.eulerAngles.z !== targetRot) {
+                                tween(this.node).to(0.5, { eulerAngles: new Vec3(0, 0, targetRot) }, {
+                                    onComplete: () => {
+                                        nextIndex++;
+                                        this.tweenMove(nextIndex, closeList);
+                                        //更新网格属性
+                                        refreshState();
+                                    }
+                                }).start();
+                            }
+                            else {
+                                nextIndex++;
+                                this.tweenMove(nextIndex, closeList);
+                            }
+                        }
+                        else {
+                            console.log("单格子移动完毕");
+                        }
+                        //更新网格属性
+                        refreshState();
+                    }
+                }).start();
+            }
+            else {
+                tween(this.node).to(0.2, { position: closeList[closeList.length - 1].node.getPosition() }, {
+                    onComplete: () => {
+                        console.log("该路线移动完毕");alert("最后一步")
+                    },
+                });
+            }
+
         }
 
-        var targetEular = nextIndex + 1 < closeList.length ? this.getAngleByTwoPos(closeList[nextIndex], closeList[nextIndex + 1]) : new Vec3(this.node.eulerAngles.x, this.node.eulerAngles.y, this.node.eulerAngles.z);
-        tween(this.node).to(0.5, { position: closeList[nextIndex].node.getPosition(), eulerAngles: targetEular }, {
-            onUpdate: () => {
-            },
-            onComplete: () => {
-                if (nextIndex < closeList.length - 1) {
-                    nextIndex++;
-                    self.tweenMove(nextIndex, closeList);
-                }
-                else {
-                    console.log("移动完毕");
-                }
-                //设置障碍属性--------------------------------------------
-                if (closeList[nextIndex].parent) {
-                    //当前map状态
-                    closeList[nextIndex].parent.isObstacle = false;
-                    //原始map状态
-                    this._tankManager.gManager.gridComponentArr[closeList[nextIndex].parent.cellX][closeList[nextIndex].parent.cellY].isObstacle=false;
-                }
-                closeList[nextIndex].isObstacle = true;
-                this._tankManager.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle=true;
-                //同步所有状态
-                this._tankManager.synGridCollectionState();
-                //-------------------------------------------------------
-            }
-        }).start();
     }
 
 

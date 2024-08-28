@@ -167,7 +167,7 @@ export class grid extends Component {
             this._sprite.color = { r: 216, g: 47, b: 47, a: 255 };
         }
         else {
-            this._sprite.color = { r: 230, g: 241, b: 103, a: 255 };
+           // this._sprite.color = { r: 230, g: 241, b: 103, a: 255 };
         }
     }
 

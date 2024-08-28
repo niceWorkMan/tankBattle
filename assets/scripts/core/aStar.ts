@@ -135,7 +135,7 @@ export class aStar extends Component {
                 var newIndex: Vec2 = new Vec2(j, k);
                 var gObj: grid = this._gridNodeArr[newIndex.x][newIndex.y];
                 if ((newIndex.x != mIdx.x || newIndex.y != mIdx.y) && gObj.getObstacle() == false) {
-                    gObj.setSpriteColor({ r: 100, g: 100, b: 103, a: 255 })
+                    //gObj.setSpriteColor({ r: 100, g: 100, b: 103, a: 255 })
                 }
             }
         }
@@ -162,7 +162,7 @@ export class aStar extends Component {
                     }
                     var price = this.getGridPrice(gObj, startGrid, endGrid);
                     gObj.price = price;
-                    gObj.setLabel(price + "")
+                    //gObj.setLabel(price + "")
                     //加入开列表 如果不在闭表中包含
                     if (gObj.isSearch == false)
                         gridUsedMaxtri.push(gObj);
@@ -237,6 +237,11 @@ export class aStar extends Component {
             this.closeList.unshift(this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY])
             this.closeList.push(this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY])
         }
+        else{
+           console.error("当前路径无法到达终点");
+           this.closeList=[];
+           return;
+        }
         //重新设置Parent和Next
         //显示路径
         for (var i = 0; i < this._closeList.length; i++) {
@@ -250,8 +255,8 @@ export class aStar extends Component {
             }
         }
 
-        //寻路结束 tank CallBack
-        //this.tk.navigation(this._closeList);
+        //开始导航
+         this.tk.navigationMove( this._closeList);
     }
 
 
@@ -287,7 +292,7 @@ export class aStar extends Component {
         if (rgDex != -1) {
             this._closeList.splice(rgDex, 1);
             //设置颜色
-            startGrid.setSpriteColor({ r: 0, g: 0, b: 0, a: 255 })
+            //startGrid.setSpriteColor({ r: 0, g: 0, b: 0, a: 255 })
         }
     }
 
@@ -350,7 +355,7 @@ export class aStar extends Component {
     delayLoopSearch(cuGrid: grid, endGrid: grid) {
         //必须setTimeout间隔执行 不然会有错误
         setTimeout(() => {
-            cuGrid.setSpriteColor({ r: 55, g: 206, b: 73, a: 255 });
+            //cuGrid.setSpriteColor({ r: 55, g: 206, b: 73, a: 255 });
             this.getPriceMixNeighborGrid(cuGrid, endGrid)
         }, 0);
     }

@@ -4,9 +4,15 @@ import { aStar } from './core/aStar';
 import { grid } from './grid';
 import { tank } from './tank';
 const { ccclass, property } = _decorator;
-
+enum tankTeam{
+    tRed,//左侧红方
+    tBlue//右侧蓝方
+}
 @ccclass('tankManager')
 export class tankManager extends Component {
+
+
+
     @property(Prefab) tankBase: Prefab;
     private _gManager: gridManager;
     public get gManager() : gridManager {
@@ -19,6 +25,9 @@ export class tankManager extends Component {
 
     //寻路tank队列
     tankQueue: tank[] = [];
+
+
+    
 
 
     start() {
@@ -34,7 +43,10 @@ export class tankManager extends Component {
 
                 //this.spawnRotate();
 
-                this.spawnActor();
+                this.spawnActor(new Vec2(0,9),new Vec2(23,9));
+                this.spawnActor(new Vec2(0,0),new Vec2(23,0));
+                this.spawnActor(new Vec2(0,3),new Vec2(23,5));
+                this.spawnActor(new Vec2(0,5),new Vec2(23,5));
                 break;
 
 
@@ -68,16 +80,17 @@ export class tankManager extends Component {
     }
 
     //测试--------------------------------------------------------------------------
-    spawnActor() {
+    spawnActor(start:Vec2,end:Vec2) {
+
         //生成实例
         var tankNode: Node = instantiate(this.tankBase);
         this.node.getChildByName("tankLayer").addChild(tankNode);
         var tk: tank = tankNode.getComponent(tank);
         tk.tankManager = this;
         //设置起始位置结束位置
-        tk.startGrid = this._gManager.getGridByCellIndex(0, 9);
-        tk.endGrid = this._gManager.getGridByCellIndex(23, 9);
-        tk.node.position = this._gManager.getPositionByCellIndex(0, 9);
+        tk.startGrid = this._gManager.getGridByCellIndex(start.x, start.y);
+        tk.endGrid = this._gManager.getGridByCellIndex(end.x, end.y);
+        tk.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
         this.startNav(tk);
     }
 
@@ -101,7 +114,6 @@ export class tankManager extends Component {
         }
         //寻路
         t.aaStar.getPriceMixNeighborGrid(t.aaStar.gridNodeArr[t.startGrid.cellX][t.startGrid.cellY], t.aaStar.gridNodeArr[t.endGrid.cellX][t.endGrid.cellY]);
-        t.navigationMove(t.aaStar.closeList);
     }
 
     //生成障碍物
