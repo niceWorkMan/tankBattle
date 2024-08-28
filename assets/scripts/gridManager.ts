@@ -7,8 +7,6 @@
 
 import { _decorator, Component, EventKeyboard, ImageAsset, Input, input, instantiate, JsonAsset, KeyCode, loader, math, Node, Prefab, random, resources, Sprite, SpriteFrame, SystemEvent, Vec2, Vec3 } from 'cc';
 import { grid } from './grid';
-import { tank } from './tank';
-import { aStar } from './core/aStar';
 import { tankManager } from './tankManager';
 const { ccclass, property } = _decorator;
 
@@ -17,7 +15,7 @@ export class gridManager extends Component {
     @property(Prefab) gridPrefab: Prefab;
     @property(Prefab) tankBase: Prefab;
     //tank管理类
-    private _tankManager:tankManager;
+    private _tankManager: tankManager;
     //格子组件数组
     private _gridComponentArr: grid[][] = [];
     public get gridComponentArr(): grid[][] {
@@ -25,14 +23,20 @@ export class gridManager extends Component {
     }
     //grid起始位置
     private _gridStartPos = { x: -690, y: -270 }
-    //坦克对象池
-    private _tankPool: tank[] = [];
-    //寻路脚本
-    private _astar: aStar;
 
     //资源
     private _assetsLoad = {};
 
+
+    //加载网格图片资源
+    private _gridSpriteFrame: SpriteFrame;
+    public set gridSpriteFrame(v: SpriteFrame) {
+        this._gridSpriteFrame = v;
+    }
+    public get gridSpriteFrame() : SpriteFrame {
+        return this._gridSpriteFrame;
+    }
+    
 
     get gridStartPos() {
         return this._gridStartPos;
@@ -59,8 +63,7 @@ export class gridManager extends Component {
 
     //初始化挂载组件
     initAttatchComponent() {
-        this._astar = this.node.getComponent(aStar);
-        this._tankManager=this.node.getComponent(tankManager);
+        this._tankManager = this.node.getComponent(tankManager);
     }
 
     //初始化网格
@@ -69,7 +72,7 @@ export class gridManager extends Component {
             var _compArr_ins: grid[] = [];
             for (var j = 0; j < this._gridMatrix.colum; j++) {
                 var _grid: Node = instantiate(this.gridPrefab);
-                this.node.addChild(_grid);
+                this.node.getChildByName("mapLayer").addChild(_grid);
                 var _gridSprite = _grid.getComponent(Sprite);
                 _gridSprite.spriteFrame = spriteFrame;
                 _grid.setPosition(new Vec3(this.gridStartPos.x + i * 60, this.gridStartPos.y + j * 60));
@@ -114,8 +117,8 @@ export class gridManager extends Component {
         return originPos;
     }
     //通过ID获取Grid对象
-    getGridByCellIndex(x, y){
-        return this._gridComponentArr[x][y].getComponent(grid); 
+    getGridByCellIndex(x, y) {
+        return this._gridComponentArr[x][y].getComponent(grid);
     }
 
     checkXY(x, y) {
@@ -139,10 +142,11 @@ export class gridManager extends Component {
 
 
     loadConfigAssets() {
-        resources.load("config/imageAssetsConf", JsonAsset, (err, res) => {
-            var jsonObj = res.json;
-            var data = jsonObj.data;
-        });
+        //加载json例子
+        // resources.load("config/imageAssetsConf", JsonAsset, (err, res) => {
+        //     var jsonObj = res.json;
+        //     var data = jsonObj.data;
+        // });
         resources.load("image/dotArea", ImageAsset, (err: any, imageAsset) => {
             //var content =  jsonAsset.toString();
             if (err) {
@@ -152,33 +156,17 @@ export class gridManager extends Component {
             var spriteFrame = SpriteFrame.createWithImage(imageAsset);
             var obj = {};
             this._assetsLoad["dotArea"] = spriteFrame;
+            this._gridSpriteFrame=spriteFrame;
             console.log("加载完成:", imageAsset);
 
             //生成网格
             this.spawnGrid(spriteFrame);
-            
+
             this._tankManager.gameInit();
         })
 
     }
 
-
-    private exampleAStarPath(startPos: Vec2, endPos: Vec2) {
-        //***复制一个数组用于查询路径算法,原始路径保留不变
-        var copyGridCompArr = this._gridComponentArr.slice();
-        var newAStar = new aStar()
-        //设置地图矩阵边界
-        newAStar.gridMatri = this._gridMatrix;
-        //传递copy数组到当前寻路地图
-        newAStar.setGridNodeArr(copyGridCompArr);
-
-        //寻路调用
-        var start: grid = copyGridCompArr[startPos.x][startPos.y];
-        var end: grid = copyGridCompArr[endPos.x][endPos.y];
-        start.setSpriteColor({ r: 25, g: 88, b: 219, a: 255 })
-        end.setSpriteColor({ r: 25, g: 88, b: 219, a: 255 })
-        newAStar.getPriceMixNeighborGrid(end, start);
-    }
 
     private exampleSetObstacle() {
         for (var i = 1; i < 22; i++) {
@@ -202,33 +190,6 @@ export class gridManager extends Component {
 
 
 
-    //生成坦克
-    spawnTankByCellPos(startPos: Vec2, endPos: Vec2) {
-        //***复制一个数组用于查询路径算法,原始路径保留不变
-        var copyGridCompArr = this._gridComponentArr.slice();
-        var newAStar = new aStar()
-        //设置地图矩阵边界
-        newAStar.gridMatri = this._gridMatrix;
-        //传递copy数组到当前寻路地图
-        newAStar.setGridNodeArr(copyGridCompArr);
-
-
-        //寻路调用
-        var start: grid = copyGridCompArr[startPos.x][startPos.y].getComponent(grid);
-        var end: grid = copyGridCompArr[endPos.x][endPos.y].getComponent(grid);
-        // start.setSpriteColor({ r: 25, g: 88, b: 219, a: 255 })
-        // end.setSpriteColor({ r: 25, g: 88, b: 219, a: 255 })
-        newAStar.getPriceMixNeighborGrid(end, start);
-
-        //生成实例
-        var tankNode: Node = instantiate(this.tankBase);
-        this.node.addChild(tankNode);
-        var pos = this.getPositionByCellIndex(startPos.x, startPos.y);
-        tankNode.setPosition(pos);
-
-        //tank寻路数据赋值
-        var tankCom: tank = tankNode.getComponent(tank);
-    }
 
 
 

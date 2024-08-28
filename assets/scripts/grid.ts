@@ -29,18 +29,18 @@ export class grid extends Component {
     private _gridManager;
     //是否是障碍物
     private _isObstacle: boolean;
-    public set isObstacle(v : boolean) {
+    public set isObstacle(v: boolean) {
         this._isObstacle = v;
     }
-    public get isObstacle() : boolean {
+    public get isObstacle(): boolean {
         return this._isObstacle
     }
-    
-    
+
+
     //父节点
     public _aStarParent: grid = null;
 
-   
+
     //是否被搜索过该格子
     private _isSearch: boolean = false;
     public set isSearch(v: boolean) {
@@ -61,8 +61,8 @@ export class grid extends Component {
     }
 
 
-   
- //下一个
+
+    //下一个
     public _next: grid;
     public set next(v: grid) {
         this._next = v;
@@ -87,7 +87,7 @@ export class grid extends Component {
 
 
     //是否回溯过
-    private _backCheck:boolean=false;
+    private _backCheck: boolean = false;
     public set backCheck(v: boolean) {
         this._backCheck = v;
     }
@@ -155,7 +155,7 @@ export class grid extends Component {
     }
 
     setLabel(str) {
-        this._indexLabel.color={ r: 255, g: 255, b: 255, a: 255 }
+        this._indexLabel.color = { r: 255, g: 255, b: 255, a: 255 }
         this._indexLabel.string = str;
     }
 
@@ -173,6 +173,9 @@ export class grid extends Component {
 
 
     setSpriteColor(c) {
+        if (!this._sprite) {
+            this._sprite = this.getComponent(Sprite);
+        }
         this._sprite.color = c;
     }
 

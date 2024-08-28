@@ -1,4 +1,4 @@
-import { _decorator, Component, log, math, Node, Vec2 } from 'cc';
+import { _decorator, Color, Component, instantiate, log, math, Node, Sprite, SpriteFrame, Vec2, Vec3 } from 'cc';
 import { grid } from '../grid';
 import { gridManager } from '../gridManager';
 import { tank } from '../tank';
@@ -7,6 +7,31 @@ const { ccclass, property } = _decorator;
 
 @ccclass('aStar')
 export class aStar extends Component {
+
+    constructor(gManager:gridManager){
+        super();
+        if(gManager)
+        {
+            this.gManager=gManager;
+            this._gridMatrix=gManager.gridMatrix;
+            //生成网格
+            this.tankNaviGrid(gManager);
+            //更新网格
+
+        }
+    }
+
+  
+    //同步网格状态
+    synGridState(gManager:gridManager){
+        var originGridArr=gManager.gridComponentArr;
+        for(var i=0;i<this._gridMatrix.row;i++){
+           for(var j=0;j<this._gridMatrix.colum;j++){
+               this._gridNodeArr[i][j].isObstacle=originGridArr[i][j].isObstacle;
+           }
+        }
+
+    }
 
     //坦克管理类
     private _tankManager: tankManager
@@ -17,9 +42,51 @@ export class aStar extends Component {
         return this._tankManager
     }
 
+    //网格管理
+    private _gridManager:gridManager;
+    public set gManager(v : gridManager) {
+        this._gridManager = v;
+    }
+    
+    public get gManager() : gridManager {
+        return this._gridManager
+    }
+    
+
+    //初始化导航网格
+    tankNaviGrid(gManager:gridManager) {
+        for (var i = 0; i < this._gridMatrix.row; i++) {
+            var _compArr_ins: grid[] = [];
+            for (var j = 0; j < this._gridMatrix.colum; j++) {
+                var _grid: Node = instantiate(this.gManager.gridPrefab);
+                this.gManager.node.getChildByName("mapLayer").addChild(_grid);
+                var _gridSprite = _grid.getComponent(Sprite);
+                _gridSprite.spriteFrame = gManager.gridSpriteFrame;
+                _grid.setPosition(new Vec3(this.gManager.gridStartPos.x + i * 60, this.gManager.gridStartPos.y + j * 60));
+                var gScript = _grid.getComponent(grid)
+
+                //加入一维数组
+                _compArr_ins.push(gScript);
+                if (gScript) {
+                    gScript.setGridManager(this.gManager);
+                    gScript.setIndexLabel(i, j);
+                    //不显示网格
+                    gScript.setSpriteColor({ r: 0, g: 0, b: 0, a: 0 })
+                    //获得原始Map的网格状态
+                    gScript.setObstacle(gManager.gridComponentArr[i][j].isObstacle);
+                }
+            }
+            //加入二维数组
+            this._gridNodeArr.push(_compArr_ins)
+        }
+    }
 
     //copy from gridManager 格子对象数组
     private _gridNodeArr: grid[][] = [];
+    public get gridNodeArr() : grid[][] {
+        return this._gridNodeArr
+    }
+    
     //查询路径结果
     private _closeList: grid[] = [];
     public get closeList(): grid[] {
@@ -41,10 +108,6 @@ export class aStar extends Component {
         console.log("AStar start");
     }
 
-    //初始化NodeArray
-    public setGridNodeArr(_gridNodeArr: grid[][]) {
-        this._gridNodeArr = _gridNodeArr;
-    }
 
 
     //坦克对象
@@ -111,9 +174,6 @@ export class aStar extends Component {
         //排序搜索数组
         if (gridUsedMaxtri.length > 0) {
             gridUsedMaxtri = this.sortPriceOfGrid(gridUsedMaxtri);
-            for (var a = 0; a < gridUsedMaxtri.length; a++) {
-                //console.log("price:", gridUsedMaxtri[a].price);
-            }
             startGrid.neighorGrid = gridUsedMaxtri;
             if (!this.compareIndexOfGrid(gridUsedMaxtri[0], endGrid)) {
                 gridUsedMaxtri[0].parent = startGrid;
@@ -161,37 +221,34 @@ export class aStar extends Component {
     //显示路径（绿色是已经粗算的路径）
     showPath() {
         //复位closeList 放在远点过滤前面
+        this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY].isSearch = false
+        this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY].backCheck = false;
+        this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY].isSearch = false;
+        this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY].backCheck = false;
         for (var i = 0; i < this._closeList.length; i++) {
             this._closeList[i].isSearch = false;
             this._closeList[i].backCheck = false;
+            this._closeList[i].price = 10000;
         };
         //远点过滤
         this.removefarGrid(this._closeList);
-
+        //头尾加入
+        if (this.closeList.length > 0) {
+            this.closeList.unshift(this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY])
+            this.closeList.push(this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY])
+        }
+        //重新设置Parent和Next
         //显示路径
         for (var i = 0; i < this._closeList.length; i++) {
             this._closeList[i].setLabel("路:" + i)
             this._closeList[i].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
-        }
-
-
-
-        //队列查询------------------------------------------
-        if (this._tankManager) {
-            var tqIndex = this._tankManager.tankQueue.indexOf(this.tk);
-            if (tqIndex != -1) {
-                this.tk.navigation(this._closeList);
-                this._tankManager.tankQueue.splice(tqIndex, 1);
+            if (i > 0) {
+                this._closeList[i].parent = this._closeList[i - 1];
             }
-
-
-            this._tankManager.checkQueue();
+            if (i < this._closeList.length - 2) {
+                this._closeList[i].next = this._closeList[i + 1];
+            }
         }
-
-
-
-        //------------------------------------------------
-
 
         //寻路结束 tank CallBack
         //this.tk.navigation(this._closeList);
@@ -206,7 +263,6 @@ export class aStar extends Component {
                 var isNeighborowColumn = (list[i].cellX == list[j].cellX) && (Math.abs(list[i].cellY - list[j].cellY) == 1) && (Math.abs(j - i) >= 3);
                 var isNeighborRow = (list[i].cellY == list[j].cellY) && (Math.abs(list[i].cellX - list[j].cellX) == 1) && (Math.abs(j - i) >= 3);
 
-                console.log("aaa", isNeighborowColumn, isNeighborRow);
                 if (isNeighborowColumn || isNeighborRow) {
                     list.splice(i + 1, j - i - 1);
                     this.removefarGrid(list);
