@@ -3,11 +3,11 @@ import { grid } from '../grid';
 import { gridManager } from '../gridManager';
 import { tank } from '../tank';
 import { tankManager } from '../tankManager';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('aStar')
 export class aStar extends Component {
-
     constructor(gManager: gridManager) {
         super();
         if (gManager) {
@@ -16,11 +16,8 @@ export class aStar extends Component {
             //生成网格
             this.tankNaviGrid(gManager);
             //更新网格
-
         }
     }
-
-
     //同步网格状态
     synGridState(gManager: gridManager) {
         var originGridArr = gManager.gridComponentArr;
@@ -52,16 +49,13 @@ export class aStar extends Component {
     }
 
 
-    //初始化导航网格
+    //初始化导航网格(只在内存中保存数据)
     tankNaviGrid(gManager: gridManager) {
         for (var i = 0; i < this._gridMatrix.row; i++) {
             var _compArr_ins: grid[] = [];
             for (var j = 0; j < this._gridMatrix.colum; j++) {
                 var _grid: Node = instantiate(this.gManager.gridPrefab);
-                //this.gManager.node.getChildByName("mapLayer").addChild(_grid);
-                //var _gridSprite = _grid.getComponent(Sprite);
-                //_gridSprite.spriteFrame = gManager.gridSpriteFrame;
-                //_grid.setPosition(new Vec3(this.gManager.gridStartPos.x + i * 60, this.gManager.gridStartPos.y + j * 60));
+                //不在操作AStar网格中的视图渲染
                 var gScript = _grid.getComponent(grid)
 
                 //加入一维数组
@@ -69,9 +63,6 @@ export class aStar extends Component {
                 if (gScript) {
                     gScript.setGridManager(this.gManager);
                     gScript.setIndexLabel(i, j);
-                    //不显示网格
-                    //gScript.setSpriteColor({ r: 0, g: 0, b: 0, a: 0 })
-                    //获得原始Map的网格状态
                     gScript.setObstacle(gManager.gridComponentArr[i][j].isObstacle);
                 }
             }
@@ -237,24 +228,21 @@ export class aStar extends Component {
             this.closeList.push(this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY])
         }
         else {
-            console.error("当前路径无法到达终点");
+            console.warn("当前路径无法到达终点");
             this.closeList = [];
-            //重新寻路  ***未修复
-            this.getPriceMixNeighborGrid(this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY], this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY]);
-            // setTimeout(() => {
-            //     //同步当前网格状态
-            //    // this.tankManager.synCurrentState(this);
-            //     //导航
-            // }, this.tk.waitObsTime * 500);
+            //在删除的对象位置重新生成寻路对象   *先生成在销毁
+            this.tankManager.spawnActor(new Vec2(this.tk.startGrid.cellX,this.tk.startGrid.cellY),new Vec2(this.tk.endGrid.cellX,this.tk.endGrid.cellY),this.tk.team);
+            //删除上一个寻路失败对象
+            this.tk.destorySelf();
             return;
         }
         //重新设置Parent和Next
         //显示路径
         for (var i = 0; i < this._closeList.length; i++) {
             //this._closeList[i].setLabel("路:" + i)
-            this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setLabel("路:" + i);
+            //this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setLabel("路:" + i);
             //this._closeList[i].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
-            this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
+            //this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
             if (i > 0) {
                 this._closeList[i].parent = this._closeList[i - 1];
             }
@@ -263,6 +251,7 @@ export class aStar extends Component {
             }
         }
 
+        this.tk.node.active = true;
         //开始导航
         if (this.tk)
             this.tk.navigationMove(this._closeList);
@@ -353,7 +342,7 @@ export class aStar extends Component {
             return collectionGrids;
         }
         else {
-            console.error("cuGrid.neighorGrid 不存在");
+            console.warn("cuGrid.neighorGrid 不存在");
             return collectionGrids;
         }
     }

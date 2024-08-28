@@ -2,6 +2,7 @@ import { _decorator, Color, Component, log, math, Node, Sprite, tween, Vec2, Vec
 import { grid } from './grid';
 import { aStar } from './core/aStar';
 import { tankManager } from './tankManager';
+import { enumTeam } from './common/enumTeam';
 const { ccclass, property } = _decorator;
 
 @ccclass('tank')
@@ -18,6 +19,17 @@ export class tank extends Component {
     public get waitObsTime(): number {
         return this._waitObsTime;
     }
+
+
+    //当前所属队伍
+    private _team: enumTeam;
+    public get team(): enumTeam {
+        return this._team
+    }
+    public set team(v: enumTeam) {
+        this._team = v;
+    }
+
 
 
 
@@ -60,12 +72,11 @@ export class tank extends Component {
     }
     //开始导航
     startNav() {
-        this.getComponent(Sprite).color=new Color(50,50,50,255)
         if (!this.aaStar) {
             //生成导航网格
             this.aaStar = new aStar(this.tankManager.gManager);
             this.aaStar.tk = this;
-            this.aaStar.tankManager=this.tankManager;
+            this.aaStar.tankManager = this.tankManager;
             //添加至导航集合
             var dex = this.tankManager.aStartCollection.indexOf(this.aaStar);
             if (dex == -1) {
@@ -76,7 +87,7 @@ export class tank extends Component {
             //同步基础网格状态
 
             this.aaStar.synGridState(this.tankManager.gManager);
-            
+
         }
         this.aaStar.tk = this;
         //寻路
@@ -95,8 +106,6 @@ export class tank extends Component {
 
 
     tweenMove(nextIndex: number, closeList: grid[]) {
-        this.node.getComponent(Sprite).color = new Color(230, 241, 103, 255);
-
         if (closeList.length == 0) {
             alert("错误的closeList长度")
         }
@@ -183,7 +192,6 @@ export class tank extends Component {
     }
 
     destorySelf() {
-        //this.aaStar = null;
         this.node.destroy()
     }
 
@@ -210,6 +218,12 @@ export class tank extends Component {
 
     update(deltaTime: number) {
 
+    }
+
+    protected onDestroy(): void {
+        if (this.aaStar.isValid) {
+            this.aaStar==null;
+        }
     }
 }
 

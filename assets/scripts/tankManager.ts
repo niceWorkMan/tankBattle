@@ -1,13 +1,11 @@
-import { _decorator, Component, EventKeyboard, instantiate, KeyCode, Node, Prefab, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Node, Prefab, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { aStar } from './core/aStar';
 import { grid } from './grid';
 import { tank } from './tank';
+import { enumTeam } from './common/enumTeam';
 const { ccclass, property } = _decorator;
-enum tankTeam {
-    tRed,//左侧红方
-    tBlue//右侧蓝方
-}
+
 @ccclass('tankManager')
 export class tankManager extends Component {
 
@@ -18,6 +16,9 @@ export class tankManager extends Component {
     public get gManager(): gridManager {
         return this._gManager
     }
+
+
+    private _isBattle=false;
 
     //导航集合
     private _aStartCollection: aStar[] = [];
@@ -32,10 +33,23 @@ export class tankManager extends Component {
 
 
 
-
-
     start() {
+        input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
         this._gManager = this.node.getComponent(gridManager);
+    }
+
+
+    onTouchStart(event: EventTouch) {
+        // 处理触摸事件
+        const touchPos = event.getLocation(); // 获取触摸位置
+        console.log(`Touch started at: x=${touchPos.x}, y=${touchPos.y}`);
+        //测试代码
+        this.battleStart();
+
+    }
+
+    protected onDestroy(): void {
+        input.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
     }
 
     public onKeyDown(event: EventKeyboard) {
@@ -44,18 +58,7 @@ export class tankManager extends Component {
                 console.log("TankManagerKeyDownA");
                 //生成tank
                 // this.spawnActor(new Vec2(0,9),new Vec2(23,9));
-                // this.spawnActor(new Vec2(0,0),new Vec2(23,0));
-                // this.spawnActor(new Vec2(0,3),new Vec2(23,5));
-                // this.spawnActor(new Vec2(0,5),new Vec2(23,3));
-                // this.spawnActor(new Vec2(0,6),new Vec2(23,6));
-
-                setInterval(() => {
-                    var pos0 = new Vec2(0, Math.ceil(Math.random() * 9));
-                    var pos1 = new Vec2(23, Math.ceil(Math.random() * 9));
-                    var isFree = (this.gManager.gridComponentArr[pos0.x][pos0.y].isObstacle == false) && (this.gManager.gridComponentArr[pos1.x][pos1.y].isObstacle == false)
-                    if (isFree)
-                        this.spawnActor(pos0, pos1);
-                }, 500);
+                this.battleStart();
                 break;
 
 
@@ -69,6 +72,34 @@ export class tankManager extends Component {
     public gameInit() {
         //生成障碍物
         this.exampleSetObstacle();
+    }
+
+
+ 
+    //开始竞技
+    private battleStart() {
+        if(this._isBattle)
+            return;
+        //只执行一次
+        this._isBattle=true;
+        //平均team生成测试
+        var spawnTime = 0;
+        setInterval(() => {
+            var pos0 = new Vec2(0, Math.ceil(Math.random() * 9));
+            var pos1 = new Vec2(23, Math.ceil(Math.random() * 9));
+            var isFree = (this.gManager.gridComponentArr[pos0.x][pos0.y].isObstacle == false) && (this.gManager.gridComponentArr[pos1.x][pos1.y].isObstacle == false)
+            var gteam: enumTeam = enumTeam.teamRed;
+            if (spawnTime % 2 == 0) {
+                var tempPos = pos0;
+                pos0 = pos1;
+                pos1 = tempPos;
+                gteam = enumTeam.teamBlue;
+            }
+            if (isFree) {
+                this.spawnActor(pos0, pos1, gteam);
+                spawnTime++;
+            }
+        }, 500);
     }
 
 
@@ -89,7 +120,7 @@ export class tankManager extends Component {
     }
 
     //测试--------------------------------------------------------------------------
-    spawnActor(start: Vec2, end: Vec2) {
+    spawnActor(start: Vec2, end: Vec2, team: enumTeam) {
         //设置起始位置结束位置
         var startGrid = this._gManager.getGridByCellIndex(start.x, start.y);
         var endGrid = this._gManager.getGridByCellIndex(end.x, end.y);
@@ -99,12 +130,24 @@ export class tankManager extends Component {
             //生成实例
             var tankNode: Node = instantiate(this.tankBase);
             this.node.getChildByName("tankLayer").addChild(tankNode);
+            //先隐藏对象(因为寻路还需要时间运算，使用了settimeout,寻路完成后再显示对象,参考aStart.showPath)
+            tankNode.active = false;
+            //赋值属性
             var tk: tank = tankNode.getComponent(tank);
-            //赋值
+            tk.team = team;
             tk.startGrid = startGrid;
             tk.endGrid = endGrid;
             tk.tankManager = this;
             tk.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
+            switch (team) {
+                case enumTeam.teamRed:
+                    tankNode.getComponent(Sprite).color = new Color(225, 0, 0, 225);
+                    break;
+
+                case enumTeam.teamBlue:
+                    tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 225);
+                    break;
+            }
             //开始导航
             tk.startNav();
         }
@@ -138,12 +181,12 @@ export class tankManager extends Component {
 
 
     //同步当前网格状态
-    public synCurrentState(astar:aStar) {
-            for (var x = 0; x < this._gManager.gridMatrix.row; x++) {
-                for (var y = 0; y < this._gManager.gridMatrix.colum; y++) {
-                    astar.gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
-                }
+    public synCurrentState(astar: aStar) {
+        for (var x = 0; x < this._gManager.gridMatrix.row; x++) {
+            for (var y = 0; y < this._gManager.gridMatrix.colum; y++) {
+                astar.gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
             }
+        }
     }
 
 
