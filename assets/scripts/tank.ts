@@ -79,6 +79,67 @@ export class tank extends Component {
     public set endGrid(v: grid) {
         this._endGrid = v;
     }
+
+
+
+    //射程
+    private _attackDis = 6;
+    public set attackDis(v: number) {
+        this._attackDis = v;
+    }
+    public get attackDis(): number {
+        return this._attackDis
+    }
+
+
+    //目标坦克距离(用来存储 做排序继续拿)
+    private _targetDis;
+    public set targetDis(v: number) {
+        this._targetDis = v;
+    }
+    public get targetDis(): number {
+        return this._targetDis;
+    }
+
+    //目标tank
+    private _targetTank: tank;
+    public set targetTank(v: tank) {
+        this._targetTank = v;
+    }
+    public get targetTank(): tank {
+        return this._targetTank
+    }
+
+
+    //由于设计停止移动,在closelist中的位置
+    private _stopIndex: number;
+    public set stopIndex(v: number) {
+        this._stopIndex = v;
+    }
+    public get stopIndex(): number {
+        return this._stopIndex;
+    }
+
+
+    //路径
+    private _closeList: grid[];
+    public set closeList(v: grid[]) {
+        this._closeList = v;
+    }
+    public get closeList(): grid[] {
+        return this._closeList
+    }
+
+
+
+
+
+
+
+
+
+
+
     //开始导航
     startNav() {
         if (!this.aaStar) {
@@ -183,6 +244,8 @@ export class tank extends Component {
                     onUpdate: () => {
                     },
                     onComplete: () => {
+                        //射击部分---------------------------------------
+                        var targetTank = this.tankManager.searchAttakTarget(this);
 
                         twMove.removeSelf();
                         if (nextIndex <= closeList.length - 1) {
@@ -193,16 +256,54 @@ export class tank extends Component {
                                 var twRotate = tween(this.node).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot) }, {
                                     onComplete: () => {
                                         twRotate.removeSelf();
+
+                                        //没有目标 移动
+                                        if (!targetTank) {
+                                            nextIndex++;
+                                            this.tweenMove(nextIndex, closeList);
+                                            //更新网格属性
+                                            refreshState();
+                                        }
+                                        //找到目标,停止移动开始射击
+                                        else {
+                                            if (targetTank.tankInGridCellIndex) {
+                                                this._stopIndex = nextIndex;
+                                                this._closeList = closeList;
+                                                this.attackTarget(targetTank);
+                                            } else {
+                                                nextIndex++;
+                                                this.tweenMove(nextIndex, closeList);
+                                                //更新网格属性
+                                                refreshState();
+                                            }
+
+                                        }
+                                    }
+                                }).start();
+                            }
+                            else {
+                                //没有目标 移动
+                                if (!targetTank) {
+                                    nextIndex++;
+                                    this.tweenMove(nextIndex, closeList);
+                                    //更新网格属性
+                                    refreshState();
+                                }
+                                //找到目标,停止移动开始射击
+                                else {
+                                    //有坐标信息后打击
+                                    if (targetTank.tankInGridCellIndex) {
+                                        this._stopIndex = nextIndex;
+                                        this._closeList = closeList;
+                                        this.attackTarget(targetTank);
+                                    } else {
                                         nextIndex++;
                                         this.tweenMove(nextIndex, closeList);
                                         //更新网格属性
                                         refreshState();
                                     }
-                                }).start();
-                            }
-                            else {
-                                nextIndex++;
-                                this.tweenMove(nextIndex, closeList);
+
+                                }
                             }
                         }
                         else {
@@ -210,6 +311,11 @@ export class tank extends Component {
                         }
                         //更新网格属性
                         refreshState();
+                        //-----------------------------------------------
+
+
+
+
                     }
                 }).start();
             }
@@ -234,6 +340,10 @@ export class tank extends Component {
     }
 
     destorySelf() {
+        //从数组中移除
+        var dex = this.tankManager.tankCollection.indexOf(this);
+        this.tankManager.tankCollection.splice(dex, 1);
+        //销毁坦克节点
         this.node.destroy()
     }
 
@@ -267,6 +377,27 @@ export class tank extends Component {
         if (this.aaStar.isValid) {
 
         }
+    }
+
+
+
+    //攻击
+    public attackTarget(target: tank) {
+        var root: Node = this.node.getChildByName("root");
+        if (target.tankInGridCellIndex) {
+            var radian = Math.atan2(target.tankInGridCellIndex.y - this.tankInGridCellIndex.y, target.tankInGridCellIndex.x - this.tankInGridCellIndex.x);
+            var targetRot = radian * (180 / Math.PI);
+            if (root.eulerAngles.z !== targetRot) {
+                var tw = tween(root).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot - this.node.eulerAngles.z) }, {
+                    onComplete: () => {
+                        console.log("转向完成");
+                    }
+                }).start();
+            }
+        } else {
+            console.log("没有打积点");
+        }
+
     }
 }
 

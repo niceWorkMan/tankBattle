@@ -17,7 +17,7 @@ export class tankManager extends Component {
     }
 
 
-    private _isBattle=false;
+    private _isBattle = false;
 
     //导航集合
     private _aStartCollection: aStar[] = [];
@@ -27,8 +27,16 @@ export class tankManager extends Component {
 
 
 
-    //寻路tank队列
-    tankQueue: tank[] = [];
+    //在线坦克集合
+    private _tankCollection: tank[] = [];
+
+    public set tankCollection(v: tank[]) {
+        this._tankCollection = v;
+    }
+    public get tankCollection(): tank[] {
+        return this._tankCollection;
+    }
+
 
 
 
@@ -43,7 +51,7 @@ export class tankManager extends Component {
         const touchPos = event.getLocation(); // 获取触摸位置
         console.log(`Touch started at: x=${touchPos.x}, y=${touchPos.y}`);
         //测试代码
-        this.battleStart();
+        //this.battleStart();
 
     }
 
@@ -74,13 +82,18 @@ export class tankManager extends Component {
     }
 
 
- 
+
     //开始竞技
     private battleStart() {
-        if(this._isBattle)
+        if (this._isBattle)
             return;
+
+        this.spawnActor(new Vec2(0, 5), new Vec2(23, 5), enumTeam.teamRed);
+        this.spawnActor(new Vec2(23, 5), new Vec2(0, 5), enumTeam.teamBlue);
+        return;
+
         //只执行一次
-        this._isBattle=true;
+        this._isBattle = true;
         //平均team生成测试
         var spawnTime = 0;
         setInterval(() => {
@@ -138,11 +151,15 @@ export class tankManager extends Component {
             tk.endGrid = endGrid;
             tk.tankManager = this;
             tk.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
+            //加入集合
+            var tankIndex = this.tankCollection.indexOf(tk);
+            if (tankIndex == -1) {
+                this.tankCollection.push(tk);
+            }
             switch (team) {
                 case enumTeam.teamRed:
                     tankNode.getComponent(Sprite).color = new Color(225, 0, 0, 225);
                     break;
-
                 case enumTeam.teamBlue:
                     tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 225);
                     break;
@@ -169,7 +186,7 @@ export class tankManager extends Component {
 
     //同步所有导航网格状态
     synGridCollectionState() {
-        if(this.aStartCollection.length>0){
+        if (this.aStartCollection.length > 0) {
             for (var i = 0; i < this.aStartCollection.length; i++) {
                 for (var x = 0; x < this._gManager.gridMatrix.row; x++) {
                     for (var y = 0; y < this._gManager.gridMatrix.colum; y++) {
@@ -178,7 +195,7 @@ export class tankManager extends Component {
                 }
             }
         }
-     
+
     }
 
 
@@ -189,6 +206,49 @@ export class tankManager extends Component {
                 astar.gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
             }
         }
+    }
+
+
+
+    //查询
+    public searchAttakTarget(t: tank) {
+        var targetTank: tank = null;
+        var targetCollection: tank[] = [];
+        //查询
+        for (var i = 0; i < this.tankCollection.length; i++) {
+            if (t.team != this.tankCollection[i].team) {
+                var targtPos = this.tankCollection[i].tankInGridCellIndex;
+                if (targtPos) {
+                    var selfPos = t.tankInGridCellIndex;
+                    var sum = Math.pow((targtPos.x - selfPos.x), 2) + Math.pow((targtPos.y - selfPos.y), 2)
+                    var dis = Math.sqrt(sum);
+                    if (dis <= t.attackDis) {
+                        this.tankCollection[i].targetDis = dis;
+                        targetCollection.push(this.tankCollection[i])
+                    }
+                }
+
+            }
+        }
+        //排序
+        for (var i = 0; i < targetCollection.length; i++) {
+            for (var j = 0; j < targetCollection.length - i - 1; j++) {
+                if (targetCollection[j].targetDis < targetCollection[i].targetDis) {
+                    var temp = targetCollection[i];
+                    targetCollection[i] = targetCollection[j];
+                    targetCollection[j] = temp;
+                }
+            }
+        }
+        //返回最近的炮台
+        if (targetCollection.length > 0) {
+            t.targetTank = targetCollection[0];
+            return targetCollection[0];
+        }
+        else {
+            return null;
+        }
+
     }
 
 
