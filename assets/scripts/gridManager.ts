@@ -96,7 +96,6 @@ export class gridManager extends Component {
         this._tankManager.onKeyDown(event);
         switch (event.keyCode) {
             case KeyCode.KEY_A:
-
                 //初始化障碍物
                 //this.exampleSetObstacle();
                 //测试寻路
@@ -112,7 +111,6 @@ export class gridManager extends Component {
 
     //通过ID获取位置
     getPositionByCellIndex(x, y) {
-        console.log(x, y);
         var originPos = this._gridComponentArr[x][y].node.getPosition();
         return originPos;
     }
@@ -129,16 +127,7 @@ export class gridManager extends Component {
     }
 
 
-    //生成坦克在格子上
-    generateTankByCellIndex(x, y) {
-        this.checkXY(x, y);
-        var tank: Node = instantiate(this.tankBase);
-        this.node.addChild(tank);
-        var pos = this.getPositionByCellIndex(x, y);
-        console.log("pos", pos);
-        tank.setPosition(pos);
-    }
-
+ 
 
 
     loadConfigAssets() {
@@ -164,36 +153,6 @@ export class gridManager extends Component {
 
             this._tankManager.gameInit();
         })
-
-    }
-
-
-    private exampleSetObstacle() {
-        for (var i = 1; i < 22; i++) {
-            for (var j = 0; j <= 9; j++) {
-                if (Math.random() > 0.7) {
-                    this._gridComponentArr[i][j].setObstacle(true);
-                }
-            }
-        }
-
-        // this._gridNodeArr[12][9].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[12][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[13][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[14][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[15][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[16][8].getComponent(grid).setObstacle(true); 
-        // this._gridNodeArr[17][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[18][8].getComponent(grid).setObstacle(true);
-        // this._gridNodeArr[19][8].getComponent(grid).setObstacle(true);
-    }
-
-
-
-
-
-
-    update(deltaTime: number) {
 
     }
 }

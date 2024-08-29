@@ -1,7 +1,6 @@
 import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Node, Prefab, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { aStar } from './core/aStar';
-import { grid } from './grid';
 import { tank } from './tank';
 import { enumTeam } from './common/enumTeam';
 const { ccclass, property } = _decorator;
@@ -99,7 +98,7 @@ export class tankManager extends Component {
                 this.spawnActor(pos0, pos1, gteam);
                 spawnTime++;
             }
-        }, 500);
+        }, 1000);
     }
 
 
@@ -131,7 +130,7 @@ export class tankManager extends Component {
             var tankNode: Node = instantiate(this.tankBase);
             this.node.getChildByName("tankLayer").addChild(tankNode);
             //先隐藏对象(因为寻路还需要时间运算，使用了settimeout,寻路完成后再显示对象,参考aStart.showPath)
-            tankNode.active = false;
+            //tankNode.active = false;
             //赋值属性
             var tk: tank = tankNode.getComponent(tank);
             tk.team = team;
@@ -170,13 +169,16 @@ export class tankManager extends Component {
 
     //同步所有导航网格状态
     synGridCollectionState() {
-        for (var i = 0; i < this.aStartCollection.length; i++) {
-            for (var x = 0; x < this._gManager.gridMatrix.row; x++) {
-                for (var y = 0; y < this._gManager.gridMatrix.colum; y++) {
-                    this.aStartCollection[i].gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
+        if(this.aStartCollection.length>0){
+            for (var i = 0; i < this.aStartCollection.length; i++) {
+                for (var x = 0; x < this._gManager.gridMatrix.row; x++) {
+                    for (var y = 0; y < this._gManager.gridMatrix.colum; y++) {
+                        this.aStartCollection[i].gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
+                    }
                 }
             }
         }
+     
     }
 
 

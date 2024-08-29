@@ -8,34 +8,33 @@ export class grid extends Component {
     private _indexLabel;
 
     private _cellX: number;
-
-    public set cellX(v: number) {
-        this._cellX = v;
-    }
     public get cellX(): number {
         return this._cellX;
     }
 
-
     private _cellY: number;
-
-    public set cellY(v: number) {
-        this._cellY = v;
-    }
     public get cellY(): number {
         return this._cellY;
     }
 
     private _gridManager;
+
     //是否是障碍物
     private _isObstacle: boolean;
     public set isObstacle(v: boolean) {
+        if (v) {
+            this.setSpriteColor({ r: 0, g: 0, b: 0, a: 100 })
+        }
+        else {
+            this.setSpriteColor({ r: 255, g: 255, b: 255, a: 255 })
+        }
+
+
         this._isObstacle = v;
     }
     public get isObstacle(): boolean {
         return this._isObstacle
     }
-
 
     //父节点
     public _aStarParent: grid = null;
@@ -167,7 +166,7 @@ export class grid extends Component {
             this._sprite.color = { r: 216, g: 47, b: 47, a: 255 };
         }
         else {
-           // this._sprite.color = { r: 230, g: 241, b: 103, a: 255 };
+            // this._sprite.color = { r: 230, g: 241, b: 103, a: 255 };
         }
     }
 
@@ -193,10 +192,10 @@ export class grid extends Component {
     public getCellIndex() {
         return new Vec2(this._cellX, this._cellY);
     }
-    
+
     //获取位置
-    public getPosition(){
-      return   this._gridManager.gridComponentArr[this._cellX][this._cellY].node.getPosition();
+    public getPosition() {
+        return this._gridManager.gridComponentArr[this._cellX][this._cellY].node.getPosition();
     }
 
 

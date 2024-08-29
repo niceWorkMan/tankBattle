@@ -11,13 +11,22 @@ export class tank extends Component {
 
     }
     //坦克移动单元格时间
-    private moveSpeed = 0.2;
+    private moveSpeed = 0.1;
     //坦克转向时间
-    private rotateSpeed = 0.3;
+    private rotateSpeed = 0.2;
     //等待障碍物时间 单位/秒
     private _waitObsTime = 0.5;
     public get waitObsTime(): number {
         return this._waitObsTime;
+    }
+
+    //当前Tank所在格子
+    private _tankInGridCellIndex: Vec2;
+    public set tankInGridCellIndex(v: Vec2) {
+        this._tankInGridCellIndex = v;
+    }
+    public get tankInGridCellIndex(): Vec2 {
+        return this._tankInGridCellIndex;
     }
 
 
@@ -82,17 +91,26 @@ export class tank extends Component {
             if (dex == -1) {
                 this.tankManager.aStartCollection.push(this.aaStar);
             }
-            //tk赋值
+            //寻路
+            this.aaStar.getPriceMixNeighborGrid(this.aaStar.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.aaStar.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY]);
         } else {
             //同步基础网格状态
+            this.tankManager.synGridCollectionState();
+            //寻路
+            if (this.tankInGridCellIndex) {
 
-            this.aaStar.synGridState(this.tankManager.gManager);
-
+                //重新设置起点
+                this.startGrid = this.aaStar.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY];
+                this.startGrid.isObstacle = false;
+                //重置数据
+                this.aaStar.resetGridArr();
+                //重新寻路
+                this.aaStar.getPriceMixNeighborGrid(this.aaStar.gridNodeArr[this.tankInGridCellIndex.x][this.tankInGridCellIndex.y], this.aaStar.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY]);
+            }
+            else
+                console.warn("没有当前的Tank所在格子位置,可能是tank未开始移动")
         }
         this.aaStar.tk = this;
-        //寻路
-        if (this.aaStar)
-            this.aaStar.getPriceMixNeighborGrid(this.aaStar.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.aaStar.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY]);
     }
 
     //移动
@@ -101,55 +119,80 @@ export class tank extends Component {
         var moveIndex = 0;
         this.tweenMove(moveIndex, closeList);
 
-        console.log("导航结束:", closeList.length);
+        console.warn("导航结束:", closeList.length);
     }
 
 
     tweenMove(nextIndex: number, closeList: grid[]) {
+
+        this.tankInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY);
+        this.startGrid = closeList[nextIndex];
         if (closeList.length == 0) {
             alert("错误的closeList长度")
         }
-        //更新属性
+        //更新属性（占用2个格子的目标）
         var refreshState = () => {
             //设置障碍属性--------------------------------------------
-            if (closeList[nextIndex].parent) {
-                //当前map状态
-                closeList[nextIndex].parent.isObstacle = false;
-                //原始map状态
-                this._tankManager.gManager.gridComponentArr[closeList[nextIndex].parent.cellX][closeList[nextIndex].parent.cellY].isObstacle = false;
+            if (nextIndex - 1 >= 0) {
+                this._tankManager.gManager.gridComponentArr[closeList[nextIndex - 1].cellX][closeList[nextIndex - 1].cellY].isObstacle = false;
             }
-            closeList[nextIndex].isObstacle = true;
             this._tankManager.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = true;
             //同步所有状态
+
             this._tankManager.synGridCollectionState();
             //-------------------------------------------------------
         }
 
-
+        var newNavi = () => {
+            setTimeout(() => {
+                //this.startGrid = closeList[nextIndex];
+                //this.tweenMove(nextIndex, closeList);
+                this._tankManager.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = false;
+                if (nextIndex - 1 > 0)
+                    this._tankManager.gManager.gridComponentArr[closeList[nextIndex - 1].cellX][closeList[nextIndex - 1].cellY].isObstacle = false;
+                this.tankManager.synGridCollectionState();
+                this.startNav();
+                //this.destorySelf();
+                //this.startNav();
+            }, this._waitObsTime * 500);
+        }
         //如果下一个目标点是障碍
-        if (closeList[nextIndex].isObstacle) {
+        if (this._tankManager.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle) {
             //重新寻路
             //等待障碍离开继续前进
-            setTimeout(() => {
-                // this.startGrid = closeList[nextIndex];
-                // this._tankManager.startNav(this);
-                this.tweenMove(nextIndex, closeList);
-            }, this._waitObsTime * 1000);
+            if (nextIndex + 1 < closeList.length - 1) {
+                if (this._tankManager.gManager.gridComponentArr[closeList[nextIndex + 1].cellX][closeList[nextIndex + 1].cellY].isObstacle) {
+                    newNavi();
+                    return;
+                }
+            }
+            newNavi();
         }
         else {
+            //
             if (nextIndex + 1 <= closeList.length - 1) {
+                //不是相邻格子
+                if (Math.abs(closeList[nextIndex].cellX - closeList[nextIndex + 1].cellX) > 1 || Math.abs(closeList[nextIndex].cellY - closeList[nextIndex + 1].cellY) > 1) {
+                    this.getComponent(Sprite).color = new Color(0, 0, 0, 225)
+                    this.startNav();
+                    return;
+                }
+                //设置当前tank所在格子
                 //位移
-                tween(this.node).to(this.moveSpeed, { position: closeList[nextIndex].getPosition() }, {
+                var twMove = tween(this.node).to(this.moveSpeed, { position: closeList[nextIndex].getPosition() }, {
                     onUpdate: () => {
                     },
                     onComplete: () => {
+
+                        twMove.removeSelf();
                         if (nextIndex <= closeList.length - 1) {
                             //转弯
                             var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
                             var targetRot = radian * (180 / Math.PI);
                             if (this.node.eulerAngles.z !== targetRot) {
-                                tween(this.node).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot) }, {
+                                var twRotate = tween(this.node).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot) }, {
                                     onComplete: () => {
+                                        twRotate.removeSelf();
                                         nextIndex++;
                                         this.tweenMove(nextIndex, closeList);
                                         //更新网格属性
@@ -163,7 +206,7 @@ export class tank extends Component {
                             }
                         }
                         else {
-                            console.log("单格子移动完毕");
+                            console.warn("单格子移动完毕");
                         }
                         //更新网格属性
                         refreshState();
@@ -172,16 +215,15 @@ export class tank extends Component {
             }
             else {
                 //最后一步特殊处理
-                tween(this.node).to(this.moveSpeed, { position: closeList[closeList.length - 1].getPosition() }, {
+                var twLast = tween(this.node).to(this.moveSpeed, { position: closeList[closeList.length - 1].getPosition() }, {
                     onComplete: () => {
-                        console.log("该路线移动完毕");
+                        twLast.removeSelf();
+                        console.warn("该路线移动完毕");
                         //更新网格属性
-                        closeList[nextIndex].isObstacle = false;
                         this._tankManager.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = false;
                         //同步所有状态
                         this._tankManager.synGridCollectionState();
-
-                        //test 销毁
+                        //销毁对象
                         this.destorySelf();
                     },
                 }).start();
@@ -194,6 +236,7 @@ export class tank extends Component {
     destorySelf() {
         this.node.destroy()
     }
+
 
 
     getAngleByTwoPos(g1: grid, g2: grid): Vec3 {
@@ -222,7 +265,7 @@ export class tank extends Component {
 
     protected onDestroy(): void {
         if (this.aaStar.isValid) {
-            this.aaStar==null;
+
         }
     }
 }
