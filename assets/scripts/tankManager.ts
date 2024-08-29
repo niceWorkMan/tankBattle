@@ -9,7 +9,7 @@ const { ccclass, property } = _decorator;
 export class tankManager extends Component {
 
 
-
+    @property(Prefab) bulletBase:Prefab;
     @property(Prefab) tankBase: Prefab;
     private _gManager: gridManager;
     public get gManager(): gridManager {

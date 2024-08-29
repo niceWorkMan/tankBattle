@@ -1,15 +1,35 @@
-import { _decorator, Color, Component, log, math, Node, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Collider2D, Color, Component, Contact2DType, instantiate, IPhysics2DContact, log, math, Node, resources, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { grid } from './grid';
 import { aStar } from './core/aStar';
 import { tankManager } from './tankManager';
 import { enumTeam } from './common/enumTeam';
+import { bullet } from './bullet';
 const { ccclass, property } = _decorator;
 
 @ccclass('tank')
 export class tank extends Component {
-    start() {
 
+    private hpComp: Node;
+    private firePoint: Node;
+    private tankCollider: Collider2D;
+    private tankLayer: Node;
+
+    start() {
+        this.initComponent();
     }
+
+    initComponent() {
+        this.hpComp = this.node.getChildByName("hp");
+        this.firePoint = this.node.getChildByName("root").getChildByName("pao").getChildByName("point");
+        this.tankLayer = this.tankManager.node.getChildByName("tankLayer");
+
+        this.tankCollider = this.getComponent(Collider2D);
+
+        this.tankCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+    }
+
+
+
     //坦克移动单元格时间
     private moveSpeed = 0.1;
     //坦克转向时间
@@ -131,13 +151,37 @@ export class tank extends Component {
     }
 
 
+    //Hp(血条)
+    private _hp: number = 100;
+    public set hp(v: number) {
+        if (v < 100) {
+            this.hpComp.active = true;
+            // if (this._hp <= 0) {
+            //     this.getComponent(Sprite).color = new Color(0, 0, 0, 255);
+            //     if (this.tankInGridCellIndex) {
+            //         var dex = this.tankInGridCellIndex;
+            //         this.tankManager.gManager.gridComponentArr[dex.x][dex.y].isObstacle = false;
+            //         this.tankManager.synGridCollectionState();
+            //         setTimeout(() => {
+            //             this.destorySelf();
+            //         }, 1000);
+            //     }
+            // }
+        }
+        this._hp = v;
+    }
+    public get hp(): number {
+        return this._hp;
+    }
 
 
 
 
 
 
+    public damage() {
 
+    }
 
 
     //开始导航
@@ -391,6 +435,10 @@ export class tank extends Component {
                 var tw = tween(root).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot - this.node.eulerAngles.z) }, {
                     onComplete: () => {
                         console.log("转向完成");
+                        //生成子弹
+                        if (this.team == enumTeam.teamRed) {
+                            this.spawnBullet();
+                        }
                     }
                 }).start();
             }
@@ -398,6 +446,37 @@ export class tank extends Component {
             console.log("没有打积点");
         }
 
+    }
+
+
+
+    public spawnBullet() {
+        var bulletNode: Node = instantiate(this.tankManager.bulletBase);
+        //设置父类
+        this.tankLayer.addChild(bulletNode);
+        bulletNode.getComponent(bullet).tankParent = this;
+        bulletNode.position = this.node.position;
+
+        var twLast = tween(bulletNode).to(3, { position: this.targetTank.node.position }, {
+            onComplete: () => {
+            },
+        }).start();
+    }
+
+
+    onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
+        var bu: bullet = otherCollider.getComponent(bullet);
+        if (bu.tankParent != this) {
+            alert("碰撞2")
+            //不是一队的 产生伤害
+            if (bu.bulletType != this._team) {
+                this.hp -= 20;
+                //otherCollider.node.destroy();
+                if(this.hp>0){
+                    bu.tankParent.spawnBullet();
+                }
+            }
+        }
     }
 }
 

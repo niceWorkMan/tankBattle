@@ -417,6 +417,10 @@
     },
     "_enabled": true,
     "__prefab": null,
+    "bulletBase": {
+      "__uuid__": "2df72478-8b56-4470-ab7e-2b79e822f41d",
+      "__expectedType__": "cc.Prefab"
+    },
     "tankBase": {
       "__uuid__": "fa8a0437-d431-4782-9118-12a38726529a",
       "__expectedType__": "cc.Prefab"
@@ -475,7 +479,7 @@
     "_priority": 0,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 360,
+    "_orthoHeight": 452.2065727699531,
     "_near": 0,
     "_far": 2000,
     "_color": {
