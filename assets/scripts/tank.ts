@@ -294,9 +294,7 @@ export class tank extends Component {
                     this.startNav();
                     return;
                 }
-                //设置站位障碍
-                this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = true;
-                this._tankManager.synGridCollectionState();
+        
                 //位移
                 var twMove = tween(this.node).to(this.moveSpeed, { position: closeList[nextIndex].getPosition() }, {
                     onUpdate: () => {
@@ -323,9 +321,6 @@ export class tank extends Component {
                                     }
                                 }
                             }
-                            //清除站位障碍
-                            this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = false;
-                            this._tankManager.synGridCollectionState();
 
                             //继续移动
                             nextIndex++;
