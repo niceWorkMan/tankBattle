@@ -51,7 +51,7 @@ export class tankManager extends Component {
         const touchPos = event.getLocation(); // 获取触摸位置
         console.log(`Touch started at: x=${touchPos.x}, y=${touchPos.y}`);
         //测试代码
-        //this.battleStart();
+        this.battleStart();
 
     }
 
@@ -88,9 +88,9 @@ export class tankManager extends Component {
         if (this._isBattle)
             return;
 
-        this.spawnActor(new Vec2(0, 5), new Vec2(23, 5), enumTeam.teamRed);
-        this.spawnActor(new Vec2(23, 5), new Vec2(0, 5), enumTeam.teamBlue);
-        return;
+        // this.spawnActor(new Vec2(0, 5), new Vec2(23, 5), enumTeam.teamBlue);
+        // this.spawnActor(new Vec2(23, 5), new Vec2(0, 5), enumTeam.teamRed);
+        // return;
 
         //只执行一次
         this._isBattle = true;
@@ -162,6 +162,7 @@ export class tankManager extends Component {
                     break;
                 case enumTeam.teamBlue:
                     tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 225);
+                    tankNode.eulerAngles=new Vec3(0,0,180)
                     break;
             }
             //开始导航

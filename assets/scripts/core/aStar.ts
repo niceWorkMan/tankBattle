@@ -214,6 +214,9 @@ export class aStar extends Component {
 
     //显示路径（绿色是已经粗算的路径）
     showPath() {
+        if(!this.tk||!this.tk.startGrid||!this.tk.endGrid){
+            return;
+        }
         //复位closeList 放在远点过滤前面
         this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY].isSearch = false
         this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY].backCheck = false;
@@ -244,7 +247,7 @@ export class aStar extends Component {
             //this._closeList[i].setLabel("路:" + i)
             //this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setLabel("路:" + i);
             //this._closeList[i].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
-            //this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
+            //this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].olor({ r: 0, g: 21, b: 225, a: 255 });
             if (i > 0) {
                 this._closeList[i].parent = this._closeList[i - 1];
             }

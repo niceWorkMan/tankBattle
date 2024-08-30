@@ -1,4 +1,4 @@
-import { _decorator, Collider2D, Color, Component, Contact2DType, instantiate, IPhysics2DContact, log, math, Node, resources, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Collider2D, color, Color, Component, Contact2DType, instantiate, IPhysics2DContact, log, math, Node, resources, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { grid } from './grid';
 import { aStar } from './core/aStar';
 import { tankManager } from './tankManager';
@@ -10,7 +10,6 @@ const { ccclass, property } = _decorator;
 export class tank extends Component {
 
     private hpComp: Node;
-    private firePoint: Node;
     private tankCollider: Collider2D;
     private tankLayer: Node;
 
@@ -20,8 +19,12 @@ export class tank extends Component {
 
     initComponent() {
         this.hpComp = this.node.getChildByName("hp");
-        this.firePoint = this.node.getChildByName("root").getChildByName("pao").getChildByName("point");
-        this.tankLayer = this.tankManager.node.getChildByName("tankLayer");
+        if (this.tankManager.node) {
+            this.tankLayer = this.tankManager.node.getChildByName("tankLayer");
+        }
+        else {
+            alert("设置Layer失败")
+        }
 
         this.tankCollider = this.getComponent(Collider2D);
 
@@ -59,9 +62,6 @@ export class tank extends Component {
         this._team = v;
     }
 
-
-
-
     //坦克管理类
     private _tankManager: tankManager
     public set tankManager(v: tankManager) {
@@ -80,8 +80,6 @@ export class tank extends Component {
         return this._aStar
     }
 
-
-
     //起始点
     private _startGrid;
     public get startGrid(): grid {
@@ -99,8 +97,6 @@ export class tank extends Component {
     public set endGrid(v: grid) {
         this._endGrid = v;
     }
-
-
 
     //射程
     private _attackDis = 6;
@@ -130,7 +126,6 @@ export class tank extends Component {
         return this._targetTank
     }
 
-
     //由于设计停止移动,在closelist中的位置
     private _stopIndex: number;
     public set stopIndex(v: number) {
@@ -150,23 +145,14 @@ export class tank extends Component {
         return this._closeList
     }
 
-
     //Hp(血条)
     private _hp: number = 100;
     public set hp(v: number) {
-        if (v < 100) {
+        if (v < 100 && v > 0) {
             this.hpComp.active = true;
-            // if (this._hp <= 0) {
-            //     this.getComponent(Sprite).color = new Color(0, 0, 0, 255);
-            //     if (this.tankInGridCellIndex) {
-            //         var dex = this.tankInGridCellIndex;
-            //         this.tankManager.gManager.gridComponentArr[dex.x][dex.y].isObstacle = false;
-            //         this.tankManager.synGridCollectionState();
-            //         setTimeout(() => {
-            //             this.destorySelf();
-            //         }, 1000);
-            //     }
-            // }
+            this.hpComp.getChildByName("forward").getComponent(Sprite).fillStart = 1 - v / 100;
+        } else {
+            this.hpComp.active = false;
         }
         this._hp = v;
     }
@@ -176,12 +162,27 @@ export class tank extends Component {
 
 
 
+    //死亡状态
+    private _die: boolean = false;
 
-
-
-    public damage() {
-
+    public set die(v: boolean) {
+        this._die = v;
     }
+    public get die(): boolean {
+        return this._die
+    }
+
+
+    //开火间隔时间
+    private _fireSpace: number = 1;
+    public set fireSpace(v: number) {
+        this._fireSpace = v;
+    }
+    public get fireSpace(): number {
+        return this._fireSpace;
+    }
+
+
 
 
     //开始导航
@@ -218,18 +219,20 @@ export class tank extends Component {
         this.aaStar.tk = this;
     }
 
-    //移动
+    //开始移动
     public navigationMove(closeList: grid[]) {
         //从第0个点开始移动
         var moveIndex = 0;
         this.tweenMove(moveIndex, closeList);
-
         console.warn("导航结束:", closeList.length);
     }
 
-
+    //移动核心逻辑
     tweenMove(nextIndex: number, closeList: grid[]) {
-
+        //判断当前tank是否存在
+        if (!this.node) {
+            return;
+        }
         this.tankInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY);
         this.startGrid = closeList[nextIndex];
         if (closeList.length == 0) {
@@ -247,30 +250,24 @@ export class tank extends Component {
             this._tankManager.synGridCollectionState();
             //-------------------------------------------------------
         }
-
+        //新的导航 延时100ms
         var newNavi = () => {
             setTimeout(() => {
+                if (!this.node)
+                    return;
                 //this.startGrid = closeList[nextIndex];
                 //this.tweenMove(nextIndex, closeList);
                 this._tankManager.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = false;
                 if (nextIndex - 1 > 0)
                     this._tankManager.gManager.gridComponentArr[closeList[nextIndex - 1].cellX][closeList[nextIndex - 1].cellY].isObstacle = false;
                 this.tankManager.synGridCollectionState();
+
+                //this.getComponent(Sprite).color = new Color(0, 0, 0, 120)
                 this.startNav();
-                //this.destorySelf();
-                //this.startNav();
-            }, this._waitObsTime * 500);
+            }, 100);
         }
         //如果下一个目标点是障碍
         if (this._tankManager.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle) {
-            //重新寻路
-            //等待障碍离开继续前进
-            if (nextIndex + 1 < closeList.length - 1) {
-                if (this._tankManager.gManager.gridComponentArr[closeList[nextIndex + 1].cellX][closeList[nextIndex + 1].cellY].isObstacle) {
-                    newNavi();
-                    return;
-                }
-            }
             newNavi();
         }
         else {
@@ -279,6 +276,7 @@ export class tank extends Component {
                 //不是相邻格子
                 if (Math.abs(closeList[nextIndex].cellX - closeList[nextIndex + 1].cellX) > 1 || Math.abs(closeList[nextIndex].cellY - closeList[nextIndex + 1].cellY) > 1) {
                     this.getComponent(Sprite).color = new Color(0, 0, 0, 225)
+                    //重新导航
                     this.startNav();
                     return;
                 }
@@ -289,66 +287,30 @@ export class tank extends Component {
                     },
                     onComplete: () => {
                         //射击部分---------------------------------------
+                        //目标坦克
                         var targetTank = this.tankManager.searchAttakTarget(this);
-
+                        //攻击源坦克
                         twMove.removeSelf();
-                        if (nextIndex <= closeList.length - 1) {
-                            //转弯
+                        if (nextIndex + 1 <= closeList.length - 1) {
+                            //转弯   
                             var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
                             var targetRot = radian * (180 / Math.PI);
                             if (this.node.eulerAngles.z !== targetRot) {
-                                var twRotate = tween(this.node).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot) }, {
-                                    onComplete: () => {
-                                        twRotate.removeSelf();
+                                this.node.eulerAngles = new Vec3(0, 0, targetRot);
 
-                                        //没有目标 移动
-                                        if (!targetTank) {
-                                            nextIndex++;
-                                            this.tweenMove(nextIndex, closeList);
-                                            //更新网格属性
-                                            refreshState();
-                                        }
-                                        //找到目标,停止移动开始射击
-                                        else {
-                                            if (targetTank.tankInGridCellIndex) {
-                                                this._stopIndex = nextIndex;
-                                                this._closeList = closeList;
-                                                this.attackTarget(targetTank);
-                                            } else {
-                                                nextIndex++;
-                                                this.tweenMove(nextIndex, closeList);
-                                                //更新网格属性
-                                                refreshState();
-                                            }
-
-                                        }
-                                    }
-                                }).start();
-                            }
-                            else {
-                                //没有目标 移动
-                                if (!targetTank) {
-                                    nextIndex++;
-                                    this.tweenMove(nextIndex, closeList);
-                                    //更新网格属性
-                                    refreshState();
-                                }
-                                //找到目标,停止移动开始射击
-                                else {
-                                    //有坐标信息后打击
+                                if (targetTank) {
                                     if (targetTank.tankInGridCellIndex) {
                                         this._stopIndex = nextIndex;
                                         this._closeList = closeList;
                                         this.attackTarget(targetTank);
-                                    } else {
-                                        nextIndex++;
-                                        this.tweenMove(nextIndex, closeList);
-                                        //更新网格属性
-                                        refreshState();
+                                        return;
                                     }
-
                                 }
                             }
+                            nextIndex++;
+                            this.tweenMove(nextIndex, closeList);
+                            //更新网格属性
+                            refreshState();
                         }
                         else {
                             console.warn("单格子移动完毕");
@@ -356,9 +318,6 @@ export class tank extends Component {
                         //更新网格属性
                         refreshState();
                         //-----------------------------------------------
-
-
-
 
                     }
                 }).start();
@@ -383,12 +342,18 @@ export class tank extends Component {
 
     }
 
+
+    //销毁
     destorySelf() {
         //从数组中移除
         var dex = this.tankManager.tankCollection.indexOf(this);
         this.tankManager.tankCollection.splice(dex, 1);
-        //销毁坦克节点
-        this.node.destroy()
+        //销毁当前网格障碍
+        this.tankManager.gManager.gridComponentArr[this.tankInGridCellIndex.x][this.tankInGridCellIndex.y].isObstacle = false;
+        this.tankManager.synGridCollectionState();
+        if (this.node)
+            this.node.destroy();
+
     }
 
 
@@ -413,9 +378,6 @@ export class tank extends Component {
     }
 
 
-    update(deltaTime: number) {
-
-    }
 
     protected onDestroy(): void {
         if (this.aaStar.isValid) {
@@ -427,56 +389,148 @@ export class tank extends Component {
 
     //攻击
     public attackTarget(target: tank) {
+        
+        //开炮逻辑
+        var attackFunc = () => {
+            //红方生成子弹
+            if (this.team == enumTeam.teamRed) {
+                //下一帧执行 物理逻辑 不能在碰撞回调中调用
+            }
+            //随机开炮速度
+            this._fireSpace = Math.random();
+            if(this._fireInterval){
+                clearInterval(this._fireSpace);
+            }
+            this._fireInterval = setInterval(() => {
+                //自身存在&&目标也存在
+                if (this.node && target.node) {
+                    this.spawnBullet();
+                }
+                else {
+                    //停止射击  继续前进
+                    clearInterval(this._fireInterval);
+                    this.tweenMove(this.stopIndex, this.closeList);
+                }
+            }, this._fireSpace * 1000);
+        }
+
+        //开炮和转向炮管逻辑
+        if (target.node) {
+            var root: Node = this.node.getChildByName("root");
+            if (target.tankInGridCellIndex) {
+                var radian = Math.atan2(target.tankInGridCellIndex.y - this.tankInGridCellIndex.y, target.tankInGridCellIndex.x - this.tankInGridCellIndex.x);
+                var targetRot = radian * (180 / Math.PI);
+                if (root.eulerAngles.z !== targetRot) {
+                    var tw = tween(root).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot - this.node.eulerAngles.z) }, {
+                        onComplete: () => {
+                            console.log("转向完成");
+                            attackFunc();
+                        }
+                    }).start();
+                }
+                else {
+                    //炮管角度相等,直接攻击
+                    attackFunc();
+                }
+            } else {
+                this.tweenMove(this.stopIndex, this.closeList);
+                console.log("没有打积点");
+            }
+        } else {
+            console.log("打击点已摧毁");
+            var targetTank = this.tankManager.searchAttakTarget(this);
+            this.tweenMove(this.stopIndex, this.closeList);
+        }
+
+
+    }
+    //旋转对方炮筒
+    public gunRote(target: tank) {
         var root: Node = this.node.getChildByName("root");
-        if (target.tankInGridCellIndex) {
+        if (this.tankInGridCellIndex) {
             var radian = Math.atan2(target.tankInGridCellIndex.y - this.tankInGridCellIndex.y, target.tankInGridCellIndex.x - this.tankInGridCellIndex.x);
             var targetRot = radian * (180 / Math.PI);
             if (root.eulerAngles.z !== targetRot) {
                 var tw = tween(root).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot - this.node.eulerAngles.z) }, {
                     onComplete: () => {
-                        console.log("转向完成");
-                        //生成子弹
-                        if (this.team == enumTeam.teamRed) {
-                            this.spawnBullet();
-                        }
+                        console.log("更新转向");
                     }
                 }).start();
             }
         } else {
             console.log("没有打积点");
         }
-
     }
 
 
+    //连续发射函数
+    private _fireInterval = null;
+    public set fireInterva(v: any) {
+        this._fireInterval = v;
+    }
+    public get value(): any {
+        return this._fireInterval;
+    }
 
+    //生成子弹
     public spawnBullet() {
         var bulletNode: Node = instantiate(this.tankManager.bulletBase);
         //设置父类
         this.tankLayer.addChild(bulletNode);
+        bulletNode.getComponent(bullet).bulletType = this.team;
         bulletNode.getComponent(bullet).tankParent = this;
-        bulletNode.position = this.node.position;
+        bulletNode.worldPosition = this.node.getChildByName("root").getChildByName("pao").getChildByName("point").worldPosition;
 
-        var twLast = tween(bulletNode).to(3, { position: this.targetTank.node.position }, {
-            onComplete: () => {
-            },
-        }).start();
+        //子弹运动方向
+        if (this.targetTank.node) {
+            var twLast = tween(bulletNode).to(0.3, { position: this.targetTank.node.position }, {
+                onComplete: () => {
+                    bulletNode.destroy();
+                    twLast.removeSelf();
+                },
+            }).start();
+        }
     }
 
-
+    //碰撞检测函数
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
         var bu: bullet = otherCollider.getComponent(bullet);
         if (bu.tankParent != this) {
-            alert("碰撞2")
+            // alert("碰撞2")
             //不是一队的 产生伤害
             if (bu.bulletType != this._team) {
                 this.hp -= 20;
-                //otherCollider.node.destroy();
-                if(this.hp>0){
-                    bu.tankParent.spawnBullet();
+                if (this.hp > 0) {
+
+                } else {
+                    //停止连续射击  等待一帧
+                    if (!this.die) {
+                        setTimeout(() => {
+                            this.die = true;
+                        }, 0);
+                    } else {
+                        //血量为0,销毁
+                        setTimeout(() => {
+                            this.destorySelf();
+                        }, 0);
+                    }
+
                 }
             }
+            console.log("HP:", this.hp);
+
+            //下一帧执行 物理逻辑 不能在碰撞回调中调用
+            setTimeout(() => {
+                otherCollider.node.destroy();
+            }, 0);
         }
+    }
+
+
+
+
+    update(deltaTime: number) {
+
     }
 }
 
