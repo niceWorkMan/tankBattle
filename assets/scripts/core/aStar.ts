@@ -8,16 +8,29 @@ const { ccclass, property } = _decorator;
 
 @ccclass('aStar')
 export class aStar extends Component {
-    constructor(gManager: gridManager) {
-        super();
-        if (gManager) {
-            this.gManager = gManager;
-            this._gridMatrix = gManager.gridMatrix;
-            //生成网格
-            this.tankNaviGrid(gManager);
-            //更新网格
-        }
+
+    start() {
+        this.initComponent();
     }
+
+
+    initComponent() {
+        this.gManager = this.node.parent.parent.getComponent(gridManager);
+        this.tManager = this.node.parent.parent.getComponent(tankManager);
+        this.tk = this.getComponent(tank);
+        if (!this.gManager) {
+            alert(this.node.parent.name)
+            alert("查询组件错误")
+        }
+        this._gridMatrix = this.gManager.getGridMatrix;
+        //生成网格
+        this.tankNaviGrid();
+        this.tManager.synGridCollectionAdd(this);
+        //开始导航
+        this.getComponent(tank).startNav();
+    }
+
+
     //同步网格状态
     synGridState(gManager: gridManager) {
         var originGridArr = gManager.gridComponentArr;
@@ -34,10 +47,10 @@ export class aStar extends Component {
 
     //坦克管理类
     private _tankManager: tankManager
-    public set tankManager(v: tankManager) {
+    public set tManager(v: tankManager) {
         this._tankManager = v;
     }
-    public get tankManager(): tankManager {
+    public get tManager(): tankManager {
         return this._tankManager
     }
 
@@ -53,7 +66,7 @@ export class aStar extends Component {
 
 
     //初始化导航网格(只在内存中保存数据)
-    tankNaviGrid(gManager: gridManager) {
+    tankNaviGrid() {
         for (var i = 0; i < this._gridMatrix.row; i++) {
             var _compArr_ins: grid[] = [];
             for (var j = 0; j < this._gridMatrix.colum; j++) {
@@ -65,7 +78,7 @@ export class aStar extends Component {
                 if (gScript) {
                     gScript.setGridManager(this.gManager);
                     gScript.setIndexLabel(i, j);
-                    gScript.setObstacle(gManager.gridComponentArr[i][j].isObstacle);
+                    gScript.setObstacle(this.gManager.gridComponentArr[i][j].isObstacle);
                 }
             }
             //加入二维数组
@@ -94,12 +107,6 @@ export class aStar extends Component {
     public set gridMatri(v: {}) {
         this._gridMatrix = v;
     }
-
-
-    start() {
-        console.log("AStar start");
-    }
-
 
 
     //坦克对象
@@ -135,7 +142,7 @@ export class aStar extends Component {
     getPriceMixNeighborGrid(startGrid: grid, endGrid: grid) {
         var mIdx = new Vec2(startGrid.cellX, startGrid.cellY);
         var limitMatrix: Vec2[] = this.getNeighborMitrax(mIdx);
-  
+
         //所有可能的路径格子
         var gridUsedMaxtri: grid[] = [];
         for (var j = limitMatrix[0].x; j <= limitMatrix[0].y; j++) {
@@ -214,7 +221,7 @@ export class aStar extends Component {
 
     //显示路径（绿色是已经粗算的路径）
     showPath() {
-        if(!this.tk||!this.tk.startGrid||!this.tk.endGrid){
+        if (!this.tk || !this.tk.startGrid || !this.tk.endGrid) {
             return;
         }
         //复位closeList 放在远点过滤前面
@@ -237,8 +244,9 @@ export class aStar extends Component {
         else {
             console.warn("当前路径无法到达终点");
             setTimeout(() => {
-               this.tk.startNav();
-            }, this.tk.waitObsTime*1000);
+                if (this.tk)
+                    this.tk.startNav();
+            }, this.tk.waitObsTime * 1000);
             return;
         }
         //重新设置Parent和Next
@@ -260,6 +268,9 @@ export class aStar extends Component {
         //开始导航
         if (this.tk)
             this.tk.navigationMove(this._closeList);
+        else {
+            alert("漏网之鱼")
+        }
 
     }
 
@@ -453,22 +464,22 @@ export class aStar extends Component {
     public resetGridArr() {
         for (var i = 0; i < this._gridMatrix.row; i++) {
             for (var j = 0; j < this._gridMatrix.colum; j++) {
-                this.gridNodeArr[i][j].parent=null;
-                this.gridNodeArr[i][j].next=null;
+                this.gridNodeArr[i][j].parent = null;
+                this.gridNodeArr[i][j].next = null;
                 //isSearch=false很重要
-                this.gridNodeArr[i][j].isObstacle=false;
-                this.gridNodeArr[i][j].isSearch=false;
-                this.gridNodeArr[i][j].backCheck=false;
-                this.gridNodeArr[i][j].neighorGrid=[];
-             }
+                this.gridNodeArr[i][j].isObstacle = false;
+                this.gridNodeArr[i][j].isSearch = false;
+                this.gridNodeArr[i][j].backCheck = false;
+                this.gridNodeArr[i][j].neighorGrid = [];
+            }
         }
-        this.closeList=[];
-        this.tankManager.synGridCollectionState();
+        this.closeList = [];
+        this.tManager.synGridCollectionState();
     }
 
-    public Clear(){
-        this._gridNodeArr=null;
-        this.closeList=null;
+    public Clear() {
+        this._gridNodeArr = null;
+        this.closeList = null;
     }
 }
 

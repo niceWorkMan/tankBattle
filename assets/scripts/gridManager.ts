@@ -33,19 +33,25 @@ export class gridManager extends Component {
     public set gridSpriteFrame(v: SpriteFrame) {
         this._gridSpriteFrame = v;
     }
-    public get gridSpriteFrame() : SpriteFrame {
+    public get gridSpriteFrame(): SpriteFrame {
         return this._gridSpriteFrame;
     }
-    
+
 
     get gridStartPos() {
         return this._gridStartPos;
     }
 
     private _gridMatrix = { row: 24, colum: 10 }
-    get gridMatrix() {
-        return this._gridMatrix;
+
+    //矩阵尺寸
+    public get getGridMatrix() : any {
+        return this._gridMatrix
     }
+    
+ 
+    
+
 
     start() {
         //按钮测试
@@ -56,10 +62,7 @@ export class gridManager extends Component {
         this.loadConfigAssets();
     }
 
-    //矩阵尺寸
-    public getGridMatrix() {
-        return this._gridMatrix;
-    }
+
 
     //初始化挂载组件
     initAttatchComponent() {
@@ -127,8 +130,6 @@ export class gridManager extends Component {
     }
 
 
- 
-
 
     loadConfigAssets() {
         //加载json例子
@@ -145,7 +146,7 @@ export class gridManager extends Component {
             var spriteFrame = SpriteFrame.createWithImage(imageAsset);
             var obj = {};
             this._assetsLoad["dotArea"] = spriteFrame;
-            this._gridSpriteFrame=spriteFrame;
+            this._gridSpriteFrame = spriteFrame;
             console.log("加载完成:", imageAsset);
 
             //生成网格

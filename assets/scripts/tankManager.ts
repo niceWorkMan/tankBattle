@@ -9,12 +9,9 @@ const { ccclass, property } = _decorator;
 export class tankManager extends Component {
 
 
-    @property(Prefab) bulletBase:Prefab;
+    @property(Prefab) bulletBase: Prefab;
     @property(Prefab) tankBase: Prefab;
     private _gManager: gridManager;
-    public get gManager(): gridManager {
-        return this._gManager
-    }
 
 
     private _isBattle = false;
@@ -24,6 +21,10 @@ export class tankManager extends Component {
     public get aStartCollection(): aStar[] {
         return this._aStartCollection;
     }
+    public set aStartCollection(v: aStar[]) {
+        this._aStartCollection = v;
+    }
+
 
 
 
@@ -42,6 +43,7 @@ export class tankManager extends Component {
 
     start() {
         input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
+        //初始化gManager;
         this._gManager = this.node.getComponent(gridManager);
     }
 
@@ -99,7 +101,7 @@ export class tankManager extends Component {
         setInterval(() => {
             var pos0 = new Vec2(0, Math.ceil(Math.random() * 9));
             var pos1 = new Vec2(23, Math.ceil(Math.random() * 9));
-            var isFree = (this.gManager.gridComponentArr[pos0.x][pos0.y].isObstacle == false) && (this.gManager.gridComponentArr[pos1.x][pos1.y].isObstacle == false)
+            var isFree = (this._gManager.gridComponentArr[pos0.x][pos0.y].isObstacle == false) && (this._gManager.gridComponentArr[pos1.x][pos1.y].isObstacle == false)
             var gteam: enumTeam = enumTeam.teamRed;
             if (spawnTime % 2 == 0) {
                 var tempPos = pos0;
@@ -149,7 +151,6 @@ export class tankManager extends Component {
             tk.team = team;
             tk.startGrid = startGrid;
             tk.endGrid = endGrid;
-            tk.tankManager = this;
             tk.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
             //加入集合
             var tankIndex = this.tankCollection.indexOf(tk);
@@ -162,11 +163,9 @@ export class tankManager extends Component {
                     break;
                 case enumTeam.teamBlue:
                     tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 225);
-                    tankNode.eulerAngles=new Vec3(0,0,180)
+                    tankNode.eulerAngles = new Vec3(0, 0, 180)
                     break;
             }
-            //开始导航
-            tk.startNav();
         }
     }
 
@@ -186,24 +185,42 @@ export class tankManager extends Component {
     }
 
     //同步所有导航网格状态
-    synGridCollectionState() {
+    public synGridCollectionState() {
         if (this.aStartCollection.length > 0) {
             for (var i = 0; i < this.aStartCollection.length; i++) {
-                for (var x = 0; x < this._gManager.gridMatrix.row; x++) {
-                    for (var y = 0; y < this._gManager.gridMatrix.colum; y++) {
-                        this.aStartCollection[i].gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
+                for (var x = 0; x < this._gManager.getGridMatrix.row; x++) {
+                    for (var y = 0; y < this._gManager.getGridMatrix.colum; y++) {
+                        if (this.aStartCollection[i])
+                            this.aStartCollection[i].gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
+                        else {
+                            console.log("当前aStart已经不在");
+
+                        }
                     }
                 }
             }
         }
-
     }
+    //同步移除所有导航网格状态(destory tank时调用)
+    synGridCollectionRemove(astar: aStar) {
+        var dex = this.aStartCollection.indexOf(astar);
+        if (dex != -1) {
+            this.aStartCollection.splice(dex, -1)
+        }
+        this.aStartCollection = [];
+    }
+
+    //同步添加所有导航网格状态(spawn tank/astar时调用)
+    synGridCollectionAdd(astar: aStar) {
+        this.aStartCollection.push(astar)
+    }
+
 
 
     //同步当前网格状态
     public synCurrentState(astar: aStar) {
-        for (var x = 0; x < this._gManager.gridMatrix.row; x++) {
-            for (var y = 0; y < this._gManager.gridMatrix.colum; y++) {
+        for (var x = 0; x < this._gManager.getGridMatrix.row; x++) {
+            for (var y = 0; y < this._gManager.getGridMatrix.colum; y++) {
                 astar.gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
             }
         }
