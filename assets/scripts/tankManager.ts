@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Node, Prefab, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { aStar } from './core/aStar';
 import { tank } from './tank';
@@ -150,6 +150,7 @@ export class tankManager extends Component {
             var tk: tank = tankNode.getComponent(tank);
             tk.team = team;
             tk.startGrid = startGrid;
+            tk.tankInGridCellIndex=new Vec2(startGrid.cellX,startGrid.cellY);
             tk.endGrid = endGrid;
             tk.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
             //加入集合
@@ -267,6 +268,28 @@ export class tankManager extends Component {
             return null;
         }
 
+    }
+
+    //转成父坐标的Eular角
+    public convertEularForParent(childNode:Node):Vec3{
+
+        // 获取节点的局部旋转欧拉角
+        let localEulerAngles = childNode.eulerAngles;
+        
+        // 创建一个四元数来表示旋转
+        let localRotationQuat = quat();
+        Quat.fromEuler(localRotationQuat, localEulerAngles.x, localEulerAngles.y, localEulerAngles.z);
+        
+        // 将局部旋转转换为世界旋转
+        let worldRotationQuat = childNode.parent.getWorldRotation(localRotationQuat);
+        
+        // 将世界四元数转换为欧拉角
+        let worldEulerAngles =new Vec3();
+        Quat.toEuler(worldEulerAngles, worldRotationQuat);
+        
+        // 现在 worldEulerAngles 就是节点在世界空间中的欧拉角
+        console.log('World Euler Angles:', worldEulerAngles);
+        return worldEulerAngles;
     }
 
 

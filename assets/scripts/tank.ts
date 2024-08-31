@@ -208,9 +208,6 @@ export class tank extends Component {
         return this._fireSpace;
     }
 
-
-
-
     //开始导航
     startNav() {
         if (!this.star) {
@@ -233,7 +230,8 @@ export class tank extends Component {
         else {
             //寻路
             //alert("首次寻路"+"this.star.gridNodeArr:"+this.star.gridNodeArr.length+"|||"+this.startGrid.cellX+"--"+this.startGrid.cellY)
-            this.star.getPriceMixNeighborGrid(this.star.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.star.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY]);
+            if (this.node)
+                this.star.getPriceMixNeighborGrid(this.star.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.star.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY]);
         }
 
 
@@ -294,19 +292,21 @@ export class tank extends Component {
                     this.startNav();
                     return;
                 }
-        
+
                 //位移
                 var twMove = tween(this.node).to(this.moveSpeed, { position: closeList[nextIndex].getPosition() }, {
                     onUpdate: () => {
                     },
                     onComplete: () => {
                         //射击部分---------------------------------------
+                        //设置当前tank坐标
+                        this.tankInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY)
                         //目标坦克
                         var targetTank = this.tManager.searchAttakTarget(this);
                         //攻击源坦克
                         twMove.removeSelf();
                         if (nextIndex + 1 <= closeList.length - 1) {
-                            //转弯   
+                            //车辆转弯   
                             var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
                             var targetRot = radian * (180 / Math.PI);
                             if (this.node.eulerAngles.z !== targetRot) {
@@ -437,20 +437,24 @@ export class tank extends Component {
         if (target.node) {
             var root: Node = this.node.getChildByName("root");
             if (target.tankInGridCellIndex) {
-                var radian = Math.atan2(target.tankInGridCellIndex.y - this.tankInGridCellIndex.y, target.tankInGridCellIndex.x - this.tankInGridCellIndex.x);
+                var radian = Math.atan2(target.node.position.y - this.node.position.y, target.node.position.x - this.node.position.x);
                 var targetRot = radian * (180 / Math.PI);
-                if (root.eulerAngles.z !== targetRot) {
-                    var tw = tween(root).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot - this.node.eulerAngles.z) }, {
-                        onComplete: () => {
-                            console.log("转向完成");
-                            attackFunc();
-                        }
-                    }).start();
-                }
-                else {
-                    //炮管角度相等,直接攻击
-                    attackFunc();
-                }
+
+
+                var targetEular: Vec3 = this.tManager.convertEularForParent(root);
+                root.setWorldRotationFromEuler(0, 0, targetEular.z)
+                attackFunc();
+
+                // var targetAngle = {value:targetEular.z};
+                // tween(targetAngle).to(this.waitObsTime * 1000, { value:  targetRot}, {
+                //     onUpdate:()=>{
+                //         root.setWorldRotationFromEuler(0,0,targetAngle.value)
+                //     },
+                //     onComplete: () => {
+                //         console.log("转向完成");
+                //         attackFunc();
+                //     }
+                // }).start();
             } else {
                 this.tweenMove(this.stopIndex, this.closeList);
                 console.log("没有打积点");
@@ -466,16 +470,13 @@ export class tank extends Component {
     //旋转对方炮筒
     public gunRote(target: tank) {
         var root: Node = this.node.getChildByName("root");
-        if (this.tankInGridCellIndex) {
-            var radian = Math.atan2(target.tankInGridCellIndex.y - this.tankInGridCellIndex.y, target.tankInGridCellIndex.x - this.tankInGridCellIndex.x);
+        if (target.node) {
+            var radian = Math.atan2(target.node.position.y - this.node.position.y, target.node.position.x - this.node.position.x);
             var targetRot = radian * (180 / Math.PI);
-            if (root.eulerAngles.z !== targetRot) {
-                var tw = tween(root).to(this.rotateSpeed, { eulerAngles: new Vec3(0, 0, targetRot - this.node.eulerAngles.z) }, {
-                    onComplete: () => {
-                        console.log("更新转向");
-                    }
-                }).start();
-            }
+            //目标转角（弧度）
+            root.setWorldRotationFromEuler(0, 0, targetRot);
+
+
         } else {
             console.log("没有打积点");
         }
@@ -549,7 +550,14 @@ export class tank extends Component {
 
 
     update(deltaTime: number) {
+        this.updateGunRotation(deltaTime);
+    }
 
+    //更新炮口旋转
+    updateGunRotation(deltaTime: number) {
+        if (this.targetTank) {
+            this.gunRote(this.targetTank);
+        }
     }
 }
 

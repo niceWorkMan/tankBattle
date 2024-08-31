@@ -374,7 +374,8 @@ export class aStar extends Component {
         //必须setTimeout间隔执行 不然会有错误
         setTimeout(() => {
             //cuGrid.setSpriteColor({ r: 55, g: 206, b: 73, a: 255 });
-            this.getPriceMixNeighborGrid(cuGrid, endGrid)
+            if (this.node)
+                this.getPriceMixNeighborGrid(cuGrid, endGrid)
         }, 0);
     }
 
@@ -423,7 +424,10 @@ export class aStar extends Component {
 
     //获取周围格子检索矩阵
     getNeighborMitrax(mIdx: Vec2): Vec2[] {
-        var gridMatrixSize = this._gridMatrix;
+        if (!this.node) {
+            return;
+        }
+        var gridMatrixSize = this.node.parent.parent.getComponent(gridManager).getGridMatrix;
         //设置当前格子四周矩阵设置
         var xMin;
         var xMax;
