@@ -11,11 +11,19 @@ export class grid extends Component {
     public get cellX(): number {
         return this._cellX;
     }
+    public set cellX(v : number) {
+        this._cellX = v;
+    }
+    
 
     private _cellY: number;
     public get cellY(): number {
         return this._cellY;
     }
+    public set cellY(v : number) {
+        this._cellY = v;
+    }
+    
 
     private _gridManager;
 

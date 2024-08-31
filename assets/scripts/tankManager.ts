@@ -150,7 +150,7 @@ export class tankManager extends Component {
             var tk: tank = tankNode.getComponent(tank);
             tk.team = team;
             tk.startGrid = startGrid;
-            tk.tankInGridCellIndex=new Vec2(startGrid.cellX,startGrid.cellY);
+            tk.tankInGridCellIndex=new Vec2(startGrid.cellX,startGrid.cellY)
             tk.endGrid = endGrid;
             tk.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
             //加入集合
@@ -191,7 +191,7 @@ export class tankManager extends Component {
             for (var i = 0; i < this.aStartCollection.length; i++) {
                 for (var x = 0; x < this._gManager.getGridMatrix.row; x++) {
                     for (var y = 0; y < this._gManager.getGridMatrix.colum; y++) {
-                        if (this.aStartCollection[i])
+                        if (this.aStartCollection[i].node)
                             this.aStartCollection[i].gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
                         else {
                             console.log("当前aStart已经不在");
@@ -223,6 +223,10 @@ export class tankManager extends Component {
         for (var x = 0; x < this._gManager.getGridMatrix.row; x++) {
             for (var y = 0; y < this._gManager.getGridMatrix.colum; y++) {
                 astar.gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
+                if(astar.gridNodeArr[x][y].isObstacle){
+                    //astar.gridNodeArr[x][y].setSpriteColor({r:0,g:0,b:0,a:225})
+           
+                }
             }
         }
     }
@@ -272,21 +276,16 @@ export class tankManager extends Component {
 
     //转成父坐标的Eular角
     public convertEularForParent(childNode:Node):Vec3{
-
         // 获取节点的局部旋转欧拉角
         let localEulerAngles = childNode.eulerAngles;
-        
         // 创建一个四元数来表示旋转
         let localRotationQuat = quat();
         Quat.fromEuler(localRotationQuat, localEulerAngles.x, localEulerAngles.y, localEulerAngles.z);
-        
         // 将局部旋转转换为世界旋转
         let worldRotationQuat = childNode.parent.getWorldRotation(localRotationQuat);
-        
         // 将世界四元数转换为欧拉角
         let worldEulerAngles =new Vec3();
         Quat.toEuler(worldEulerAngles, worldRotationQuat);
-        
         // 现在 worldEulerAngles 就是节点在世界空间中的欧拉角
         console.log('World Euler Angles:', worldEulerAngles);
         return worldEulerAngles;

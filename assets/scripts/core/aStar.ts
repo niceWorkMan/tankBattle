@@ -268,6 +268,7 @@ export class aStar extends Component {
         //开始导航
         if (this.tk)
             this.tk.navigationMove(this._closeList);
+            //this.tk.tweenMove(0, this.tk.closeList);
         else {
             alert("漏网之鱼")
         }
@@ -477,14 +478,9 @@ export class aStar extends Component {
                 this.gridNodeArr[i][j].neighorGrid = [];
             }
         }
-        this.closeList = [];
-        this.tManager.synGridCollectionState();
+        this._closeList=[];
     }
 
-    public Clear() {
-        this._gridNodeArr = null;
-        this.closeList = null;
-    }
 }
 
 
