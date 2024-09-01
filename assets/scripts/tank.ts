@@ -171,6 +171,15 @@ export class tank extends Component {
         return this._closeList
     }
 
+
+    //当前站位的格子
+    private _inObstaleGrid: grid;
+    public get inObstaleGrid(): grid {
+        return this._inObstaleGrid
+    }
+
+
+
     //Hp(血条)
     private _hp: number = 100;
     public set hp(v: number) {
@@ -345,11 +354,19 @@ export class tank extends Component {
     //销毁
     destorySelf() {
         //销毁当前网格障碍
-        if (this.tankInGridCellIndex) {
-            this._gManager.gridComponentArr[this.tankInGridCellIndex.x][this.tankInGridCellIndex.y].isObstacle = false;
-            this.tManager.synGridCollectionState();
-        }
+        // if (this.tankInGridCellIndex)
+        //     this.gManager.gridComponentArr[this, this.tankInGridCellIndex.x][this, this.tankInGridCellIndex.y].isObstacle = false;
 
+
+        for (var i = 0; i < this.gManager.getGridMatrix.row; i++) {
+            var _compArr_ins: grid[] = [];
+            for (var j = 0; j < this.gManager.getGridMatrix.colum; j++) {
+                if (this.gManager.gridComponentArr[i][j].moveObstaleParent == this) {
+                    this.gManager.gridComponentArr[i][j].isObstacle = false;
+                }
+            }
+        }
+        this.tManager.synGridCollectionState();
         //从数组中移除
         var dex = this.tManager.tankCollection.indexOf(this);
         if (dex != -1) {
@@ -365,34 +382,11 @@ export class tank extends Component {
     }
 
 
-
-    getAngleByTwoPos(g1: grid, g2: grid): Vec3 {
-        var angle = new Vec3(0, 0, 0);
-        if (g1.cellX == g2.cellX) {
-            if (g1.cellY < g2.cellY) {
-                angle.z = 90;
-            } else {
-                angle.z = -90;
-            }
-        }
-        if (g1.cellY == g2.cellY) {
-            if (g1.cellX < g2.cellX) {
-                angle.z = 0;
-            } else {
-                angle.z = 180;
-            }
-        }
-        return angle;
-    }
-
-
-
     protected onDestroy(): void {
         if (this.star.isValid) {
 
         }
     }
-
 
 
     //攻击
@@ -418,7 +412,7 @@ export class tank extends Component {
                     clearInterval(this._fireInterval);
                     this.tweenMove(this.stopIndex, this.closeList);
                 }
-            }, this._fireSpace * 1000);
+            }, this._fireSpace * 100);
         }
 
         //开炮和转向炮管逻辑
@@ -432,17 +426,6 @@ export class tank extends Component {
                 var targetEular: Vec3 = this.tManager.convertEularForParent(root);
                 root.setWorldRotationFromEuler(0, 0, targetEular.z)
                 attackFunc();
-
-                // var targetAngle = {value:targetEular.z};
-                // tween(targetAngle).to(this.waitObsTime * 1000, { value:  targetRot}, {
-                //     onUpdate:()=>{
-                //         root.setWorldRotationFromEuler(0,0,targetAngle.value)
-                //     },
-                //     onComplete: () => {
-                //         console.log("转向完成");
-                //         attackFunc();
-                //     }
-                // }).start();
             } else {
                 this.tweenMove(this.stopIndex, this.closeList);
                 console.log("没有打积点");
@@ -507,27 +490,24 @@ export class tank extends Component {
             // alert("碰撞2")
             //不是一队的 产生伤害
             if (bu.bulletType != this._team) {
-                this.hp -= 20;
+                this.hp -= 5;
                 if (this.hp > 0) {
 
                 } else {
                     //停止连续射击  等待一帧
                     if (!this.die) {
                         this.die = true;
-                    } else {
-                        //血量为0,销毁
                         setTimeout(() => {
                             this.destorySelf();
                         }, 0);
                     }
-
                 }
             }
             console.log("HP:", this.hp);
 
             //下一帧执行 物理逻辑 不能在碰撞回调中调用
             setTimeout(() => {
-                otherCollider.node.destroy();
+                bu.node.destroy();
             }, 0);
         }
     }
@@ -551,11 +531,21 @@ export class tank extends Component {
     //更新路径障碍坦克
     updateTankMoveObstacle(index: number, closeList: grid[]) {
         for (var i = 0; i < closeList.length; i++) {
-            if (i != index) {
-                this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].isObstacle = false;
+            if (i == index) {
+                this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].isObstacle = true;
+                //设置产生障碍的父对象
+                this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].moveObstaleParent = this;
+                //设置当前的占位格子
+                this._inObstaleGrid = this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY];
             }
             else {
-                this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].isObstacle = true;
+                //前后一格的范围
+                if (Math.abs(i - index) <= 1)
+                   {
+                    this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].isObstacle = false;
+                       //设置产生障碍的父对象 移除
+                       this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].moveObstaleParent = null;
+                   }
             }
         }
         this.tManager.synGridCollectionState();

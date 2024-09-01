@@ -23,6 +23,17 @@ export class grid extends Component {
     public set cellY(v : number) {
         this._cellY = v;
     }
+
+    //运动产生的障碍的父对象（产生障碍的对象）
+    private _moveObstaleParent:any=null;
+    public set moveObstaleParent(v : any) {
+        this._moveObstaleParent = v;
+    }
+    public get moveObstaleParent() : any {
+        return  this._moveObstaleParent
+    }
+    
+    
     
 
     private _gridManager;

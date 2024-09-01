@@ -113,7 +113,7 @@ export class tankManager extends Component {
                 this.spawnActor(pos0, pos1, gteam);
                 spawnTime++;
             }
-        }, 1000);
+        }, 300);
     }
 
 
@@ -235,7 +235,6 @@ export class tankManager extends Component {
 
     //查询
     public searchAttakTarget(t: tank) {
-        var targetTank: tank = null;
         var targetCollection: tank[] = [];
         //查询
         for (var i = 0; i < this.tankCollection.length; i++) {
