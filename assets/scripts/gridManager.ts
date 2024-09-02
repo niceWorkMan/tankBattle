@@ -22,7 +22,7 @@ export class gridManager extends Component {
         return this._gridComponentArr;
     }
     //grid起始位置
-    private _gridStartPos = { x: -690, y: -270 }
+    private _gridStartPos = { x: -350, y: -640 }
 
     //资源
     private _assetsLoad = {};
@@ -42,7 +42,7 @@ export class gridManager extends Component {
         return this._gridStartPos;
     }
 
-    private _gridMatrix = { row: 24, colum: 10 }
+    private _gridMatrix = { row: 15, colum: 26 }
 
     //矩阵尺寸
     public get getGridMatrix(): any {
@@ -78,7 +78,7 @@ export class gridManager extends Component {
                 this.node.getChildByName("mapLayer").addChild(_grid);
                 var _gridSprite = _grid.getComponent(Sprite);
                 _gridSprite.spriteFrame = spriteFrame;
-                _grid.setPosition(new Vec3(this.gridStartPos.x + i * 60, this.gridStartPos.y + j * 60));
+                _grid.setPosition(new Vec3(this.gridStartPos.x + i * 50, this.gridStartPos.y + j * (1334/26)));
                 var gScript = _grid.getComponent(grid)
 
                 //加入一维数组

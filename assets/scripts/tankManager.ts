@@ -99,8 +99,8 @@ export class tankManager extends Component {
         //平均team生成测试
         var spawnTime = 0;
         setInterval(() => {
-            var pos0 = new Vec2(0, Math.ceil(Math.random() * 9));
-            var pos1 = new Vec2(23, Math.ceil(Math.random() * 9));
+            var pos0 = new Vec2( Math.ceil(Math.random() * 14),0);
+            var pos1 = new Vec2( Math.ceil(Math.random() * 14),25);
             var isFree = (this._gManager.gridComponentArr[pos0.x][pos0.y].isObstacle == false) && (this._gManager.gridComponentArr[pos1.x][pos1.y].isObstacle == false)
             var gteam: enumTeam = enumTeam.teamRed;
             if (spawnTime % 2 == 0) {
@@ -161,10 +161,11 @@ export class tankManager extends Component {
             switch (team) {
                 case enumTeam.teamRed:
                     tankNode.getComponent(Sprite).color = new Color(225, 0, 0, 225);
+                    tankNode.eulerAngles = new Vec3(0, 0, 90)
                     break;
                 case enumTeam.teamBlue:
                     tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 225);
-                    tankNode.eulerAngles = new Vec3(0, 0, 180)
+                    tankNode.eulerAngles = new Vec3(0, 0, -90)
                     break;
             }
         }
@@ -174,8 +175,8 @@ export class tankManager extends Component {
 
     //生成障碍物
     private exampleSetObstacle() {
-        for (var i = 2; i < 22; i++) {
-            for (var j = 0; j <= 9; j++) {
+        for (var i = 0; i < 15; i++) {
+            for (var j = 1; j < 25; j++) {
                 if (Math.random() > 0.8) {
                     this._gManager.gridComponentArr[i][j].setObstacle(true);
                     this._gManager.gridComponentArr[i][j].isStatic = true;
