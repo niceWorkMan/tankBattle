@@ -20,8 +20,6 @@ export class tank extends Component {
 
     initComponent() {
         this.tManager = this.node.parent.parent.getComponent(tankManager);
-        console.log("tankManager", this.tManager);
-
         this.gManager = this.node.parent.parent.getComponent(gridManager);
         this.hpComp = this.node.getChildByName("hp");
         if (this.tManager.node) {
@@ -244,11 +242,6 @@ export class tank extends Component {
         setTimeout(() => {
             this.tweenMove(moveIndex, closeList);
             console.warn("导航结束:", moveIndex, closeList.length);
-            // closeList.forEach(element => {
-            //     console.log(element.cellX, element.cellY);
-            //     if(this.node)
-            //     this.gManager.gridComponentArr[element.cellX][element.cellY].setSpriteColor({ r: 0, g: 0, b: 0, a: 200 })
-            // });
         }, 0);
 
     }
@@ -259,19 +252,27 @@ export class tank extends Component {
         if (!this.node) {
             return;
         }
-        this.tankInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY);
         this.startGrid = closeList[nextIndex];
         if (closeList.length == 0) {
             alert("错误的closeList长度")
         }
-        //如果下一个目标点是障碍
-        if (this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle) {
-            //重新寻路时,当前格子一定要清空障碍属性；
-            this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = false;
-            this.startNav();
+        //到达最后一个点,移动结束
+        if (nextIndex == closeList.length - 1) {
+            this.node.active = false;
+            this.destorySelf();
+            return;
         }
-        else {
-            if (nextIndex + 1 <= closeList.length - 1) {
+
+        //如果下一个目标点是障碍
+        if (nextIndex + 1 <= closeList.length - 1) {
+
+            //更新当前坐标
+            this.tankInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY);
+            //检测下个坐标是否有障碍物
+            if (this._gManager.gridComponentArr[closeList[nextIndex + 1].cellX][closeList[nextIndex + 1].cellY].isObstacle) {
+                this.startNav();
+            }
+            else {
                 //不是相邻格子
                 if (Math.abs(closeList[nextIndex].cellX - closeList[nextIndex + 1].cellX) > 1 || Math.abs(closeList[nextIndex].cellY - closeList[nextIndex + 1].cellY) > 1) {
                     this.getComponent(Sprite).color = new Color(0, 0, 0, 225)
@@ -289,8 +290,6 @@ export class tank extends Component {
                         //射击部分---------------------------------------
                         //设置当前tank坐标
                         this.tankInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY)
-                        //更新占位
-                        this.updateTankMoveObstacle(nextIndex, closeList);
                         //目标坦克
                         var targetTank = this.tManager.searchAttakTarget(this);
                         //攻击源坦克
@@ -301,71 +300,52 @@ export class tank extends Component {
                             var targetRot = radian * (180 / Math.PI);
                             if (this.node.eulerAngles.z !== targetRot) {
                                 this.node.eulerAngles = new Vec3(0, 0, targetRot);
-
+                                //攻击
                                 if (targetTank) {
-                                    console.log("攻击", this.node.uuid);
-
                                     if (targetTank.tankInGridCellIndex) {
                                         this._stopIndex = nextIndex;
                                         this._closeList = closeList;
                                         this.attackTarget(targetTank);
                                         return;
                                     }
+                                } else {
+                                    //炮筒转到正向(局部eular角)
+                                    var root: Node = this.node.getChildByName("root");
+                                    root.eulerAngles = new Vec3(0, 0, 0);
                                 }
                             }
-
                             //继续移动
                             nextIndex++;
                             this.tweenMove(nextIndex, closeList);
                         }
                         else {
-                            console.warn("单格子移动完毕");
+
                         }
                         //-----------------------------------------------
 
                     }
                 }).start();
             }
-            else {
-                //最后一步特殊处理
-                var twLast = tween(this.node).to(this.moveSpeed, { position: closeList[closeList.length - 1].getPosition() }, {
-                    onComplete: () => {
-                        twLast.removeSelf();
-                        console.warn("该路线移动完毕");
-                        //同步所有状态
-                        this._tankManager.synGridCollectionState();
-                        this.gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY].isObstacle = false;
-                        if (nextIndex - 1 > 0)
-                            this.gManager.gridComponentArr[closeList[nextIndex - 1].cellX][closeList[nextIndex - 1].cellY].isObstacle = false;
-                        if (nextIndex + 1 < closeList.length - 1)
-                            this.gManager.gridComponentArr[closeList[nextIndex + 1].cellX][closeList[nextIndex + 1].cellY].isObstacle = false;
-                        this.tManager.synGridCollectionState();
-                        //销毁对象
-                        this.destorySelf();
-                    },
-                }).start();
-            }
+            //更新格子
+            this.gManager.upDataObstale();
 
         }
+        //list最后一个不设置Obstale
+        else {
+            this.tankInGridCellIndex = new Vec2(-1, -1);
+        }
+
 
     }
+
 
 
     //销毁
     destorySelf() {
         //销毁当前网格障碍
-        // if (this.tankInGridCellIndex)
-        //     this.gManager.gridComponentArr[this, this.tankInGridCellIndex.x][this, this.tankInGridCellIndex.y].isObstacle = false;
+        if (this.tankInGridCellIndex)
+            this.gManager.gridComponentArr[this, this.tankInGridCellIndex.x][this, this.tankInGridCellIndex.y].isObstacle = false;
 
-
-        for (var i = 0; i < this.gManager.getGridMatrix.row; i++) {
-            var _compArr_ins: grid[] = [];
-            for (var j = 0; j < this.gManager.getGridMatrix.colum; j++) {
-                if (this.gManager.gridComponentArr[i][j].moveObstaleParent == this) {
-                    this.gManager.gridComponentArr[i][j].isObstacle = false;
-                }
-            }
-        }
         this.tManager.synGridCollectionState();
         //从数组中移除
         var dex = this.tManager.tankCollection.indexOf(this);
@@ -422,17 +402,15 @@ export class tank extends Component {
                 var radian = Math.atan2(target.node.position.y - this.node.position.y, target.node.position.x - this.node.position.x);
                 var targetRot = radian * (180 / Math.PI);
 
-
                 var targetEular: Vec3 = this.tManager.convertEularForParent(root);
                 root.setWorldRotationFromEuler(0, 0, targetEular.z)
                 attackFunc();
             } else {
+                //没有打击点
                 this.tweenMove(this.stopIndex, this.closeList);
-                console.log("没有打积点");
             }
         } else {
-            console.log("打击点已摧毁");
-            var targetTank = this.tManager.searchAttakTarget(this);
+            //打击点已摧毁
             this.tweenMove(this.stopIndex, this.closeList);
         }
 
@@ -446,10 +424,8 @@ export class tank extends Component {
             var targetRot = radian * (180 / Math.PI);
             //目标转角（弧度）
             root.setWorldRotationFromEuler(0, 0, targetRot);
-
-
         } else {
-            console.log("没有打积点");
+            //没有打击点
         }
     }
 
@@ -487,12 +463,11 @@ export class tank extends Component {
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
         var bu: bullet = otherCollider.getComponent(bullet);
         if (bu.tankParent != this) {
-            // alert("碰撞2")
             //不是一队的 产生伤害
             if (bu.bulletType != this._team) {
                 this.hp -= 5;
                 if (this.hp > 0) {
-
+                //还可以扛
                 } else {
                     //停止连续射击  等待一帧
                     if (!this.die) {
@@ -502,13 +477,15 @@ export class tank extends Component {
                         }, 0);
                     }
                 }
+
+                //下一帧执行 物理逻辑 不能在碰撞回调中调用(不能放在最外层 会被同队伍的对象截断碰撞)
+                setTimeout(() => {
+                    bu.node.destroy();
+                }, 0);
             }
             console.log("HP:", this.hp);
 
-            //下一帧执行 物理逻辑 不能在碰撞回调中调用
-            setTimeout(() => {
-                bu.node.destroy();
-            }, 0);
+
         }
     }
 
@@ -529,27 +506,26 @@ export class tank extends Component {
 
 
     //更新路径障碍坦克
-    updateTankMoveObstacle(index: number, closeList: grid[]) {
-        for (var i = 0; i < closeList.length; i++) {
-            if (i == index) {
-                this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].isObstacle = true;
-                //设置产生障碍的父对象
-                this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].moveObstaleParent = this;
-                //设置当前的占位格子
-                this._inObstaleGrid = this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY];
-            }
-            else {
-                //前后一格的范围
-                if (Math.abs(i - index) <= 1)
-                   {
-                    this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].isObstacle = false;
-                       //设置产生障碍的父对象 移除
-                       this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].moveObstaleParent = null;
-                   }
-            }
-        }
-        this.tManager.synGridCollectionState();
-    }
+    // updateTankMoveObstacle(index: number, closeList: grid[]) {
+    //     for (var i = 0; i < closeList.length; i++) {
+    //         if (i == index) {
+    //             this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].isObstacle = true;
+    //             //设置产生障碍的父对象
+    //             this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].moveObstaleParent = this;
+    //             //设置当前的占位格子
+    //             this._inObstaleGrid = this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY];
+    //         }
+    //         else {
+    //             //前后一格的范围
+    //             if (Math.abs(i - index) <= 1) {
+    //                 this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].isObstacle = false;
+    //                 //设置产生障碍的父对象 移除
+    //                 this.gManager.gridComponentArr[closeList[i].cellX][closeList[i].cellY].moveObstaleParent = null;
+    //             }
+    //         }
+    //     }
+    //     this.tManager.synGridCollectionState();
+    // }
 }
 
 

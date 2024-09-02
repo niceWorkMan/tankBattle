@@ -1,5 +1,6 @@
 import { _decorator, Color, Component, Label, Node, NodeEventType, Sprite, tween, Vec2 } from 'cc';
 import { gridManager } from './gridManager';
+import { tankManager } from './tankManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('grid')
@@ -11,30 +12,30 @@ export class grid extends Component {
     public get cellX(): number {
         return this._cellX;
     }
-    public set cellX(v : number) {
+    public set cellX(v: number) {
         this._cellX = v;
     }
-    
+
 
     private _cellY: number;
     public get cellY(): number {
         return this._cellY;
     }
-    public set cellY(v : number) {
+    public set cellY(v: number) {
         this._cellY = v;
     }
 
     //运动产生的障碍的父对象（产生障碍的对象）
-    private _moveObstaleParent:any=null;
-    public set moveObstaleParent(v : any) {
+    private _moveObstaleParent: any = null;
+    public set moveObstaleParent(v: any) {
         this._moveObstaleParent = v;
     }
-    public get moveObstaleParent() : any {
-        return  this._moveObstaleParent
+    public get moveObstaleParent(): any {
+        return this._moveObstaleParent
     }
-    
-    
-    
+
+
+
 
     private _gridManager;
 
@@ -54,6 +55,18 @@ export class grid extends Component {
     public get isObstacle(): boolean {
         return this._isObstacle
     }
+
+
+    //障碍物是否是静态的
+    private _isStatic:boolean
+    public set isStatic(v : boolean) {
+        this._isStatic = v;
+    }
+    public get isStatic() : boolean {
+        return this._isStatic;
+    }
+    
+    
 
     //父节点
     public _aStarParent: grid = null;
@@ -218,11 +231,6 @@ export class grid extends Component {
     }
 
 
-
-    public test() {
-
-        console.log("hellow")
-    }
 }
 
 

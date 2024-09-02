@@ -45,12 +45,12 @@ export class gridManager extends Component {
     private _gridMatrix = { row: 24, colum: 10 }
 
     //矩阵尺寸
-    public get getGridMatrix() : any {
+    public get getGridMatrix(): any {
         return this._gridMatrix
     }
-    
- 
-    
+
+
+
 
 
     start() {
@@ -155,6 +155,31 @@ export class gridManager extends Component {
             this._tankManager.gameInit();
         })
 
+    }
+
+
+    //更新tank占位
+    public upDataObstale() {
+        var tManager: tankManager = this.getComponent(tankManager);
+        var gManager: gridManager = this;
+        for (var i = 0; i < gManager.getGridMatrix.row; i++) {
+            for (var j = 0; j < gManager.getGridMatrix.colum; j++) {
+                //非静态障碍物 才会动态设置障碍属性
+                if (!gManager.gridComponentArr[i][j].isStatic) {
+                    var isObstacle = false;
+                    for (var k = 0; k < tManager.tankCollection.length; k++) {
+                        if (tManager.tankCollection[k].tankInGridCellIndex != new Vec2(-1, -1)) {
+                            var pos: Vec2 = tManager.tankCollection[k].tankInGridCellIndex;
+                            if (i == pos.x && j == pos.y) {
+                                isObstacle = true;
+                                break;
+                            }
+                        }
+                    }
+                    gManager.gridComponentArr[i][j].isObstacle = isObstacle;
+                }
+            }
+        }
     }
 }
 
