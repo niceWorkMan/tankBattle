@@ -1,16 +1,18 @@
 import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { aStar } from './core/aStar';
-import { tank } from './tank';
+import { tank } from './node/tank';
 import { enumTeam } from './common/enumTeam';
+import { element } from './node/element';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
 export class tankManager extends Component {
 
 
-    @property(Prefab) bulletBase: Prefab;
-    @property(Prefab) tankBase: Prefab;
+    @property(Prefab) bulletPrefab: Prefab;
+    @property(Prefab) tankPrefab: Prefab;
+    @property(Prefab) boy01Prefab: Prefab;
     private _gManager: gridManager;
 
 
@@ -29,13 +31,13 @@ export class tankManager extends Component {
 
 
     //在线坦克集合
-    private _tankCollection: tank[] = [];
+    private _nodeCollection: element[] = [];
 
-    public set tankCollection(v: tank[]) {
-        this._tankCollection = v;
+    public set nodeCollection(v: element[]) {
+        this._nodeCollection = v;
     }
-    public get tankCollection(): tank[] {
-        return this._tankCollection;
+    public get nodeCollection(): element[] {
+        return this._nodeCollection;
     }
 
 
@@ -90,8 +92,8 @@ export class tankManager extends Component {
         if (this._isBattle)
             return;
 
-        // this.spawnActor(new Vec2(0, 5), new Vec2(23, 5), enumTeam.teamBlue);
-        // this.spawnActor(new Vec2(23, 5), new Vec2(0, 5), enumTeam.teamRed);
+        // this.spawnActor(new Vec2(5, 25), new Vec2(7, 0), enumTeam.teamBlue);
+        // this.spawnActor(new Vec2(6, 0), new Vec2(0, 25), enumTeam.teamRed);
         // return;
 
         //只执行一次
@@ -99,8 +101,8 @@ export class tankManager extends Component {
         //平均team生成测试
         var spawnTime = 0;
         setInterval(() => {
-            var pos0 = new Vec2( Math.ceil(Math.random() * 14),0);
-            var pos1 = new Vec2( Math.ceil(Math.random() * 14),25);
+            var pos0 = new Vec2(Math.ceil(Math.random() * 14), 0);
+            var pos1 = new Vec2(Math.ceil(Math.random() * 14), 25);
             var isFree = (this._gManager.gridComponentArr[pos0.x][pos0.y].isObstacle == false) && (this._gManager.gridComponentArr[pos1.x][pos1.y].isObstacle == false)
             var gteam: enumTeam = enumTeam.teamRed;
             if (spawnTime % 2 == 0) {
@@ -120,7 +122,7 @@ export class tankManager extends Component {
 
     spawnRotate() {
         //生成实例
-        var tankNode: Node = instantiate(this.tankBase);
+        var tankNode: Node = instantiate(this.tankPrefab);
         this.node.addChild(tankNode);
         var tk: tank = tankNode.getComponent(tank);
         tween(tankNode).to(10, { eulerAngles: new Vec3(0, 0, 180) }, {
@@ -142,7 +144,7 @@ export class tankManager extends Component {
         //过滤当前位置是否被占用
         if (startGrid.isObstacle == false) {
             //生成实例
-            var tankNode: Node = instantiate(this.tankBase);
+            var tankNode: Node = instantiate(this.tankPrefab);
             this.node.getChildByName("tankLayer").addChild(tankNode);
             //先隐藏对象(因为寻路还需要时间运算，使用了settimeout,寻路完成后再显示对象,参考aStart.showPath)
             //tankNode.active = false;
@@ -150,13 +152,13 @@ export class tankManager extends Component {
             var tk: tank = tankNode.getComponent(tank);
             tk.team = team;
             tk.startGrid = startGrid;
-            tk.tankInGridCellIndex = new Vec2(startGrid.cellX, startGrid.cellY)
+            tk.nodeInGridCellIndex = new Vec2(startGrid.cellX, startGrid.cellY)
             tk.endGrid = endGrid;
             tk.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
             //加入集合
-            var tankIndex = this.tankCollection.indexOf(tk);
+            var tankIndex = this.nodeCollection.indexOf(tk);
             if (tankIndex == -1) {
-                this.tankCollection.push(tk);
+                this.nodeCollection.push(tk);
             }
             switch (team) {
                 case enumTeam.teamRed:
@@ -235,19 +237,19 @@ export class tankManager extends Component {
 
 
     //查询
-    public searchAttakTarget(t: tank) {
-        var targetCollection: tank[] = [];
+    public searchAttakTarget(t: element) {
+        var targetCollection: element[] = [];
         //查询
-        for (var i = 0; i < this.tankCollection.length; i++) {
-            if (t.team != this.tankCollection[i].team) {
-                var targtPos = this.tankCollection[i].tankInGridCellIndex;
+        for (var i = 0; i < this.nodeCollection.length; i++) {
+            if (t.team != this.nodeCollection[i].team) {
+                var targtPos = this.nodeCollection[i].nodeInGridCellIndex;
                 if (targtPos) {
-                    var selfPos = t.tankInGridCellIndex;
+                    var selfPos = t.nodeInGridCellIndex;
                     var sum = Math.pow((targtPos.x - selfPos.x), 2) + Math.pow((targtPos.y - selfPos.y), 2)
                     var dis = Math.sqrt(sum);
                     if (dis <= t.attackDis) {
-                        this.tankCollection[i].targetDis = dis;
-                        targetCollection.push(this.tankCollection[i])
+                        this.nodeCollection[i].targetDis = dis;
+                        targetCollection.push(this.nodeCollection[i])
                     }
                 }
 
@@ -265,7 +267,7 @@ export class tankManager extends Component {
         }
         //返回最近的炮台
         if (targetCollection.length > 0) {
-            t.targetTank = targetCollection[0];
+            t.targetNode = targetCollection[0];
             return targetCollection[0];
         }
         else {

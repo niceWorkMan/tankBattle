@@ -1,8 +1,9 @@
 import { _decorator, Color, Component, instantiate, log, math, Node, Sprite, SpriteFrame, Vec2, Vec3 } from 'cc';
 import { grid } from '../grid';
 import { gridManager } from '../gridManager';
-import { tank } from '../tank';
+import { tank } from '../node/tank';
 import { tankManager } from '../tankManager';
+import { element } from '../node/element';
 
 const { ccclass, property } = _decorator;
 
@@ -18,16 +19,21 @@ export class aStar extends Component {
         this.gManager = this.node.parent.parent.getComponent(gridManager);
         this.tManager = this.node.parent.parent.getComponent(tankManager);
         this.tk = this.getComponent(tank);
+        if(!this.tk){
+            alert(123123)
+        }
         if (!this.gManager) {
             alert(this.node.parent.name)
             alert("查询组件错误")
+        }
+        if(! this.tk){
+            alert("获取_spawmComponentType失败")
         }
         this._gridMatrix = this.gManager.getGridMatrix;
         //生成网格
         this.tankNaviGrid();
         this.tManager.synGridCollectionAdd(this);
         //开始导航
-        this.getComponent(tank).startNav();
     }
 
 
@@ -110,12 +116,20 @@ export class aStar extends Component {
 
 
     //坦克对象
-    private _tk: tank
-    public set tk(v: tank) {
+    private _tk: element
+    public set tk(v: element) {
         this._tk = v;
     }
-    public get tk(): tank {
+    public get tk(): element {
         return this._tk;
+    }
+
+
+
+    //生成时所用的子类
+    private _spawmComponentType: any
+    public set spawmComponentType(v: any) {
+        this._spawmComponentType = v;
     }
 
 
@@ -267,8 +281,10 @@ export class aStar extends Component {
         this.tk.node.active = true;
         //开始导航
         if (this.tk)
+          {
             this.tk.navigationMove(this._closeList);
-            //this.tk.tweenMove(0, this.tk.closeList);
+          }
+        //this.tk.tweenMove(0, this.tk.closeList);
         else {
             alert("漏网之鱼")
         }
@@ -478,7 +494,7 @@ export class aStar extends Component {
                 this.gridNodeArr[i][j].neighorGrid = [];
             }
         }
-        this._closeList=[];
+        this._closeList = [];
     }
 
 }

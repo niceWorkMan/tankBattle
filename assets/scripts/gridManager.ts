@@ -8,6 +8,7 @@
 import { _decorator, Component, EventKeyboard, ImageAsset, Input, input, instantiate, JsonAsset, KeyCode, loader, math, Node, Prefab, random, resources, Sprite, SpriteFrame, SystemEvent, Vec2, Vec3 } from 'cc';
 import { grid } from './grid';
 import { tankManager } from './tankManager';
+import { util } from './common/util';
 const { ccclass, property } = _decorator;
 
 @ccclass('gridManager')
@@ -16,6 +17,7 @@ export class gridManager extends Component {
     @property(Prefab) tankBase: Prefab;
     //tank管理类
     private _tankManager: tankManager;
+    private _util:util;
     //格子组件数组
     private _gridComponentArr: grid[][] = [];
     public get gridComponentArr(): grid[][] {
@@ -67,6 +69,7 @@ export class gridManager extends Component {
     //初始化挂载组件
     initAttatchComponent() {
         this._tankManager = this.node.getComponent(tankManager);
+        this._util= this.node.getComponent(util);
     }
 
     //初始化网格
@@ -78,7 +81,7 @@ export class gridManager extends Component {
                 this.node.getChildByName("mapLayer").addChild(_grid);
                 var _gridSprite = _grid.getComponent(Sprite);
                 _gridSprite.spriteFrame = spriteFrame;
-                _grid.setPosition(new Vec3(this.gridStartPos.x + i * 50, this.gridStartPos.y + j * (1334/26)));
+                _grid.setPosition(new Vec3(this.gridStartPos.x + i * 50, this.gridStartPos.y + j * (1334 / 26)));
                 var gScript = _grid.getComponent(grid)
 
                 //加入一维数组
@@ -97,6 +100,7 @@ export class gridManager extends Component {
     //键盘监听
     onKeyDown(event: EventKeyboard) {
         this._tankManager.onKeyDown(event);
+        this._util.onKeyDown(event);
         switch (event.keyCode) {
             case KeyCode.KEY_A:
                 //初始化障碍物
@@ -109,6 +113,8 @@ export class gridManager extends Component {
 
             case KeyCode.KEY_B:
                 break;
+
+
         }
     }
 
@@ -158,7 +164,7 @@ export class gridManager extends Component {
     }
 
 
-    //更新tank占位
+    //更新moveObstale占位
     public upDataObstale() {
         var tManager: tankManager = this.getComponent(tankManager);
         var gManager: gridManager = this;
@@ -167,9 +173,9 @@ export class gridManager extends Component {
                 //非静态障碍物 才会动态设置障碍属性
                 if (!gManager.gridComponentArr[i][j].isStatic) {
                     var isObstacle = false;
-                    for (var k = 0; k < tManager.tankCollection.length; k++) {
-                        if (tManager.tankCollection[k].tankInGridCellIndex != new Vec2(-1, -1)) {
-                            var pos: Vec2 = tManager.tankCollection[k].tankInGridCellIndex;
+                    for (var k = 0; k < tManager.nodeCollection.length; k++) {
+                        if (tManager.nodeCollection[k].nodeInGridCellIndex != new Vec2(-1, -1)) {
+                            var pos: Vec2 = tManager.nodeCollection[k].nodeInGridCellIndex;
                             if (i == pos.x && j == pos.y) {
                                 isObstacle = true;
                                 break;
