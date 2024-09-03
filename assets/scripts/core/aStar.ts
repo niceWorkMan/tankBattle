@@ -179,7 +179,7 @@ export class aStar extends Component {
     //获取位置
     public getPosition(g:grid_c) {
         var pos:Vec3=this.node.parent.parent.getComponent(gridManager).gridComponentArr[g.cellX][g.cellY].node.getPosition();
-        console.log("测试:x:"+g.cellX+"  y:"+g.cellY+"  位置:x:"+pos.x+"  y:"+pos.y);
+        //console.log("测试:x:"+g.cellX+"  y:"+g.cellY+"  位置:x:"+pos.x+"  y:"+pos.y);
         return pos;
     }
 
@@ -305,7 +305,7 @@ export class aStar extends Component {
             this.closeList.push(this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY])
         }
         else {
-            console.warn("当前路径无法到达终点");
+            //console.warn("当前路径无法到达终点");
             setTimeout(() => {
                 if (this.tk)
                     this.startNav();
@@ -383,7 +383,7 @@ export class aStar extends Component {
         if (cuGrid.parent)
             grids = this.caculteParentNeighborGrids(cuGrid.parent);
         else {//内部结束
-            console.warn("结束");
+            //console.warn("结束");
             return grids;
         }
         //没有
@@ -399,11 +399,11 @@ export class aStar extends Component {
                     return searchGrids;
                 } else {
                     //内部结束
-                    console.warn("结束");
+                    //console.warn("结束");
                     return grid_c[0];
                 }
             } else {
-                console.warn("查询失败 结束");
+               // console.warn("查询失败 结束");
             }
             //移除在闭表里的对象
             this.removeBackGrid(cuGrid);
@@ -426,7 +426,7 @@ export class aStar extends Component {
             return collectionGrids;
         }
         else {
-            console.warn("cuGrid.neighorGrid 不存在");
+            //console.warn("cuGrid.neighorGrid 不存在");
             return collectionGrids;
         }
     }
