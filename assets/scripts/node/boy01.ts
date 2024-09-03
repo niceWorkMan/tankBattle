@@ -21,7 +21,7 @@ export class boy01 extends element {
         this.nodeCollider = this.getComponent(Collider2D);
         this.nodeCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
         //设置移动速度
-        this.moveSpeed = 0.4;
+        this.moveSpeed = 0.3;
 
         this.getComponent(aStar).key = this._key
         //默认动画

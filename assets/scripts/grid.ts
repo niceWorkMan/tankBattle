@@ -1,6 +1,5 @@
 import { _decorator, Color, Component, Label, Node, NodeEventType, Sprite, tween, Vec2 } from 'cc';
 import { gridManager } from './gridManager';
-import { tankManager } from './tankManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('grid')
