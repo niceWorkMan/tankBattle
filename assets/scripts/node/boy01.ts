@@ -1,4 +1,4 @@
-import { _decorator, Collider2D, Color, Component, Contact2DType, IPhysics2DContact, Node, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Animation, Collider2D, Color, Component, Contact2DType, IPhysics2DContact, Node, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { element } from './element';
 import { grid } from '../grid';
 import { aStar } from '../core/aStar';
@@ -15,12 +15,17 @@ export class boy01 extends element {
         //初始化config的key
         this._key = "boy01";
     }
+    private animClip:Animation;
 
     start(): void {
         this.nodeCollider = this.getComponent(Collider2D);
         this.nodeCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+        //设置移动速度
+        this.moveSpeed=0.4;
 
         this.getComponent(aStar).key = this._key
+        //默认动画
+        this.animClip = this.node.getComponent(Animation);
     }
 
     //移动核心逻辑
@@ -28,9 +33,9 @@ export class boy01 extends element {
         if (!this.node) {
             return;
         }
-        var star=this.getComponent(aStar);
-        this._gManager=this.node.parent.parent.getComponent(gridManager)
-        this._tankManager=this.node.parent.parent.getComponent(tankManager);
+        var star = this.getComponent(aStar);
+        this._gManager = this.node.parent.parent.getComponent(gridManager)
+        this._tankManager = this.node.parent.parent.getComponent(tankManager);
         //判断当前tank是否存在
         if (!this.node) {
             return;
@@ -82,7 +87,24 @@ export class boy01 extends element {
                             var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
                             var targetRot = radian * (180 / Math.PI);
                             if (this.node.eulerAngles.z !== targetRot) {
-                                this.node.eulerAngles = new Vec3(0, 0, targetRot);
+                                //this.node.eulerAngles = new Vec3(0, 0, targetRot);
+
+
+                                //  anim.getState("boy01_moveUp").repeatCount = 100;//循环10次
+                                console.log("angle:", targetRot)
+                                switch (targetRot) {
+                                    case -90:
+                                        this.animClip.play('boy01_down');
+                                        break;
+                                    case 90:
+                                        this.animClip.play('boy01_up');
+                                        break;
+                                    case 0:
+                                        this.animClip.play('boy01_right');
+                                        break
+                                    case 180:
+                                        this.animClip.play('boy01_left');
+                                }
                             }
                             //继续移动
                             nextIndex++;
@@ -109,36 +131,36 @@ export class boy01 extends element {
     }
 
 
-        //碰撞检测函数
-        onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
-            var bu: bullet = otherCollider.getComponent(bullet);
-            if (bu.tankParent != this) {
-                //不是一队的 产生伤害
-                if (bu.bulletType != this._team) {
-                    setTimeout(() => {
-                        this.hp -= 5;
-                    }, 0);
-                    if (this.hp > 0) {
-                        //还可以扛
-                    } else {
-                        //停止连续射击  等待一帧
-                        if (!this.die) {
-                            this.die = true;
-                            setTimeout(() => {
-                                this.destorySelf();
-                            }, 0);
-                        }
+    //碰撞检测函数
+    onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
+        var bu: bullet = otherCollider.getComponent(bullet);
+        if (bu.tankParent != this) {
+            //不是一队的 产生伤害
+            if (bu.bulletType != this._team) {
+                setTimeout(() => {
+                    this.hp -= 5;
+                }, 0);
+                if (this.hp > 0) {
+                    //还可以扛
+                } else {
+                    //停止连续射击  等待一帧
+                    if (!this.die) {
+                        this.die = true;
+                        setTimeout(() => {
+                            this.destorySelf();
+                        }, 0);
                     }
-                    //下一帧执行 物理逻辑 不能在碰撞回调中调用(不能放在最外层 会被同队伍的对象截断碰撞)
-                    setTimeout(() => {
-                        bu.node.destroy();
-                    }, 0);
                 }
-                console.log("HP:", this.hp);
-    
-    
+                //下一帧执行 物理逻辑 不能在碰撞回调中调用(不能放在最外层 会被同队伍的对象截断碰撞)
+                setTimeout(() => {
+                    bu.node.destroy();
+                }, 0);
             }
+            console.log("HP:", this.hp);
+
+
         }
+    }
 
     update(deltaTime: number) {
 

@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.AnimationClip",
-    "_name": "boy01",
+    "_name": "boy01_down",
     "_objFlags": 0,
     "__editorExtras__": {
       "embeddedPlayerGroups": []
@@ -9,7 +9,7 @@
     "_native": "",
     "sample": 60,
     "speed": 1,
-    "wrapMode": 1,
+    "wrapMode": 2,
     "enableTrsBlending": false,
     "_duration": 0.21666666666666667,
     "_hash": 500763545,
@@ -67,15 +67,15 @@
     ],
     "_values": [
       {
-        "__uuid__": "440ebda9-9854-46ab-b0f9-eaa50943990e@4e01c",
+        "__uuid__": "440ebda9-9854-46ab-b0f9-eaa50943990e@555e6",
         "__expectedType__": "cc.SpriteFrame"
       },
       {
-        "__uuid__": "440ebda9-9854-46ab-b0f9-eaa50943990e@ad8f7",
+        "__uuid__": "440ebda9-9854-46ab-b0f9-eaa50943990e@bb500",
         "__expectedType__": "cc.SpriteFrame"
       },
       {
-        "__uuid__": "440ebda9-9854-46ab-b0f9-eaa50943990e@147ff",
+        "__uuid__": "440ebda9-9854-46ab-b0f9-eaa50943990e@fa15b",
         "__expectedType__": "cc.SpriteFrame"
       }
     ]

@@ -45,10 +45,10 @@ export class tankManager extends Component {
     private _spawnInterval;
     //配置表
     private _config;
-    public get config() : string {
+    public get config(): string {
         return this._config;
     }
-    
+
 
 
     start() {
@@ -56,7 +56,7 @@ export class tankManager extends Component {
         //初始化gManager;
         this._gManager = this.node.getComponent(gridManager);
         //初始化Config
-        this._config={
+        this._config = {
             tank: {
                 prefab: this.tankPrefab,
                 component: tank,
@@ -184,14 +184,15 @@ export class tankManager extends Component {
             var cofResult = this._config[key]
             //生成实例
             var tankNode: Node = instantiate(cofResult.prefab);
-    
+
             this.node.getChildByName("tankLayer").addChild(tankNode);
+            //tankNode.active=false;
             //先隐藏对象(因为寻路还需要时间运算，使用了settimeout,寻路完成后再显示对象,参考aStart.showPath)
             //tankNode.active = false;
             //赋值属性
             var el: any = tankNode.getComponent(cofResult.component);
             el.team = team;
-            tankNode.getComponent(aStar).tk=el;
+            tankNode.getComponent(aStar).tk = el;
             tankNode.getComponent(aStar).startGrid = startGrid;
             tankNode.getComponent(aStar).endGrid = endGrid;
             tankNode.getComponent(aStar).nodeInGridCellIndex = new Vec2(startGrid.cellX, startGrid.cellY)
@@ -201,16 +202,20 @@ export class tankManager extends Component {
             if (tankIndex == -1) {
                 this.nodeCollection.push(el);
             }
+
             switch (team) {
                 case enumTeam.teamRed:
                     tankNode.getComponent(Sprite).color = new Color(225, 0, 0, 225);
-                    tankNode.eulerAngles = new Vec3(0, 0, 90)
+                    if (key == "tank")
+                        tankNode.eulerAngles = new Vec3(0, 0, 90)
                     break;
                 case enumTeam.teamBlue:
                     tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 225);
-                    tankNode.eulerAngles = new Vec3(0, 0, -90)
+                    if (key == "tank")
+                        tankNode.eulerAngles = new Vec3(0, 0, -90)
                     break;
             }
+
         }
     }
 
