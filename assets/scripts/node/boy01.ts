@@ -21,7 +21,7 @@ export class boy01 extends element {
         this.nodeCollider = this.getComponent(Collider2D);
         this.nodeCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
         //设置移动速度
-        this.moveSpeed = 0.3;
+        this.moveSpeed = 0.2;
 
         this.getComponent(aStar).key = this._key
         //默认动画
@@ -139,7 +139,7 @@ export class boy01 extends element {
             //不是一队的 产生伤害
             if (bu.bulletType != this._team) {
                 setTimeout(() => {
-                    this.hp -= 5;
+                    this.hp -= 50;
                 }, 0);
                 if (this.hp > 0) {
                     //还可以扛
@@ -157,9 +157,6 @@ export class boy01 extends element {
                     bu.node.destroy();
                 }, 0);
             }
-            console.log("HP:", this.hp);
-
-
         }
     }
 

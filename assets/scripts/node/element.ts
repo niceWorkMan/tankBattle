@@ -23,15 +23,14 @@ export class element extends Component {
         this.tManager = this.node.parent.parent.getComponent(tankManager);
         this.gManager = this.node.parent.parent.getComponent(gridManager);
 
-
         //获取导航网格
-        this.star = this.getComponent(aStar);
-        this.star.tk = this;
-        this.star.tManager = this.tManager;
+        var star = this.getComponent(aStar);
+        star.tk = this;
+        star.tManager = this.tManager;
         //添加至导航集合
-        var dex = this.tManager.aStartCollection.indexOf(this.star);
+        var dex = this.tManager.aStartCollection.indexOf(star);
         if (dex == -1) {
-            this.tManager.aStartCollection.push(this.star);
+            this.tManager.aStartCollection.push(star);
         }
 
     }
@@ -96,14 +95,6 @@ export class element extends Component {
     }
 
 
-    //aStart;
-    protected _aStar: aStar;
-    public set star(v: aStar) {
-        this._aStar = v;
-    }
-    public get star(): aStar {
-        return this._aStar
-    }
 
 
 
@@ -248,7 +239,7 @@ export class element extends Component {
 
         //销毁自己
         if (this.node) {
-            tManager.synGridCollectionRemove(this.star);
+            tManager.synGridCollectionRemove(star);
             this.node.destroy();
         }
 

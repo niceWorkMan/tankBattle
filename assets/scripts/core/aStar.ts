@@ -123,6 +123,7 @@ export class aStar extends Component {
             var _compArr_ins: grid[] = [];
             for (var j = 0; j < this._gridMatrix.colum; j++) {
                 var _grid: Node = instantiate(this.gManager.gridPrefab);
+                _grid.active=false;
                 //不在操作AStar网格中的视图渲染
                 var gScript = _grid.getComponent(grid)
                 //加入一维数组
