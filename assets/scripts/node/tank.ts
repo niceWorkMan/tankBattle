@@ -26,6 +26,13 @@ export class tank extends element {
             return;
         }
 
+        //是否
+        if(this.isPause){
+            this._stopIndex = nextIndex;
+            this._closeList = closeList;
+            return;
+        }
+
         //如果下一个目标点是障碍
         if (nextIndex + 1 <= closeList.length - 1) {
 

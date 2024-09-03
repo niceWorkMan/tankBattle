@@ -40,7 +40,8 @@ export class tankManager extends Component {
         return this._nodeCollection;
     }
 
-
+    //生成函数
+    private _spawnInterval;
 
 
     start() {
@@ -88,7 +89,7 @@ export class tankManager extends Component {
 
 
     //开始竞技
-    private battleStart() {
+    public battleStart() {
         if (this._isBattle)
             return;
 
@@ -100,7 +101,7 @@ export class tankManager extends Component {
         this._isBattle = true;
         //平均team生成测试
         var spawnTime = 0;
-        setInterval(() => {
+        this._spawnInterval = setInterval(() => {
             var pos0 = new Vec2(Math.ceil(Math.random() * 14), 0);
             var pos1 = new Vec2(Math.ceil(Math.random() * 14), 25);
             var isFree = (this._gManager.gridComponentArr[pos0.x][pos0.y].isObstacle == false) && (this._gManager.gridComponentArr[pos1.x][pos1.y].isObstacle == false)
@@ -116,6 +117,14 @@ export class tankManager extends Component {
                 spawnTime++;
             }
         }, 300);
+    }
+
+
+    //停止竞技
+    public battleStop() {
+        this._isBattle=false;
+        if (this._spawnInterval)
+            clearInterval(this._spawnInterval)
     }
 
 

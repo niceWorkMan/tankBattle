@@ -44,7 +44,7 @@ export class element extends Component {
             this.tManager.aStartCollection.push(this.star);
         }
 
-        //等待一帧 开始导航
+        //等待一帧 开始导航******
         setTimeout(() => {
             this.startNav();
         }, 0);
@@ -57,6 +57,10 @@ export class element extends Component {
     protected tweenMove(nextIndex: number, closeList: grid[]) { };
 
 
+    //外部调用 继续移动
+    public tweenMoveOn(){
+        this.tweenMove(this.stopIndex,this._closeList);
+    }
 
     //坦克移动单元格时间
     protected moveSpeed = 0.1;
@@ -225,6 +229,17 @@ export class element extends Component {
     public get fireSpace(): number {
         return this._fireSpace;
     }
+
+
+    //是否暂停
+    protected _isPause:boolean;
+    public get isPause() : boolean {
+        return this._isPause;
+    }
+    public set isPause(v : boolean) {
+        this._isPause = v;
+    }
+    
 
 
     //开始导航
