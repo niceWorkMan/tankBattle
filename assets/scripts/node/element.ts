@@ -4,6 +4,7 @@ import { grid } from '../grid';
 import { gridManager } from '../gridManager';
 import { tankManager } from '../tankManager';
 import { enumTeam } from '../common/enumTeam';
+import { grid_c } from '../core/grid_c';
 const { ccclass, property } = _decorator;
 
 @ccclass('element')
@@ -36,7 +37,7 @@ export class element extends Component {
     }
 
     //移动
-    protected tweenMove(nextIndex: number, closeList: grid[]) { };
+    protected tweenMove(nextIndex: number, closeList: grid_c[]) { };
 
 
     //外部调用 继续移动
@@ -137,18 +138,18 @@ export class element extends Component {
 
 
     //路径
-    protected _closeList: grid[];
-    public set closeList(v: grid[]) {
+    protected _closeList: grid_c[];
+    public set closeList(v: grid_c[]) {
         this._closeList = v;
     }
-    public get closeList(): grid[] {
+    public get closeList(): grid_c[] {
         return this._closeList
     }
 
 
     //当前站位的格子
-    protected _inObstaleGrid: grid;
-    public get inObstaleGrid(): grid {
+    protected _inObstaleGrid: grid_c;
+    public get inObstaleGrid(): grid_c {
         return this._inObstaleGrid
     }
 
@@ -202,13 +203,18 @@ export class element extends Component {
         this._isPause = v;
     }
 
+     //获取位置
+     protected getPosition(g:grid_c) {
+        return this.node.parent.parent.getComponent(gridManager).gridComponentArr[g.cellX][g.cellX].node.getPosition();
+    }
+
 
 
     //开始导航
 
 
     //开始移动
-    navigationMove(closeList: grid[]) {
+    navigationMove(closeList: grid_c[]) {
         if (!this.node)
             return;
         //从第0个点开始移动

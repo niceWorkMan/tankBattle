@@ -4,22 +4,24 @@ import { gridManager } from '../gridManager';
 import { tank } from '../node/tank';
 import { tankManager } from '../tankManager';
 import { element } from '../node/element';
+import { grid_c } from './grid_c';
 
 const { ccclass, property } = _decorator;
+
 
 @ccclass('aStar')
 export class aStar extends Component {
 
-     //起始点
-     protected _startGrid;
-     public get startGrid(): grid {
-         return this._startGrid
-     }
-     public set startGrid(v: grid) {
-         this._startGrid = v;
-     }
+    //起始点
+    protected _startGrid;
+    public get startGrid(): grid_c {
+        return this._startGrid
+    }
+    public set startGrid(v: grid_c) {
+        this._startGrid = v;
+    }
 
-         //结束点
+    //结束点
     protected _endGrid;
     public get endGrid(): grid {
         return this._endGrid
@@ -28,7 +30,7 @@ export class aStar extends Component {
         this._endGrid = v;
     }
 
-     
+
     //当前Tank所在格子
     private _nodeInGridCellIndex: Vec2;
     public set nodeInGridCellIndex(v: Vec2) {
@@ -37,7 +39,7 @@ export class aStar extends Component {
     public get nodeInGridCellIndex(): Vec2 {
         return this._nodeInGridCellIndex;
     }
- 
+
 
     //配置键
     protected _key: string;
@@ -58,7 +60,7 @@ export class aStar extends Component {
     initComponent() {
         this.gManager = this.node.parent.parent.getComponent(gridManager);
         this.tManager = this.node.parent.parent.getComponent(tankManager);
-        
+
         this._gridMatrix = this.gManager.getGridMatrix;
         //生成网格
         this.tankNaviGrid();
@@ -120,19 +122,13 @@ export class aStar extends Component {
     //初始化导航网格(只在内存中保存数据)
     tankNaviGrid() {
         for (var i = 0; i < this._gridMatrix.row; i++) {
-            var _compArr_ins: grid[] = [];
+            var _compArr_ins: grid_c[] = [];
             for (var j = 0; j < this._gridMatrix.colum; j++) {
-                var _grid: Node = instantiate(this.gManager.gridPrefab);
-                _grid.active=false;
-                //不在操作AStar网格中的视图渲染
-                var gScript = _grid.getComponent(grid)
-                //加入一维数组
-                _compArr_ins.push(gScript);
-                if (gScript) {
-                    gScript.setGridManager(this.gManager);
-                    gScript.setIndexLabel(i, j);
-                    gScript.setObstacle(this.gManager.gridComponentArr[i][j].isObstacle);
-                }
+                var _grid:grid_c =new grid_c();
+                _grid.cellX=i;
+                _grid.cellY=j;
+                _grid.setObstacle(this.gManager.gridComponentArr[i][j].isObstacle)
+                _compArr_ins.push(_grid);
             }
             //加入二维数组
             this._gridNodeArr.push(_compArr_ins)
@@ -140,17 +136,17 @@ export class aStar extends Component {
     }
 
     //copy from gridManager 格子对象数组
-    private _gridNodeArr: grid[][] = [];
-    public get gridNodeArr(): grid[][] {
+    private _gridNodeArr: grid_c[][] = [];
+    public get gridNodeArr(): grid_c[][] {
         return this._gridNodeArr
     }
 
     //查询路径结果
-    private _closeList: grid[] = [];
-    public get closeList(): grid[] {
+    private _closeList: grid_c[] = [];
+    public get closeList(): grid_c[] {
         return this._closeList;
     }
-    public set closeList(v: grid[]) {
+    public set closeList(v: grid_c[]) {
         this._closeList = v;
     }
 
@@ -180,18 +176,24 @@ export class aStar extends Component {
     }
 
 
+    //获取位置
+    public getPosition(g:grid_c) {
+        var pos:Vec3=this.node.parent.parent.getComponent(gridManager).gridComponentArr[g.cellX][g.cellY].node.getPosition();
+        console.log("测试:x:"+g.cellX+"  y:"+g.cellY+"  位置:x:"+pos.x+"  y:"+pos.y);
+        return pos;
+    }
 
     update(deltaTime: number) {
 
     }
     //获取相邻可用的格子
-    getNeighborGrid(currentGrid: grid) {
+    getNeighborGrid(currentGrid: grid_c) {
         var mIdx = currentGrid.getCellIndex();
         var limitMatrix: Vec2[] = this.getNeighborMitrax(mIdx);
         for (var j = limitMatrix[0].x; j <= limitMatrix[0].y; j++) {
             for (var k = limitMatrix[1].x; k <= limitMatrix[1].y; k++) {
                 var newIndex: Vec2 = new Vec2(j, k);
-                var gObj: grid = this._gridNodeArr[newIndex.x][newIndex.y];
+                var gObj: grid_c = this._gridNodeArr[newIndex.x][newIndex.y];
                 if ((newIndex.x != mIdx.x || newIndex.y != mIdx.y) && gObj.getObstacle() == false) {
                     //gObj.setSpriteColor({ r: 100, g: 100, b: 103, a: 255 })
                 }
@@ -200,16 +202,16 @@ export class aStar extends Component {
     }
 
     //获取到最小代价的格子
-    getPriceMixNeighborGrid(startGrid: grid, endGrid: grid) {
+    getPriceMixNeighborGrid(startGrid: grid_c, endGrid: grid_c) {
         var mIdx = new Vec2(startGrid.cellX, startGrid.cellY);
         var limitMatrix: Vec2[] = this.getNeighborMitrax(mIdx);
 
         //所有可能的路径格子
-        var gridUsedMaxtri: grid[] = [];
+        var gridUsedMaxtri: grid_c[] = [];
         for (var j = limitMatrix[0].x; j <= limitMatrix[0].y; j++) {
             for (var k = limitMatrix[1].x; k <= limitMatrix[1].y; k++) {
                 var newIndex: Vec2 = new Vec2(j, k);
-                var gObj: grid = this._gridNodeArr[newIndex.x][newIndex.y];
+                var gObj: grid_c = this._gridNodeArr[newIndex.x][newIndex.y];
                 if ((newIndex.x != mIdx.x || newIndex.y != mIdx.y) && !(newIndex.x != mIdx.x && newIndex.y != mIdx.y) && gObj.backCheck == false && gObj.getObstacle() == false) {
                     if (this._closeList.indexOf(gObj) == -1) {
                         //检索搜索格
@@ -247,7 +249,7 @@ export class aStar extends Component {
         //回退搜索Neighbor
         else {
             //找父节点
-            var collection: grid[] = this.checkParentGrid(startGrid)
+            var collection: grid_c[] = this.checkParentGrid(startGrid)
             if (collection) {
                 //计算代价
                 for (var i = 0; i < collection.length; i++) {
@@ -282,7 +284,7 @@ export class aStar extends Component {
 
     //显示路径（绿色是已经粗算的路径）
     showPath() {
-        if (!this|| !this.startGrid || !this.endGrid) {
+        if (!this || !this.startGrid || !this.endGrid) {
             return;
         }
         //复位closeList 放在远点过滤前面
@@ -338,7 +340,7 @@ export class aStar extends Component {
 
 
     //移除远点的点(蓝色是已有数据的最优解)
-    removefarGrid(list: grid[]): grid[] {
+    removefarGrid(list: grid_c[]): grid_c[] {
         for (var i = 0; i < list.length; i++) {
             for (var j = i; j < list.length; j++) {
                 //x 相同 y 间隔
@@ -356,7 +358,7 @@ export class aStar extends Component {
     }
 
 
-    closeListAdd(g: grid) {
+    closeListAdd(g: grid_c) {
         var index = this._closeList.indexOf(g)
         if (index == -1) {
             this._closeList.push(g)
@@ -364,7 +366,7 @@ export class aStar extends Component {
     }
 
     //移除回溯路线点
-    removeBackGrid(startGrid: grid) {
+    removeBackGrid(startGrid: grid_c) {
         var rgDex = this._closeList.indexOf(startGrid);
         if (rgDex != -1) {
             this._closeList.splice(rgDex, 1);
@@ -375,7 +377,7 @@ export class aStar extends Component {
 
 
     //检查回退父节点Neighbor
-    checkParentGrid(cuGrid: grid): grid[] {
+    checkParentGrid(cuGrid: grid_c): grid_c[] {
         //检查父级有没有Neigbor
         var grids = [];
         if (cuGrid.parent)
@@ -393,12 +395,12 @@ export class aStar extends Component {
                 cuGrid.backCheck = true;
                 //继续向腹肌查询
                 if (cuGrid.parent != null) {
-                    var searchGrids: grid[] = this.checkParentGrid(cuGrid.parent);
+                    var searchGrids: grid_c[] = this.checkParentGrid(cuGrid.parent);
                     return searchGrids;
                 } else {
                     //内部结束
                     console.warn("结束");
-                    return grid[0];
+                    return grid_c[0];
                 }
             } else {
                 console.warn("查询失败 结束");
@@ -412,10 +414,10 @@ export class aStar extends Component {
     }
 
     //计算父节点的neighbor
-    caculteParentNeighborGrids(cuGrid: grid): grid[] {
-        var collectionGrids: grid[] = [];
+    caculteParentNeighborGrids(cuGrid: grid_c): grid_c[] {
+        var collectionGrids: grid_c[] = [];
         if (cuGrid.neighorGrid != null) {
-            var parentSearchGrids: grid[] = cuGrid.neighorGrid;
+            var parentSearchGrids: grid_c[] = cuGrid.neighorGrid;
             for (var i = 0; i < parentSearchGrids.length; i++) {
                 if (parentSearchGrids[i].isSearch == false) {
                     collectionGrids.push(parentSearchGrids[i]);
@@ -432,7 +434,7 @@ export class aStar extends Component {
 
 
     //递归循环查找
-    delayLoopSearch(cuGrid: grid, endGrid: grid) {
+    delayLoopSearch(cuGrid: grid_c, endGrid: grid_c) {
         //必须setTimeout间隔执行 不然会有错误
         setTimeout(() => {
             //cuGrid.setSpriteColor({ r: 55, g: 206, b: 73, a: 255 });
@@ -442,7 +444,7 @@ export class aStar extends Component {
     }
 
     //冒泡排序代价
-    sortPriceOfGrid(gArr: grid[]): grid[] {
+    sortPriceOfGrid(gArr: grid_c[]): grid_c[] {
         //排序
         for (var i = 0; i < gArr.length; i++) {
             for (var j = 0; j < gArr.length - i - 1; j++) {
@@ -464,7 +466,7 @@ export class aStar extends Component {
     }
 
     //获取格子的代价
-    getGridPrice(currentGrid: grid, startGrid: grid, endGrid: grid) {
+    getGridPrice(currentGrid: grid_c, startGrid: grid_c, endGrid: grid_c) {
         //公式 h=f+g;
         var f = Math.abs(currentGrid.getCellIndex().x - startGrid.getCellIndex().x) + Math.abs(currentGrid.getCellIndex().y - startGrid.getCellIndex().y);
         var g = Math.abs(endGrid.getCellIndex().x - currentGrid.getCellIndex().x) + Math.abs(endGrid.getCellIndex().y - currentGrid.getCellIndex().y);
@@ -479,7 +481,7 @@ export class aStar extends Component {
 
 
     //比较格子的索引
-    compareIndexOfGrid(g1: grid, g2: grid) {
+    compareIndexOfGrid(g1: grid_c, g2: grid_c) {
         return g1 == g2
     }
 
@@ -530,13 +532,13 @@ export class aStar extends Component {
     public resetGridArr() {
         for (var i = 0; i < this._gridMatrix.row; i++) {
             for (var j = 0; j < this._gridMatrix.colum; j++) {
-                this.gridNodeArr[i][j].parent = null;
-                this.gridNodeArr[i][j].next = null;
+                this._gridNodeArr[i][j].parent = null;
+                this._gridNodeArr[i][j].next = null;
                 //isSearch=false很重要
-                this.gridNodeArr[i][j].isObstacle = false;
-                this.gridNodeArr[i][j].isSearch = false;
-                this.gridNodeArr[i][j].backCheck = false;
-                this.gridNodeArr[i][j].neighorGrid = [];
+                this._gridNodeArr[i][j].isObstacle = false;
+                this._gridNodeArr[i][j].isSearch = false;
+                this._gridNodeArr[i][j].backCheck = false;
+                this._gridNodeArr[i][j].neighorGrid = [];
             }
         }
         this._closeList = [];
@@ -544,12 +546,7 @@ export class aStar extends Component {
 
 
     protected onDestroy(): void {
-        for (var i = 0; i < this._gridMatrix.row; i++) {
-            for (var j = 0; j < this._gridMatrix.colum; j++) {
-              this._gridNodeArr[i][j].destroy();
-            }
-        }
-        this._gridNodeArr=null;
+        this._gridNodeArr = null;
     }
 
 }

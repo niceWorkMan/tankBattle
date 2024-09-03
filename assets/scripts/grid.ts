@@ -71,21 +71,12 @@ export class grid extends Component {
     public _aStarParent: grid = null;
 
 
-    //是否被搜索过该格子
-    private _isSearch: boolean = false;
-    public set isSearch(v: boolean) {
-        this._isSearch = v;
-    }
-    public get isSearch(): boolean {
-        return this._isSearch;
-    }
 
     //上一个
     public _parent: grid;
     public set parent(v: grid) {
         this._parent = v;
     }
-
     public get parent(): grid {
         return this._parent;
     }
@@ -100,42 +91,6 @@ export class grid extends Component {
 
     public get next(): grid {
         return this._next;
-    }
-
-
-
-    //邻居格子
-    private _neighorGrid: grid[];
-
-    public set neighorGrid(v: grid[]) {
-        this._neighorGrid = v;
-    }
-
-    public get neighorGrid(): grid[] {
-        return this._neighorGrid;
-    }
-
-
-    //是否回溯过
-    private _backCheck: boolean = false;
-    public set backCheck(v: boolean) {
-        this._backCheck = v;
-    }
-
-    public get backCheck(): boolean {
-        return this._backCheck;
-    }
-
-
-
-    //代价
-    private _price: number;
-    public set price(v: number) {
-        this._price = v;
-    }
-
-    public get price(): number {
-        return this._price;
     }
 
 
@@ -201,7 +156,6 @@ export class grid extends Component {
         }
     }
 
-
     setSpriteColor(c) {
         if (!this._sprite) {
             this._sprite = this.getComponent(Sprite);
@@ -219,15 +173,8 @@ export class grid extends Component {
 
 
 
-    //获取索引位置
-    public getCellIndex() {
-        return new Vec2(this._cellX, this._cellY);
-    }
 
-    //获取位置
-    public getPosition() {
-        return this._gridManager.gridComponentArr[this._cellX][this._cellY].node.getPosition();
-    }
+   
 
 
 }

@@ -5,6 +5,7 @@ import { aStar } from '../core/aStar';
 import { gridManager } from '../gridManager';
 import { tankManager } from '../tankManager';
 import { bullet } from '../bullet';
+import { grid_c } from '../core/grid_c';
 const { ccclass, property } = _decorator;
 
 @ccclass('boy01')
@@ -29,7 +30,7 @@ export class boy01 extends element {
     }
 
     //移动核心逻辑
-    override tweenMove(nextIndex: number, closeList: grid[]) {
+    override tweenMove(nextIndex: number, closeList: grid_c[]) {
         if (!this.node) {
             return;
         }
@@ -77,7 +78,7 @@ export class boy01 extends element {
                     return;
                 }
                 //位移
-                var twMove = tween(this.node).to(this.moveSpeed, { position: closeList[nextIndex].getPosition() }, {
+                var twMove = tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
                     onUpdate: () => {
                     },
                     onComplete: () => {
