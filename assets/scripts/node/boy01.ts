@@ -15,13 +15,13 @@ export class boy01 extends element {
         //初始化config的key
         this._key = "boy01";
     }
-    private animClip:Animation;
+    private animClip: Animation;
 
     start(): void {
         this.nodeCollider = this.getComponent(Collider2D);
         this.nodeCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
         //设置移动速度
-        this.moveSpeed=0.4;
+        this.moveSpeed = 0.4;
 
         this.getComponent(aStar).key = this._key
         //默认动画
@@ -48,6 +48,12 @@ export class boy01 extends element {
         if (nextIndex == closeList.length - 1) {
             this.node.active = false;
             this.destorySelf();
+            return;
+        }
+        //是否暂停
+        if (this.isPause) {
+            this._stopIndex = nextIndex;
+            this._closeList = closeList;
             return;
         }
 
@@ -87,11 +93,6 @@ export class boy01 extends element {
                             var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
                             var targetRot = radian * (180 / Math.PI);
                             if (this.node.eulerAngles.z !== targetRot) {
-                                //this.node.eulerAngles = new Vec3(0, 0, targetRot);
-
-
-                                //  anim.getState("boy01_moveUp").repeatCount = 100;//循环10次
-                                console.log("angle:", targetRot)
                                 switch (targetRot) {
                                     case -90:
                                         this.animClip.play('boy01_down');

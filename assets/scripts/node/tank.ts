@@ -48,8 +48,7 @@ export class tank extends element {
             this.destorySelf();
             return;
         }
-
-        //是否
+        //是否暂停
         if (this.isPause) {
             this._stopIndex = nextIndex;
             this._closeList = closeList;
@@ -252,9 +251,6 @@ export class tank extends element {
                     bu.node.destroy();
                 }, 0);
             }
-            console.log("HP:", this.hp);
-
-
         }
     }
 
