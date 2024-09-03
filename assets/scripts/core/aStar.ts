@@ -542,6 +542,16 @@ export class aStar extends Component {
         this._closeList = [];
     }
 
+
+    protected onDestroy(): void {
+        for (var i = 0; i < this._gridMatrix.row; i++) {
+            for (var j = 0; j < this._gridMatrix.colum; j++) {
+              this._gridNodeArr[i][j].destroy();
+            }
+        }
+        this._gridNodeArr=null;
+    }
+
 }
 
 
