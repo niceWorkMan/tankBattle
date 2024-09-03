@@ -10,7 +10,47 @@ const { ccclass, property } = _decorator;
 @ccclass('aStar')
 export class aStar extends Component {
 
+     //起始点
+     protected _startGrid;
+     public get startGrid(): grid {
+         return this._startGrid
+     }
+     public set startGrid(v: grid) {
+         this._startGrid = v;
+     }
+
+         //结束点
+    protected _endGrid;
+    public get endGrid(): grid {
+        return this._endGrid
+    }
+    public set endGrid(v: grid) {
+        this._endGrid = v;
+    }
+
+     
+    //当前Tank所在格子
+    private _nodeInGridCellIndex: Vec2;
+    public set nodeInGridCellIndex(v: Vec2) {
+        this._nodeInGridCellIndex = v;
+    }
+    public get nodeInGridCellIndex(): Vec2 {
+        return this._nodeInGridCellIndex;
+    }
+ 
+
+    //配置键
+    protected _key: string;
+    public set key(v: string) {
+        this._key = v;
+    }
+    public get key(): string {
+        return this._key
+    }
+
+
     start() {
+        //保证在element的Start()函数后执行
         this.initComponent();
     }
 
@@ -18,22 +58,28 @@ export class aStar extends Component {
     initComponent() {
         this.gManager = this.node.parent.parent.getComponent(gridManager);
         this.tManager = this.node.parent.parent.getComponent(tankManager);
-        this.tk = this.getComponent(tank);
-        if(!this.tk){
-            alert(123123)
-        }
-        if (!this.gManager) {
-            alert(this.node.parent.name)
-            alert("查询组件错误")
-        }
-        if(! this.tk){
-            alert("获取_spawmComponentType失败")
-        }
+        
         this._gridMatrix = this.gManager.getGridMatrix;
         //生成网格
         this.tankNaviGrid();
         this.tManager.synGridCollectionAdd(this);
         //开始导航
+        this.startNav();
+    }
+
+    public startNav() {
+
+        //重置数据
+        this.resetGridArr();
+        this.tManager.synCurrentState(this);
+        //----------------------------------------------------
+        //同步基础网格状态
+        //寻路
+        this.startGrid.cellX = this.nodeInGridCellIndex.x;
+        this.startGrid.cellY = this.nodeInGridCellIndex.y;
+
+        this.getPriceMixNeighborGrid(this.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY])
+
     }
 
 
@@ -116,11 +162,11 @@ export class aStar extends Component {
 
 
     //坦克对象
-    private _tk: element
-    public set tk(v: element) {
+    private _tk: any
+    public set tk(v: any) {
         this._tk = v;
     }
-    public get tk(): element {
+    public get tk(): any {
         return this._tk;
     }
 
@@ -235,14 +281,14 @@ export class aStar extends Component {
 
     //显示路径（绿色是已经粗算的路径）
     showPath() {
-        if (!this.tk || !this.tk.startGrid || !this.tk.endGrid) {
+        if (!this|| !this.startGrid || !this.endGrid) {
             return;
         }
         //复位closeList 放在远点过滤前面
-        this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY].isSearch = false
-        this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY].backCheck = false;
-        this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY].isSearch = false;
-        this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY].backCheck = false;
+        this.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY].isSearch = false
+        this.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY].backCheck = false;
+        this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY].isSearch = false;
+        this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY].backCheck = false;
         for (var i = 0; i < this._closeList.length; i++) {
             this._closeList[i].isSearch = false;
             this._closeList[i].backCheck = false;
@@ -252,14 +298,14 @@ export class aStar extends Component {
         this.removefarGrid(this._closeList);
         //头尾加入
         if (this.closeList.length > 0) {
-            this.closeList.unshift(this.gridNodeArr[this.tk.startGrid.cellX][this.tk.startGrid.cellY])
-            this.closeList.push(this.gridNodeArr[this.tk.endGrid.cellX][this.tk.endGrid.cellY])
+            this.closeList.unshift(this.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY])
+            this.closeList.push(this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY])
         }
         else {
             console.warn("当前路径无法到达终点");
             setTimeout(() => {
                 if (this.tk)
-                    this.tk.startNav();
+                    this.startNav();
             }, this.tk.waitObsTime * 1000);
             return;
         }
@@ -278,13 +324,11 @@ export class aStar extends Component {
             }
         }
 
-        this.tk.node.active = true;
+        this.node.active = true;
         //开始导航
-        if (this.tk)
-          {
+        if (this.tk) {
             this.tk.navigationMove(this._closeList);
-          }
-        //this.tk.tweenMove(0, this.tk.closeList);
+        }
         else {
             alert("漏网之鱼")
         }

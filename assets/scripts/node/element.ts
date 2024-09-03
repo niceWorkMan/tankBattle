@@ -8,11 +8,12 @@ const { ccclass, property } = _decorator;
 
 @ccclass('element')
 export class element extends Component {
+    constructor() {
+        super();
+    }
 
 
-    protected hpComp: Node;
     protected nodeCollider: Collider2D;
-    protected nodeLayer: Node;
 
     start() {
         this.initComponent();
@@ -21,18 +22,7 @@ export class element extends Component {
     initComponent() {
         this.tManager = this.node.parent.parent.getComponent(tankManager);
         this.gManager = this.node.parent.parent.getComponent(gridManager);
-        this.hpComp = this.node.getChildByName("hp");
-        if (this.tManager.node) {
-            this.nodeLayer = this.tManager.node.getChildByName("tankLayer");
-        }
-        else {
-            alert("设置Layer失败")
-        }
 
-
-        //监听碰撞
-        this.nodeCollider = this.getComponent(Collider2D);
-        this.nodeCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
 
         //获取导航网格
         this.star = this.getComponent(aStar);
@@ -44,22 +34,15 @@ export class element extends Component {
             this.tManager.aStartCollection.push(this.star);
         }
 
-        //等待一帧 开始导航******
-        setTimeout(() => {
-            this.startNav();
-        }, 0);
-
     }
 
-    //碰撞  
-    protected onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) { };
     //移动
     protected tweenMove(nextIndex: number, closeList: grid[]) { };
 
 
     //外部调用 继续移动
-    public tweenMoveOn(){
-        this.tweenMove(this.stopIndex,this._closeList);
+    public tweenMoveOn() {
+        this.tweenMove(this.stopIndex, this._closeList);
     }
 
     //坦克移动单元格时间
@@ -72,14 +55,17 @@ export class element extends Component {
         return this._waitObsTime;
     }
 
-    //当前Tank所在格子
-    private _nodeInGridCellIndex: Vec2;
-    public set nodeInGridCellIndex(v: Vec2) {
-        this._nodeInGridCellIndex = v;
+    //配置键
+    protected _key: string;
+    public set key(v: string) {
+        this._key = v;
     }
-    public get nodeInGridCellIndex(): Vec2 {
-        return this._nodeInGridCellIndex;
+    public get key(): string {
+        return this._key
     }
+
+
+
 
 
     //当前所属队伍
@@ -119,23 +105,7 @@ export class element extends Component {
         return this._aStar
     }
 
-    //起始点
-    protected _startGrid;
-    public get startGrid(): grid {
-        return this._startGrid
-    }
-    public set startGrid(v: grid) {
-        this._startGrid = v;
-    }
 
-    //结束点
-    protected _endGrid;
-    public get endGrid(): grid {
-        return this._endGrid
-    }
-    public set endGrid(v: grid) {
-        this._endGrid = v;
-    }
 
     //射程
     protected _attackDis = 6;
@@ -196,11 +166,12 @@ export class element extends Component {
     //Hp(血条)
     protected _hp: number = 100;
     public set hp(v: number) {
+        var hpComp = this.node.getChildByName("hp");
         if (v < 100 && v > 0) {
-            this.hpComp.active = true;
-            this.hpComp.getChildByName("forward").getComponent(Sprite).fillStart = 1 - v / 100;
+            hpComp.active = true;
+            hpComp.getChildByName("forward").getComponent(Sprite).fillStart = 1 - v / 100;
         } else {
-            this.hpComp.active = false;
+            hpComp.active = false;
         }
         this._hp = v;
     }
@@ -232,37 +203,21 @@ export class element extends Component {
 
 
     //是否暂停
-    protected _isPause:boolean;
-    public get isPause() : boolean {
+    protected _isPause: boolean;
+    public get isPause(): boolean {
         return this._isPause;
     }
-    public set isPause(v : boolean) {
+    public set isPause(v: boolean) {
         this._isPause = v;
     }
-    
+
 
 
     //开始导航
-     startNav() {
-        if (!this.star) {
-            this.star = this.getComponent(aStar);
-        }
-        //重置数据
-        this.star.resetGridArr();
-        this.tManager.synCurrentState(this._aStar);
-        //----------------------------------------------------
-        //同步基础网格状态
-        //寻路
-        this.startGrid.cellX = this.nodeInGridCellIndex.x;
-        this.startGrid.cellY = this.nodeInGridCellIndex.y;
 
-        this.star.getPriceMixNeighborGrid(this.star.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.star.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY]);
-        this.star.tk = this;
-
-    }
 
     //开始移动
-     navigationMove(closeList: grid[]) {
+    navigationMove(closeList: grid[]) {
         if (!this.node)
             return;
         //从第0个点开始移动
@@ -277,20 +232,23 @@ export class element extends Component {
 
     //销毁
     protected destorySelf() {
+        var star = this.getComponent(aStar);
+        var tManager=this.node.parent.parent.getComponent(tankManager);
+        var gManager=this.node.parent.parent.getComponent(gridManager);
         //销毁当前网格障碍
-        if (this.nodeInGridCellIndex)
-            this.gManager.gridComponentArr[this, this.nodeInGridCellIndex.x][this, this.nodeInGridCellIndex.y].isObstacle = false;
+        if (star.nodeInGridCellIndex)
+            gManager.gridComponentArr[this, star.nodeInGridCellIndex.x][this, star.nodeInGridCellIndex.y].isObstacle = false;
 
-        this.tManager.synGridCollectionState();
+        tManager.synGridCollectionState();
         //从数组中移除
-        var dex = this.tManager.nodeCollection.indexOf(this);
+        var dex = tManager.nodeCollection.indexOf(this);
         if (dex != -1) {
-            this.tManager.nodeCollection.splice(dex, 1);
+            tManager.nodeCollection.splice(dex, 1);
         }
 
         //销毁自己
         if (this.node) {
-            this.tManager.synGridCollectionRemove(this.star);
+            tManager.synGridCollectionRemove(this.star);
             this.node.destroy();
         }
 

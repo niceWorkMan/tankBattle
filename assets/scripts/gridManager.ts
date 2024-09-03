@@ -9,6 +9,7 @@ import { _decorator, Component, EventKeyboard, ImageAsset, Input, input, instant
 import { grid } from './grid';
 import { tankManager } from './tankManager';
 import { util } from './common/util';
+import { aStar } from './core/aStar';
 const { ccclass, property } = _decorator;
 
 @ccclass('gridManager')
@@ -174,8 +175,8 @@ export class gridManager extends Component {
                 if (!gManager.gridComponentArr[i][j].isStatic) {
                     var isObstacle = false;
                     for (var k = 0; k < tManager.nodeCollection.length; k++) {
-                        if (tManager.nodeCollection[k].nodeInGridCellIndex != new Vec2(-1, -1)) {
-                            var pos: Vec2 = tManager.nodeCollection[k].nodeInGridCellIndex;
+                        if (tManager.nodeCollection[k].getComponent(aStar).nodeInGridCellIndex != new Vec2(-1, -1)) {
+                            var pos: Vec2 = tManager.nodeCollection[k].getComponent(aStar).nodeInGridCellIndex;
                             if (i == pos.x && j == pos.y) {
                                 isObstacle = true;
                                 break;
