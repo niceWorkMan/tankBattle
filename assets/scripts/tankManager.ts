@@ -82,10 +82,10 @@ export class tankManager extends Component {
 
     onTouchStart(event: EventTouch) {
         // 处理触摸事件
-        const touchPos = event.getLocation(); // 获取触摸位置
-        console.log(`Touch started at: x=${touchPos.x}, y=${touchPos.y}`);
-        //测试代码
-        this.battleStart();
+        // const touchPos = event.getLocation(); // 获取触摸位置
+        // console.log(`Touch started at: x=${touchPos.x}, y=${touchPos.y}`);
+        // //测试代码
+        // this.battleStart();
 
     }
 

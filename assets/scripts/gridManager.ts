@@ -18,6 +18,9 @@ export class gridManager extends Component {
     @property(Prefab) tankBase: Prefab;
     //障碍树
     @property(Prefab) trees: Prefab;
+
+    //默认资源
+    @property(SpriteFrame) gSprite:SpriteFrame;
     //tank管理类
     private _tankManager: tankManager;
     private _util:util;
@@ -63,8 +66,17 @@ export class gridManager extends Component {
         input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
         //初始化挂载组件
         this.initAttatchComponent();
-        //加载图片资源（生成grid）
-        this.loadConfigAssets();
+        //生成网格
+        this.gridInit();
+    }
+
+    gridInit(){
+        //生成网格
+        this.spawnGrid();
+        this._tankManager=this.getComponent(tankManager);
+        setTimeout(() => {
+            this._tankManager.gameInit();
+        }, 100);
     }
 
 
@@ -76,14 +88,14 @@ export class gridManager extends Component {
     }
 
     //初始化网格
-    spawnGrid(spriteFrame: SpriteFrame) {
+    spawnGrid() {
         for (var i = 0; i < this._gridMatrix.row; i++) {
             var _compArr_ins: grid[] = [];
             for (var j = 0; j < this._gridMatrix.colum; j++) {
                 var _grid: Node = instantiate(this.gridPrefab);
                 this.node.getChildByName("mapLayer").addChild(_grid);
                 var _gridSprite = _grid.getComponent(Sprite);
-                _gridSprite.spriteFrame = spriteFrame;
+                _gridSprite.spriteFrame = this.gSprite;
                 _grid.setPosition(new Vec3(this.gridStartPos.x + i * 50, this.gridStartPos.y + j * (1334 / 26)));
                 var gScript = _grid.getComponent(grid)
 
@@ -152,16 +164,7 @@ export class gridManager extends Component {
                 console.log(err);
                 return;
             }
-            var spriteFrame = SpriteFrame.createWithImage(imageAsset);
-            var obj = {};
-            this._assetsLoad["dotArea"] = spriteFrame;
-            this._gridSpriteFrame = spriteFrame;
-            console.log("加载完成:", imageAsset);
-
-            //生成网格
-            this.spawnGrid(spriteFrame);
-
-            this._tankManager.gameInit();
+          
         })
 
     }
