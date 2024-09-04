@@ -41,7 +41,7 @@ export class boy01 extends element {
         if (!this.node) {
             return;
         }
-        star.startGrid = closeList[nextIndex];
+        star.startGrid = this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY];
         if (closeList.length == 0) {
             alert("错误的closeList长度")
         }

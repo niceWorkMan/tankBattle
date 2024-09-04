@@ -50,6 +50,10 @@ export class tankManager extends Component {
     }
 
 
+    //树木
+    private _tress:Node[]=[];
+
+
 
     start() {
         input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
@@ -223,13 +227,22 @@ export class tankManager extends Component {
 
     //生成障碍物
     private exampleSetObstacle() {
+        var obstaleLayer:Node=this.node.getChildByName("obstaleLayer");
         for (var i = 0; i < 15; i++) {
             for (var j = 1; j < 25; j++) {
                 if (Math.random() > 0.8) {
                     this._gManager.gridComponentArr[i][j].setObstacle(true);
                     this._gManager.gridComponentArr[i][j].isStatic = true;
+                    var trees:Node = instantiate(this._gManager.trees);
+                    obstaleLayer.addChild(trees);
+                    this._tress.push(trees);
+                    trees.position=this._gManager.gridComponentArr[i][j].node.getPosition();
                 }
             }
+        }
+        //设置层级（反转）
+        for(var i=0;i<this._tress.length;i++){
+           this._tress[i].setSiblingIndex(this._tress.length-1-i);
         }
         //同步所有导航网格的障碍
         this.synGridCollectionState();

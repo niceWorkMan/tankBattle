@@ -14,10 +14,10 @@ export class aStar extends Component {
 
     //起始点
     protected _startGrid;
-    public get startGrid(): grid_c {
+    public get startGrid(): grid {
         return this._startGrid
     }
-    public set startGrid(v: grid_c) {
+    public set startGrid(v: grid) {
         this._startGrid = v;
     }
 

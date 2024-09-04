@@ -16,6 +16,8 @@ const { ccclass, property } = _decorator;
 export class gridManager extends Component {
     @property(Prefab) gridPrefab: Prefab;
     @property(Prefab) tankBase: Prefab;
+    //障碍树
+    @property(Prefab) trees: Prefab;
     //tank管理类
     private _tankManager: tankManager;
     private _util:util;
@@ -144,7 +146,7 @@ export class gridManager extends Component {
         //     var jsonObj = res.json;
         //     var data = jsonObj.data;
         // });
-        resources.load("image/dotArea", ImageAsset, (err: any, imageAsset) => {
+        resources.load("image/ground/grass", ImageAsset, (err: any, imageAsset) => {
             //var content =  jsonAsset.toString();
             if (err) {
                 console.log(err);
