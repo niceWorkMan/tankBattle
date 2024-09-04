@@ -214,12 +214,12 @@ export class tankManager extends Component {
 
             switch (team) {
                 case enumTeam.teamRed:
-                    tankNode.getComponent(Sprite).color = new Color(225, 0, 0, 225);
+                   // tankNode.getComponent(Sprite).color = new Color(225, 0, 0, 225);
                     if (key == "tank")
                         tankNode.eulerAngles = new Vec3(0, 0, 90)
                     break;
                 case enumTeam.teamBlue:
-                    tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 225);
+                   // tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 225);
                     if (key == "tank")
                         tankNode.eulerAngles = new Vec3(0, 0, -90)
                     break;
