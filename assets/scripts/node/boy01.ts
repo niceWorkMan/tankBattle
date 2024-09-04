@@ -34,6 +34,12 @@ export class boy01 extends element {
         if (!this.node) {
             return;
         }
+        //是否暂停
+        if (this.isPause) {
+            this._stopIndex = nextIndex;
+            this._closeList = closeList;
+            return;
+        }
         var star = this.getComponent(aStar);
         this._gManager = this.node.parent.parent.getComponent(gridManager)
         this._tankManager = this.node.parent.parent.getComponent(tankManager);
@@ -51,12 +57,7 @@ export class boy01 extends element {
             this.destorySelf();
             return;
         }
-        //是否暂停
-        if (this.isPause) {
-            this._stopIndex = nextIndex;
-            this._closeList = closeList;
-            return;
-        }
+
 
         //如果下一个目标点是障碍
         if (nextIndex + 1 <= closeList.length - 1) {

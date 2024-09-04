@@ -13,18 +13,20 @@ export class loadAssets extends Component {
         });
     }
 
+
+
     onProgress(finished: number, total: number, item: AssetManager.RequestItem) {
         console.log(finished + " / " + total);
         this._process.fillRange = finished / total;
         this._label.string=finished + " / " + total;
     }
     onLoaded(err?: Error | null) {
-        director.loadScene('main');
+       // director.loadScene('main');
+       console.log("onLoaded fight.")
     }
     protected onDestroy(): void {
         console.log("destroy fight.")
     }
-
     update(deltaTime: number) {
 
     }
