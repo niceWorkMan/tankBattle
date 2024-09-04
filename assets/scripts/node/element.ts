@@ -1,4 +1,4 @@
-import { _decorator, Collider2D, Component, Contact2DType, IPhysics2DContact, Node, Sprite, Vec2 } from 'cc';
+import { _decorator, Collider2D, Color, Component, Contact2DType, IPhysics2DContact, Node, Sprite, Vec2 } from 'cc';
 import { aStar } from '../core/aStar';
 import { grid } from '../grid';
 import { gridManager } from '../gridManager';
@@ -203,8 +203,8 @@ export class element extends Component {
         this._isPause = v;
     }
 
-     //获取位置
-     protected getPosition(g:grid_c) {
+    //获取位置
+    protected getPosition(g: grid_c) {
         return this.node.parent.parent.getComponent(gridManager).gridComponentArr[g.cellX][g.cellX].node.getPosition();
     }
 
@@ -230,8 +230,8 @@ export class element extends Component {
     //销毁
     protected destorySelf() {
         var star = this.getComponent(aStar);
-        var tManager=this.node.parent.parent.getComponent(tankManager);
-        var gManager=this.node.parent.parent.getComponent(gridManager);
+        var tManager = this.node.parent.parent.getComponent(tankManager);
+        var gManager = this.node.parent.parent.getComponent(gridManager);
         //销毁当前网格障碍
         if (star.nodeInGridCellIndex)
             gManager.gridComponentArr[this, star.nodeInGridCellIndex.x][this, star.nodeInGridCellIndex.y].isObstacle = false;
@@ -244,10 +244,30 @@ export class element extends Component {
         }
 
         //销毁自己
-        if (this.node) {
-            tManager.synGridCollectionRemove(star);
-            this.node.destroy();
+        var destoryFun = () => {
+            if (this.node) {
+                tManager.synGridCollectionRemove(star);
+                this.node.destroy();
+            }
         }
+
+        //生成爆炸
+        switch (this.key) {
+            case "tank":
+                tManager.expolision(new Vec2(star.nodeInGridCellIndex.x,star.nodeInGridCellIndex.y));
+                this.getComponent(Sprite).color = new Color(0, 0, 0, 255);
+                this.isPause=true;
+                setTimeout(() => {
+                    destoryFun();
+                }, 1500);
+                break;
+            case "boy01":
+                destoryFun();
+                break;
+        }
+
+
+
 
     }
 

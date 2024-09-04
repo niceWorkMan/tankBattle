@@ -5,18 +5,23 @@ import { tank } from './node/tank';
 import { enumTeam } from './common/enumTeam';
 import { element } from './node/element';
 import { boy01 } from './node/boy01';
+import { grid_c } from './core/grid_c';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
 export class tankManager extends Component {
 
-
+    //对象
     @property(Prefab) bulletPrefab: Prefab;
     @property(Prefab) tankPrefab: Prefab;
     @property(Prefab) boy01Prefab: Prefab;
+
+
+    //特效
+    @property(Prefab) expolisinPrefab: Prefab;
+
+
     private _gManager: gridManager;
-
-
     private _isBattle = false;
 
     //导航集合
@@ -350,13 +355,17 @@ export class tankManager extends Component {
         return worldEulerAngles;
     }
 
-
-
-
+    //
+    public expolision(pos:Vec2){
+         var ex:Node = instantiate(this.expolisinPrefab);
+         this.node.getChildByName("effectLayer").addChild(ex);
+         ex.position=this.getComponent(gridManager).gridComponentArr[pos.x][pos.y].node.position;
+    }
 
     update(deltaTime: number) {
 
     }
+    
 }
 
 
