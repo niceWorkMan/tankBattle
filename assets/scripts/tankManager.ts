@@ -56,7 +56,7 @@ export class tankManager extends Component {
 
 
     //树木
-    private _tress:Node[]=[];
+    private _tress: Node[] = [];
 
 
 
@@ -183,7 +183,7 @@ export class tankManager extends Component {
         if (startGrid.isObstacle == false) {
             //随机模拟生成
             var key = "tank";
-            if (Math.random() > 0.5) {
+            if (Math.random() > 0.3) {
                 key = "tank"
             }
             else {
@@ -214,14 +214,18 @@ export class tankManager extends Component {
 
             switch (team) {
                 case enumTeam.teamRed:
-                   // tankNode.getComponent(Sprite).color = new Color(225, 0, 0, 225);
-                    if (key == "tank")
+                    tankNode.getComponent(Sprite).color = new Color(225, 0, 0,200);
+                    if (key == "tank") {
+                        //tankNode.getChildByName("root").getChildByName("gun").getComponent(Sprite).color = new Color(180, 0, 0, 200);
                         tankNode.eulerAngles = new Vec3(0, 0, 90)
+                    }
                     break;
                 case enumTeam.teamBlue:
-                   // tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 225);
-                    if (key == "tank")
+                    tankNode.getComponent(Sprite).color = new Color(0, 184, 225, 200);
+                    if (key == "tank") {
                         tankNode.eulerAngles = new Vec3(0, 0, -90)
+                        //tankNode.getChildByName("root").getChildByName("gun").getComponent(Sprite).color = new Color(0, 164, 225, 225);
+                    }
                     break;
             }
 
@@ -232,22 +236,22 @@ export class tankManager extends Component {
 
     //生成障碍物
     private exampleSetObstacle() {
-        var obstaleLayer:Node=this.node.getChildByName("obstaleLayer");
+        var obstaleLayer: Node = this.node.getChildByName("obstaleLayer");
         for (var i = 0; i < 15; i++) {
             for (var j = 1; j < 25; j++) {
                 if (Math.random() > 0.8) {
                     this._gManager.gridComponentArr[i][j].setObstacle(true);
                     this._gManager.gridComponentArr[i][j].isStatic = true;
-                    var trees:Node = instantiate(this._gManager.trees);
+                    var trees: Node = instantiate(this._gManager.trees);
                     obstaleLayer.addChild(trees);
                     this._tress.push(trees);
-                    trees.position=this._gManager.gridComponentArr[i][j].node.getPosition();
+                    trees.position = this._gManager.gridComponentArr[i][j].node.getPosition();
                 }
             }
         }
         //设置层级（反转）
-        for(var i=0;i<this._tress.length;i++){
-           this._tress[i].setSiblingIndex(this._tress.length-1-i);
+        for (var i = 0; i < this._tress.length; i++) {
+            this._tress[i].setSiblingIndex(this._tress.length - 1 - i);
         }
         //同步所有导航网格的障碍
         this.synGridCollectionState();
@@ -356,16 +360,16 @@ export class tankManager extends Component {
     }
 
     //
-    public expolision(pos:Vec2){
-         var ex:Node = instantiate(this.expolisinPrefab);
-         this.node.getChildByName("effectLayer").addChild(ex);
-         ex.position=this.getComponent(gridManager).gridComponentArr[pos.x][pos.y].node.position;
+    public expolision(pos: Vec2) {
+        var ex: Node = instantiate(this.expolisinPrefab);
+        this.node.getChildByName("effectLayer").addChild(ex);
+        ex.position = this.getComponent(gridManager).gridComponentArr[pos.x][pos.y].node.position;
     }
 
     update(deltaTime: number) {
 
     }
-    
+
 }
 
 

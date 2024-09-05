@@ -42,7 +42,7 @@ export class grid extends Component {
     private _isObstacle: boolean;
     public set isObstacle(v: boolean) {
         if (v) {
-            this.setSpriteColor({ r: 0, g: 0, b: 0, a: 100 })
+           // this.setSpriteColor({ r: 0, g: 0, b: 0, a: 100 })
         }
         else {
             this.setSpriteColor({ r: 255, g: 255, b: 255, a: 255 })
@@ -100,12 +100,10 @@ export class grid extends Component {
     start() {
         this._sprite = this.getComponent(Sprite)
         //
-        this.node.on(NodeEventType.MOUSE_DOWN, (e) => {
-            this.tweenColor();
-        })
-        this.node.on(NodeEventType.TOUCH_START, (e) => {
-            this.tweenColor();
-        })
+        // this.node.on(NodeEventType.MOUSE_DOWN, (e) => {
+        //     this.tweenColor();
+        // })
+
     }
 
 

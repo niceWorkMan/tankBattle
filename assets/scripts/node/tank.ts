@@ -1,4 +1,4 @@
-import { _decorator, Collider2D, color, Color, Component, Contact2DType, instantiate, IPhysics2DContact, log, math, Node, resources, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Animation, Collider2D, color, Color, Component, Contact2DType, instantiate, IPhysics2DContact, log, math, Node, resources, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { grid } from '../grid';
 import { enumTeam } from '../common/enumTeam';
 import { bullet } from '../bullet';
@@ -17,12 +17,17 @@ export class tank extends element {
         this._key = "tank";
     }
 
+
+    private _gun:Node
+
     start(): void {
         //监听碰撞
         this.nodeCollider = this.getComponent(Collider2D);
         this.nodeCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
 
         this.getComponent(aStar).key = this._key
+
+        this._gun=this.node.getChildByName("root").getChildByName("gun");
     }
 
 
@@ -100,6 +105,7 @@ export class tank extends element {
                                     if (targetTank.getComponent(aStar).nodeInGridCellIndex) {
                                         this._stopIndex = nextIndex;
                                         this._closeList = closeList;
+                                        var EZ=Number(targetRot+"");
                                         this.attackTarget(targetTank);
                                         return;
                                     }
@@ -147,21 +153,24 @@ export class tank extends element {
                 //下一帧执行 物理逻辑 不能在碰撞回调中调用
             }
             //随机开炮速度
-            this._fireSpace = Math.random();
+            //this._fireSpace = Math.random();
             if (this._fireInterval) {
                 clearInterval(this._fireSpace);
             }
             this._fireInterval = setInterval(() => {
                 //自身存在&&目标也存在
                 if (this.node && target.node) {
-                    this.spawnBullet();
+                    //播放炮动画
+                    var anim:Animation=this._gun.getComponent(Animation);
+                    anim.play("fire_t001")
+                    this.spawnBullet(target);
                 }
                 else {
                     //停止射击  继续前进
                     clearInterval(this._fireInterval);
                     this.tweenMove(this.stopIndex, this.closeList);
                 }
-            }, this._fireSpace * 100);
+            }, this._fireSpace * 1000);
         }
 
         //开炮和转向炮管逻辑
@@ -209,14 +218,20 @@ export class tank extends element {
     }
 
     //生成子弹
-    public spawnBullet() {
+    public spawnBullet(target: element) {
         var nodeLayer = this.node.parent.parent.getChildByName("tankLayer");
         var bulletNode: Node = instantiate(this.tManager.bulletPrefab);
         //设置父类
+        var targetPos=target.node.getPosition();
+        var selfPos=this.node.getPosition();
+        var radian = Math.atan2(targetPos.y-selfPos.y, targetPos.x-selfPos.x);
+        var targetRot = radian * (180 / Math.PI);
+        //
         nodeLayer.addChild(bulletNode);
+        bulletNode.eulerAngles=new Vec3(0,0,targetRot)
         bulletNode.getComponent(bullet).bulletType = this.team;
         bulletNode.getComponent(bullet).tankParent = this;
-        bulletNode.worldPosition = this.node.getChildByName("root").getChildByName("pao").getChildByName("point").worldPosition;
+        bulletNode.worldPosition = this.node.getChildByName("root").getChildByName("gun").getChildByName("point").worldPosition;
 
         //子弹运动方向
         if (this.targetNode.node) {
