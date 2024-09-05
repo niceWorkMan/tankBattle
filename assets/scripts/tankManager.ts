@@ -6,6 +6,7 @@ import { enumTeam } from './common/enumTeam';
 import { element } from './node/element';
 import { boy01 } from './node/boy01';
 import { grid_c } from './core/grid_c';
+import { pig } from './node/pig';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
@@ -15,6 +16,7 @@ export class tankManager extends Component {
     @property(Prefab) bulletPrefab: Prefab;
     @property(Prefab) tankPrefab: Prefab;
     @property(Prefab) boy01Prefab: Prefab;
+    @property(Prefab) PigPrefab: Prefab;
 
 
     //特效
@@ -73,6 +75,9 @@ export class tankManager extends Component {
             boy01: {
                 prefab: this.boy01Prefab,
                 component: boy01,
+            },pig:{
+                prefab: this.PigPrefab,
+                component: pig,
             }
         }
     }
@@ -183,11 +188,15 @@ export class tankManager extends Component {
         if (startGrid.isObstacle == false) {
             //随机模拟生成
             var key = "tank";
-            if (Math.random() > 0.3) {
+            var rand = Math.random()
+            if (rand < 0.3) {
                 key = "tank"
             }
-            else {
+            else if (rand>=0.3&&rand<=0.6) {
                 key = "boy01"
+            }
+            else{
+                key = "pig"
             }
             //获取对应的类和Prefab
             var cofResult = this._config[key]
@@ -214,7 +223,7 @@ export class tankManager extends Component {
 
             switch (team) {
                 case enumTeam.teamRed:
-                    tankNode.getComponent(Sprite).color = new Color(225, 0, 0,200);
+                    tankNode.getComponent(Sprite).color = new Color(225, 0, 0, 200);
                     if (key == "tank") {
                         //tankNode.getChildByName("root").getChildByName("gun").getComponent(Sprite).color = new Color(180, 0, 0, 200);
                         tankNode.eulerAngles = new Vec3(0, 0, 90)
