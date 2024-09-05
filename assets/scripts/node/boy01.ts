@@ -121,8 +121,8 @@ export class boy01 extends element {
                     }
                 }).start();
             }
-            //更新格子
-            this.gManager.upDataObstale();
+            //更新格子(人不给占位)
+            //this.gManager.upDataObstale();
 
         }
         //list最后一个不设置Obstale
