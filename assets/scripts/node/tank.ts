@@ -18,7 +18,7 @@ export class tank extends element {
     }
 
 
-    private _gun:Node
+    private _gun: Node
 
     start(): void {
         //监听碰撞
@@ -27,7 +27,7 @@ export class tank extends element {
 
         this.getComponent(aStar).key = this._key
 
-        this._gun=this.node.getChildByName("root").getChildByName("gun");
+        this._gun = this.node.getChildByName("root").getChildByName("gun");
     }
 
 
@@ -105,7 +105,7 @@ export class tank extends element {
                                     if (targetTank.getComponent(aStar).nodeInGridCellIndex) {
                                         this._stopIndex = nextIndex;
                                         this._closeList = closeList;
-                                        var EZ=Number(targetRot+"");
+                                        var EZ = Number(targetRot + "");
                                         this.attackTarget(targetTank);
                                         return;
                                     }
@@ -127,8 +127,8 @@ export class tank extends element {
                     }
                 }).start();
             }
-            //更新格子
-            this._gManager.upDataObstale();
+            //更新格子 （占位）
+            //this._gManager.upDataObstale();
 
         }
         //list最后一个不设置Obstale
@@ -146,6 +146,9 @@ export class tank extends element {
 
     //攻击
     public attackTarget(target: element) {
+        if (this.isPause) {
+            return;
+        }
         //开炮逻辑
         var attackFunc = () => {
             //红方生成子弹
@@ -161,7 +164,7 @@ export class tank extends element {
                 //自身存在&&目标也存在
                 if (this.node && target.node) {
                     //播放炮动画
-                    var anim:Animation=this._gun.getComponent(Animation);
+                    var anim: Animation = this._gun.getComponent(Animation);
                     anim.play("fire_t001")
                     this.spawnBullet(target);
                 }
@@ -170,7 +173,7 @@ export class tank extends element {
                     clearInterval(this._fireInterval);
                     this.tweenMove(this.stopIndex, this.closeList);
                 }
-            }, this._fireSpace * 1000);
+            }, this._fireSpace * 200);
         }
 
         //开炮和转向炮管逻辑
@@ -222,13 +225,13 @@ export class tank extends element {
         var nodeLayer = this.node.parent.parent.getChildByName("tankLayer");
         var bulletNode: Node = instantiate(this.tManager.bulletPrefab);
         //设置父类
-        var targetPos=target.node.getPosition();
-        var selfPos=this.node.getPosition();
-        var radian = Math.atan2(targetPos.y-selfPos.y, targetPos.x-selfPos.x);
+        var targetPos = target.node.getPosition();
+        var selfPos = this.node.getPosition();
+        var radian = Math.atan2(targetPos.y - selfPos.y, targetPos.x - selfPos.x);
         var targetRot = radian * (180 / Math.PI);
         //
         nodeLayer.addChild(bulletNode);
-        bulletNode.eulerAngles=new Vec3(0,0,targetRot)
+        bulletNode.eulerAngles = new Vec3(0, 0, targetRot)
         bulletNode.getComponent(bullet).bulletType = this.team;
         bulletNode.getComponent(bullet).tankParent = this;
         bulletNode.worldPosition = this.node.getChildByName("root").getChildByName("gun").getChildByName("point").worldPosition;
@@ -251,7 +254,7 @@ export class tank extends element {
             //不是一队的 产生伤害
             if (bu.bulletType != this._team) {
                 setTimeout(() => {
-                    this.hp -= 5;
+                    this.hp -= 30;
                 }, 0);
                 if (this.hp > 0) {
                     //还可以扛
@@ -273,6 +276,18 @@ export class tank extends element {
     }
 
 
+    protected override pause(p: boolean): void {
+        console.log("暂停1")
+        if (p) {
+            console.log("暂停2")
+            if (this._fireInterval) {
+                console.log("暂停31")
+                clearInterval(this._fireInterval);
+            }
+        }
+    }
+
+
 
 
     update(deltaTime: number) {
@@ -282,7 +297,8 @@ export class tank extends element {
     //更新炮口旋转
     updateGunRotation(deltaTime: number) {
         if (this.targetNode) {
-            this.gunRote(this.targetNode);
+            if (!this.isPause)
+                this.gunRote(this.targetNode);
         }
     }
 }

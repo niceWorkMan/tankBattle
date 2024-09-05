@@ -47,7 +47,14 @@ export class boy01 extends element {
         if (!this.node) {
             return;
         }
-        star.startGrid = this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY];
+        //设置下一个起点  不然不连续
+        if (closeList[nextIndex])
+            star.startGrid = this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY];
+        else
+            alert("起点未设置")
+
+
+            
         if (closeList.length == 0) {
             alert("错误的closeList长度")
         }

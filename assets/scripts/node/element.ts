@@ -200,6 +200,7 @@ export class element extends Component {
         return this._isPause;
     }
     public set isPause(v: boolean) {
+        this.pause(v);
         this._isPause = v;
     }
 
@@ -254,20 +255,31 @@ export class element extends Component {
         //生成爆炸
         switch (this.key) {
             case "tank":
-                tManager.expolision(new Vec2(star.nodeInGridCellIndex.x,star.nodeInGridCellIndex.y));
+                tManager.expolision(new Vec2(star.nodeInGridCellIndex.x, star.nodeInGridCellIndex.y));
                 this.getComponent(Sprite).color = new Color(0, 0, 0, 255);
-                this.isPause=true;
+                this.node.getChildByName("root").active = false;
+                this.isPause = true;
                 setTimeout(() => {
                     destoryFun();
                 }, 1500);
                 break;
-            case "boy01":
+            // case "boy01":
+            //     destoryFun();
+            //     break;
+            // case "pig":
+            //     destoryFun();
+            //     break;
+
+            default:
                 destoryFun();
-                break;
         }
 
 
 
+
+    }
+
+    protected pause(p: boolean) {
 
     }
 
