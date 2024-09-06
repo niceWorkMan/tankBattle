@@ -313,13 +313,13 @@ export class aStar extends Component {
             //主要的重新导航在这里，直接找不到路径就换路径
             setTimeout(() => {
                 if (this.tk) {
-                    //如果当前有敌人格子可用
-                    var usefulGrid = this.findEnemyUsedGrid();
-                    //console.log("当前查询的可用格子:");
-                    if (usefulGrid != null) {
-                        //将结束格子设置为 敌人附近可用格子
-                        this.endGrid = this.gManager.gridComponentArr[usefulGrid.cellX][usefulGrid.cellY];
-                    }
+                    // //如果当前有敌人格子可用
+                    // var usefulGrid = this.findEnemyUsedGrid();
+                    // //console.log("当前查询的可用格子:");
+                    // if (usefulGrid != null) {
+                    //     //将结束格子设置为 敌人附近可用格子
+                    //     this.endGrid = this.gManager.gridComponentArr[usefulGrid.cellX][usefulGrid.cellY];
+                    // }
                     this.startNav();
                 }
             }, this.tk.waitObsTime * 1000);

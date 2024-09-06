@@ -141,7 +141,7 @@ export class tank extends element {
                 }).start();
             }
             //更新格子 （占位）
-            this._gManager.upDataObstale();
+            //this._gManager.upDataObstale();
 
         }
         //list最后一个不设置Obstale

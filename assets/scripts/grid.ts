@@ -1,5 +1,7 @@
 import { _decorator, Color, Component, Label, Node, NodeEventType, Sprite, tween, Vec2 } from 'cc';
 import { gridManager } from './gridManager';
+import { build } from './building/build';
+import { UIManager } from './UIManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('grid')
@@ -42,7 +44,7 @@ export class grid extends Component {
     private _isObstacle: boolean;
     public set isObstacle(v: boolean) {
         if (v) {
-           // this.setSpriteColor({ r: 0, g: 0, b: 0, a: 100 })
+            // this.setSpriteColor({ r: 0, g: 0, b: 0, a: 100 })
         }
         else {
             this.setSpriteColor({ r: 255, g: 255, b: 255, a: 255 })
@@ -57,15 +59,15 @@ export class grid extends Component {
 
 
     //障碍物是否是静态的
-    private _isStatic:boolean
-    public set isStatic(v : boolean) {
+    private _isStatic: boolean
+    public set isStatic(v: boolean) {
         this._isStatic = v;
     }
-    public get isStatic() : boolean {
+    public get isStatic(): boolean {
         return this._isStatic;
     }
-    
-    
+
+
 
     //父节点
     public _aStarParent: grid = null;
@@ -94,16 +96,35 @@ export class grid extends Component {
     }
 
 
+    //格子上层建筑
+    private _buiding: build;
+
+    public set buiding(v: build) {
+        this._buiding = v;
+    }
+    public get buiding(): build {
+        return this._buiding;
+    }
+
+
+
 
 
 
     start() {
         this._sprite = this.getComponent(Sprite)
         //
-        // this.node.on(NodeEventType.MOUSE_DOWN, (e) => {
-        //     this.tweenColor();
-        // })
+        this.node.on(NodeEventType.MOUSE_DOWN, (e) => {
+            this.touchGrid(e);
+        })
+        this.node.on(NodeEventType.TOUCH_START, (e) => {
+            this.touchGrid(e);
+        })
 
+    }
+
+    touchGrid(e) {
+        UIManager.Instance.showPop("buildPanel")
     }
 
 
@@ -172,7 +193,7 @@ export class grid extends Component {
 
 
 
-   
+
 
 
 }

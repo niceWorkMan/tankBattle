@@ -153,7 +153,7 @@ export class tankManager extends Component {
                 this.spawnActor(pos0, pos1, gteam);
                 spawnTime++;
             }
-        }, 200);
+        }, 100);
     }
 
 

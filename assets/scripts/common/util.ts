@@ -5,6 +5,12 @@ const { ccclass, property } = _decorator;
 
 @ccclass('util')
 export class util extends Component {
+
+    constructor(){
+        super();
+        util._instance=this;
+    }
+
     start() {
         this.tManager = this.getComponent(tankManager);
         //失去焦点监听
@@ -22,6 +28,17 @@ export class util extends Component {
                 this.gamepause(false);
             }
         });
+    }
+
+
+    private static _instance: util = null;
+    // 只能通过自身进行初始化
+    public static get Instance() {
+        if (this._instance == null) {
+            //获取单例失败
+            alert("获取UIManager单例失败")
+        }
+        return this._instance;
     }
 
     update(deltaTime: number) {
@@ -58,7 +75,7 @@ export class util extends Component {
     public _isPause;
 
 
-    private gamepause(isPause: boolean) {
+    public gamepause(isPause: boolean) {
         if (isPause == false) {
             this.tManager.battleStart();
         }
