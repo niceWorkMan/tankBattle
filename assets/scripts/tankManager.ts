@@ -51,8 +51,8 @@ export class tankManager extends Component {
     //生成函数
     private _spawnInterval;
     //配置表
-    private _config;
-    public get config(): string {
+    private _config = {};
+    public get config(): any {
         return this._config;
     }
 
@@ -75,7 +75,7 @@ export class tankManager extends Component {
             boy01: {
                 prefab: this.boy01Prefab,
                 component: boy01,
-            },pig:{
+            }, pig: {
                 prefab: this.PigPrefab,
                 component: pig,
             }
@@ -189,15 +189,15 @@ export class tankManager extends Component {
             //随机模拟生成
             var key = "tank";
             var rand = Math.random()
-            if (rand < 0.3) {
+            if (rand > 0) {
                 key = "tank"
             }
-            else if (rand>=0.3&&rand<=0.6) {
-                key = "boy01"
-            }
-            else{
-                key = "pig"
-            }
+            // else if (rand >= 0.3 && rand <= 0.6) {
+            //     key = "boy01"
+            // }
+            // else {
+            //     key = "pig"
+            // }
             //获取对应的类和Prefab
             var cofResult = this._config[key]
             //生成实例
@@ -210,9 +210,12 @@ export class tankManager extends Component {
             //赋值属性
             var el: any = tankNode.getComponent(cofResult.component);
             el.team = team;
-            tankNode.getComponent(aStar).tk = el;
-            tankNode.getComponent(aStar).startGrid = startGrid;
-            tankNode.getComponent(aStar).endGrid = endGrid;
+            var star = tankNode.getComponent(aStar);
+            star.tk = el;
+            star.startGrid = startGrid;
+            star.endGrid = endGrid;
+            star.finalGrid = endGrid;
+
             tankNode.getComponent(aStar).nodeInGridCellIndex = new Vec2(startGrid.cellX, startGrid.cellY)
             el.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
             //加入集合

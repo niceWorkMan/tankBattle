@@ -31,6 +31,16 @@ export class aStar extends Component {
     }
 
 
+    //结束点
+    protected _finalGrid;
+    public get finalGrid(): grid {
+        return this._finalGrid
+    }
+    public set finalGrid(v: grid) {
+        this._finalGrid = v;
+    }
+
+
     //当前Tank所在格子
     private _nodeInGridCellIndex: Vec2;
     public set nodeInGridCellIndex(v: Vec2) {
@@ -124,9 +134,9 @@ export class aStar extends Component {
         for (var i = 0; i < this._gridMatrix.row; i++) {
             var _compArr_ins: grid_c[] = [];
             for (var j = 0; j < this._gridMatrix.colum; j++) {
-                var _grid:grid_c =new grid_c();
-                _grid.cellX=i;
-                _grid.cellY=j;
+                var _grid: grid_c = new grid_c();
+                _grid.cellX = i;
+                _grid.cellY = j;
                 _grid.setObstacle(this.gManager.gridComponentArr[i][j].isObstacle)
                 _compArr_ins.push(_grid);
             }
@@ -177,28 +187,14 @@ export class aStar extends Component {
 
 
     //获取位置
-    public getPosition(g:grid_c) {
-        var pos:Vec3=this.node.parent.parent.getComponent(gridManager).gridComponentArr[g.cellX][g.cellY].node.getPosition();
+    public getPosition(g: grid_c) {
+        var pos: Vec3 = this.node.parent.parent.getComponent(gridManager).gridComponentArr[g.cellX][g.cellY].node.getPosition();
         //console.log("测试:x:"+g.cellX+"  y:"+g.cellY+"  位置:x:"+pos.x+"  y:"+pos.y);
         return pos;
     }
 
     update(deltaTime: number) {
 
-    }
-    //获取相邻可用的格子
-    getNeighborGrid(currentGrid: grid_c) {
-        var mIdx = currentGrid.getCellIndex();
-        var limitMatrix: Vec2[] = this.getNeighborMitrax(mIdx);
-        for (var j = limitMatrix[0].x; j <= limitMatrix[0].y; j++) {
-            for (var k = limitMatrix[1].x; k <= limitMatrix[1].y; k++) {
-                var newIndex: Vec2 = new Vec2(j, k);
-                var gObj: grid_c = this._gridNodeArr[newIndex.x][newIndex.y];
-                if ((newIndex.x != mIdx.x || newIndex.y != mIdx.y) && gObj.getObstacle() == false) {
-                    //gObj.setSpriteColor({ r: 100, g: 100, b: 103, a: 255 })
-                }
-            }
-        }
     }
 
     //获取到最小代价的格子
@@ -306,9 +302,19 @@ export class aStar extends Component {
         }
         else {
             //console.warn("当前路径无法到达终点");
+            //主要的重新导航在这里，直接找不到路径就换路径
             setTimeout(() => {
-                if (this.tk)
+                if (this.tk) {
+                    //如果当前有敌人格子可用
+                    var usefulGrid = this.findEnemyUsedGrid();
+                    //console.log("当前查询的可用格子:");
+
+                    if (usefulGrid != null) {
+                        //将结束格子设置为 敌人附近可用格子
+                        this.endGrid = this.gManager.gridComponentArr[usefulGrid.cellX][usefulGrid.cellY];
+                    }
                     this.startNav();
+                }
             }, this.tk.waitObsTime * 1000);
             return;
         }
@@ -326,7 +332,7 @@ export class aStar extends Component {
                 this._closeList[i].next = this._closeList[i + 1];
             }
         }
-
+        //显示对象
         this.node.active = true;
         //开始导航
         if (this.tk) {
@@ -403,7 +409,7 @@ export class aStar extends Component {
                     return grid_c[0];
                 }
             } else {
-               // console.warn("查询失败 结束");
+                // console.warn("查询失败 结束");
             }
             //移除在闭表里的对象
             this.removeBackGrid(cuGrid);
@@ -547,6 +553,94 @@ export class aStar extends Component {
 
     protected onDestroy(): void {
         this._gridNodeArr = null;
+    }
+
+
+    //寻找敌人格子周围可用格子的整体算法***
+    findEnemyUsedGrid(): grid_c {
+        var els: element[] = this.findEnemyGrids()
+        for (var i = 0; i < els.length; i++) {
+            var matixs: grid_c[] = this.getEnemyNeighbor(els[i]);
+
+            console.log("可用的格子数:" + matixs.length)
+            if (matixs.length > 0) {
+                return matixs[0]
+            }
+        }
+        return null;
+    }
+
+
+
+    //寻找可导航到敌人的点
+    findEnemyGrids(): element[] {
+        var collection = this.tManager.nodeCollection;
+
+        var newCollection = [];
+        for (var i = 0; i < collection.length; i++) {
+            //是否是敌人
+            var notSameTeam = collection[i].team != this.tk.team;
+            //y当前对象坐标Y和终点Y 中间
+            var numRangeV2 = new Vec2(this.nodeInGridCellIndex.y, this.finalGrid.cellY)
+            //目标所在Y的位置
+            var targetPosY = collection[i].getComponent(aStar).nodeInGridCellIndex.y;
+            //目标是否在中间
+            var isBetween = (targetPosY > numRangeV2.x) && (targetPosY < numRangeV2.y);
+
+            //检测出 不是一队 并且在中间
+
+            if (notSameTeam && isBetween) {
+                newCollection.push(collection[i]);
+            }
+        }
+        //排序离当前最近的
+
+        for (var i = 0; i < newCollection.length; i++) {
+            for (var j = 0; j < newCollection.length - i - 1; j++) {
+                var p1 = newCollection[i].getComponent(aStar).nodeInGridCellIndex;
+                var p2 = newCollection[j].getComponent(aStar).nodeInGridCellIndex;
+                var dis1 = this.getLengthBydoubleGrid(p1, this.nodeInGridCellIndex);
+                var dis2 = this.getLengthBydoubleGrid(p2, this.nodeInGridCellIndex);
+                if (dis2 <= dis1) {
+                    var temp = newCollection[i];
+                    newCollection[i] = newCollection[j];
+                    newCollection[j] = temp;
+                }
+            }
+        }
+        return newCollection;
+    }
+
+
+    //获取敌人周边可导航的格子
+    getEnemyNeighbor(el: element): grid_c[] {
+        var mIdx: Vec2 = el.getComponent(aStar).nodeInGridCellIndex;
+        var limitMatrix: Vec2[] = this.getNeighborMitrax(mIdx);
+        var gridUsedMaxtri: grid_c[] = [];
+        for (var j = limitMatrix[0].x; j <= limitMatrix[0].y; j++) {
+            for (var k = limitMatrix[1].x; k <= limitMatrix[1].y; k++) {
+                var newIndex: Vec2 = new Vec2(j, k);
+                var gObj: grid_c = this._gridNodeArr[newIndex.x][newIndex.y];
+                if ((newIndex.x != mIdx.x || newIndex.y != mIdx.y) && !(newIndex.x != mIdx.x && newIndex.y != mIdx.y) && gObj.getObstacle() == false) {
+                    gridUsedMaxtri.push(gObj);
+                }
+            }
+        }
+        return gridUsedMaxtri;
+    }
+
+    //2个float值排序
+    sortTwoFloat(f1, f2) {
+        if (f1 <= f2) {
+            return new Vec2(f1, f2)
+        }
+        else {
+            return new Vec2(f2, f1)
+        }
+    }
+    //获取两个格子的距离
+    getLengthBydoubleGrid(p1: Vec2, p2: Vec2) {
+        return Math.sqrt(Math.pow(p2.y - p1.y, 2) + Math.pow(p2.x - p1.x, 2))
     }
 
 }
