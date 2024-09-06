@@ -54,14 +54,25 @@ export class boy01 extends element {
             alert("起点未设置")
 
 
-            
+
         if (closeList.length == 0) {
             alert("错误的closeList长度")
         }
         //到达最后一个点,移动结束
+        //到达最后一个点,移动结束
         if (nextIndex == closeList.length - 1) {
             this.node.active = false;
-            this.destorySelf();
+            //判断是否真的移动到终点
+            if (star.endGrid == star.finalGrid) {
+                if (this.node)
+                    this.destorySelf();
+            }
+            else {
+                //设置结束点为最终终点
+                star.endGrid = star.finalGrid
+                //继续导航
+                star.startNav();
+            }
             return;
         }
 
@@ -73,7 +84,7 @@ export class boy01 extends element {
             star.nodeInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY);
             //检测下个坐标是否有障碍物
             if (this._gManager.gridComponentArr[closeList[nextIndex + 1].cellX][closeList[nextIndex + 1].cellY].isObstacle) {
-                star.startNav();
+                star.startNav()
             }
             else {
                 //不是相邻格子

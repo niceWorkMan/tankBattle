@@ -5,6 +5,7 @@ import { tank } from '../node/tank';
 import { tankManager } from '../tankManager';
 import { element } from '../node/element';
 import { grid_c } from './grid_c';
+import { util } from '../common/util';
 
 const { ccclass, property } = _decorator;
 
@@ -76,7 +77,9 @@ export class aStar extends Component {
         this.tankNaviGrid();
         this.tManager.synGridCollectionAdd(this);
         //开始导航
-        this.startNav();
+        setTimeout(() => {
+            this.startNav();
+        }, 0);
     }
 
     public startNav() {
@@ -199,6 +202,11 @@ export class aStar extends Component {
 
     //获取到最小代价的格子
     getPriceMixNeighborGrid(startGrid: grid_c, endGrid: grid_c) {
+        //游戏暂停逻辑
+        if (this.tManager.node.getComponent(util)._isPause == true) {
+            return;
+        }
+       
         var mIdx = new Vec2(startGrid.cellX, startGrid.cellY);
         var limitMatrix: Vec2[] = this.getNeighborMitrax(mIdx);
 
@@ -308,7 +316,6 @@ export class aStar extends Component {
                     //如果当前有敌人格子可用
                     var usefulGrid = this.findEnemyUsedGrid();
                     //console.log("当前查询的可用格子:");
-
                     if (usefulGrid != null) {
                         //将结束格子设置为 敌人附近可用格子
                         this.endGrid = this.gManager.gridComponentArr[usefulGrid.cellX][usefulGrid.cellY];
@@ -384,6 +391,10 @@ export class aStar extends Component {
 
     //检查回退父节点Neighbor
     checkParentGrid(cuGrid: grid_c): grid_c[] {
+        //游戏暂停逻辑
+        if (this.tManager.node.getComponent(util)._isPause == true) {
+            return;
+        }
         //检查父级有没有Neigbor
         var grids = [];
         if (cuGrid.parent)
@@ -536,6 +547,10 @@ export class aStar extends Component {
 
     //重置格子的数据
     public resetGridArr() {
+        if(!this.node){
+            return;
+        }
+        this._gridMatrix=this.node.parent.parent.getComponent(gridManager).getGridMatrix;
         for (var i = 0; i < this._gridMatrix.row; i++) {
             for (var j = 0; j < this._gridMatrix.colum; j++) {
                 this._gridNodeArr[i][j].parent = null;

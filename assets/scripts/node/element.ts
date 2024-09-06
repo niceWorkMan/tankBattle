@@ -42,8 +42,14 @@ export class element extends Component {
 
     //外部调用 继续移动
     public tweenMoveOn() {
-        this.tweenMove(this.stopIndex, this._closeList);
+        if (this._closeList) {
+            if (this.stopIndex <= this._closeList.length - 1)
+                this.tweenMove(this.stopIndex, this._closeList);
+        }
     }
+
+
+    protected navigationSpaceTime=200;
 
     //坦克移动单元格时间
     protected moveSpeed = 0.1;
@@ -222,7 +228,7 @@ export class element extends Component {
         var moveIndex = 0;
         setTimeout(() => {
             this.tweenMove(moveIndex, closeList);
-            console.warn("导航结束:", moveIndex, closeList.length);
+            //console.warn("导航结束:", moveIndex, closeList.length);
         }, 0);
 
     }

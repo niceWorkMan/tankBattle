@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Color, Component, EventKeyboard, EventTouch, game, Input, input, instantiate, KeyCode, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { aStar } from './core/aStar';
 import { tank } from './node/tank';
@@ -63,6 +63,9 @@ export class tankManager extends Component {
 
 
     start() {
+        //设置帧率30
+        game.setFrameRate(30);
+        
         input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
         //初始化gManager;
         this._gManager = this.node.getComponent(gridManager);
@@ -150,7 +153,7 @@ export class tankManager extends Component {
                 this.spawnActor(pos0, pos1, gteam);
                 spawnTime++;
             }
-        }, 100);
+        }, 200);
     }
 
 
@@ -189,15 +192,15 @@ export class tankManager extends Component {
             //随机模拟生成
             var key = "tank";
             var rand = Math.random()
-            if (rand > 0) {
+            if (rand < 0.3) {
                 key = "tank"
             }
-            // else if (rand >= 0.3 && rand <= 0.6) {
-            //     key = "boy01"
-            // }
-            // else {
-            //     key = "pig"
-            // }
+            else if (rand >= 0.3 && rand <= 0.6) {
+                key = "boy01"
+            }
+            else {
+                key = "pig"
+            }
             //获取对应的类和Prefab
             var cofResult = this._config[key]
             //生成实例
@@ -219,10 +222,7 @@ export class tankManager extends Component {
             tankNode.getComponent(aStar).nodeInGridCellIndex = new Vec2(startGrid.cellX, startGrid.cellY)
             el.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
             //加入集合
-            var tankIndex = this.nodeCollection.indexOf(el);
-            if (tankIndex == -1) {
-                this.nodeCollection.push(el);
-            }
+            this.nodeCollection.push(el);
 
             switch (team) {
                 case enumTeam.teamRed:
@@ -250,8 +250,8 @@ export class tankManager extends Component {
     private exampleSetObstacle() {
         var obstaleLayer: Node = this.node.getChildByName("obstaleLayer");
         for (var i = 0; i < 15; i++) {
-            for (var j = 1; j < 25; j++) {
-                if (Math.random() > 0.8) {
+            for (var j = 3; j < 22; j++) {
+                if (Math.random() > 0.9) {
                     this._gManager.gridComponentArr[i][j].setObstacle(true);
                     this._gManager.gridComponentArr[i][j].isStatic = true;
                     var trees: Node = instantiate(this._gManager.trees);

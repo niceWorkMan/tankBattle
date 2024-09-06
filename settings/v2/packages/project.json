@@ -6,5 +6,8 @@
       "width": 750,
       "height": 1334
     }
+  },
+  "physics": {
+    "fixedTimeStep": 0.03333333333333333
   }
 }

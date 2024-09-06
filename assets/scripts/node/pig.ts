@@ -54,10 +54,19 @@ export class pig extends element {
         //到达最后一个点,移动结束
         if (nextIndex == closeList.length - 1) {
             this.node.active = false;
-            this.destorySelf();
+            //判断是否真的移动到终点
+            if (star.endGrid == star.finalGrid) {
+                if (this.node)
+                    this.destorySelf();
+            }
+            else {
+                //设置结束点为最终终点
+                star.endGrid = star.finalGrid
+                //继续导航
+                star.startNav();
+            }
             return;
         }
-
 
         //如果下一个目标点是障碍
         if (nextIndex + 1 <= closeList.length - 1) {

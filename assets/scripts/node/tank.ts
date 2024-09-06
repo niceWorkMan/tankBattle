@@ -43,10 +43,11 @@ export class tank extends element {
             this._closeList = closeList;
             return;
         }
+        var star = this.getComponent(aStar);
         this._gManager = this.node.parent.parent.getComponent(gridManager)
         this._tankManager = this.node.parent.parent.getComponent(tankManager);
 
-        var star = this.getComponent(aStar);
+
         //判断当前tank是否存在
         if (!this.node) {
             return;
@@ -60,11 +61,12 @@ export class tank extends element {
             this.node.active = false;
             //判断是否真的移动到终点
             if (star.endGrid == star.finalGrid) {
-                this.destorySelf();
+                if (this.node)
+                    this.destorySelf();
             }
             else {
                 //设置结束点为最终终点
-                star.endGrid=star.finalGrid
+                star.endGrid = star.finalGrid
                 //继续导航
                 star.startNav();
             }
@@ -93,6 +95,11 @@ export class tank extends element {
                     onUpdate: () => {
                     },
                     onComplete: () => {
+                        if (this.isPause) {
+                            this._stopIndex = nextIndex;
+                            this._closeList = closeList;
+                            return;
+                        }
                         //射击部分---------------------------------------
                         //设置当前tank坐标
                         star.nodeInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY)
@@ -246,7 +253,8 @@ export class tank extends element {
         if (this.targetNode.node) {
             var twLast = tween(bulletNode).to(0.3, { position: this.targetNode.node.position }, {
                 onComplete: () => {
-                    bulletNode.destroy();
+                    if (bulletNode)
+                        bulletNode.destroy();
                     twLast.removeSelf();
                 },
             }).start();
@@ -255,6 +263,9 @@ export class tank extends element {
 
     //碰撞检测函数
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
+        if (this.isPause) {
+            return;
+        }
         var bu: bullet = otherCollider.getComponent(bullet);
         if (bu.tankParent != this) {
             //不是一队的 产生伤害
@@ -275,7 +286,8 @@ export class tank extends element {
                 }
                 //下一帧执行 物理逻辑 不能在碰撞回调中调用(不能放在最外层 会被同队伍的对象截断碰撞)
                 setTimeout(() => {
-                    bu.node.destroy();
+                    if (bu)
+                        bu.node.destroy();
                 }, 0);
             }
         }
@@ -287,7 +299,6 @@ export class tank extends element {
         if (p) {
             console.log("暂停2")
             if (this._fireInterval) {
-                console.log("暂停31")
                 clearInterval(this._fireInterval);
             }
         }
