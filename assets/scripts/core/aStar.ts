@@ -76,11 +76,9 @@ export class aStar extends Component {
         //生成网格
         this.tankNaviGrid();
         this.tManager.synGridCollectionAdd(this);
-        //开始导航
-        setTimeout(() => {
-            this.startNav();
-        }, 0);
     }
+
+
 
     public startNav() {
 
@@ -313,13 +311,13 @@ export class aStar extends Component {
             //主要的重新导航在这里，直接找不到路径就换路径
             setTimeout(() => {
                 if (this.tk) {
-                    // //如果当前有敌人格子可用
-                    // var usefulGrid = this.findEnemyUsedGrid();
-                    // //console.log("当前查询的可用格子:");
-                    // if (usefulGrid != null) {
-                    //     //将结束格子设置为 敌人附近可用格子
-                    //     this.endGrid = this.gManager.gridComponentArr[usefulGrid.cellX][usefulGrid.cellY];
-                    // }
+                    //如果当前有敌人格子可用
+                    var usefulGrid = this.findEnemyUsedGrid();
+                    //console.log("当前查询的可用格子:");
+                    if (usefulGrid != null) {
+                        //将结束格子设置为 敌人附近可用格子
+                        this.endGrid = this.gManager.gridComponentArr[usefulGrid.cellX][usefulGrid.cellY];
+                    }
                     this.startNav();
                 }
             }, this.tk.waitObsTime * 1000);
@@ -550,13 +548,14 @@ export class aStar extends Component {
         if(!this.node){
             return;
         }
-        this._gridMatrix=this.node.parent.parent.getComponent(gridManager).getGridMatrix;
+        this._gridMatrix=gridManager.Instance.getGridMatrix;
         for (var i = 0; i < this._gridMatrix.row; i++) {
             for (var j = 0; j < this._gridMatrix.colum; j++) {
                 this._gridNodeArr[i][j].parent = null;
                 this._gridNodeArr[i][j].next = null;
                 //isSearch=false很重要
                 this._gridNodeArr[i][j].isObstacle = false;
+                this._gridNodeArr[i][j].isStatic=false;
                 this._gridNodeArr[i][j].isSearch = false;
                 this._gridNodeArr[i][j].backCheck = false;
                 this._gridNodeArr[i][j].neighorGrid = [];

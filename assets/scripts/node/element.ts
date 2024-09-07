@@ -49,7 +49,7 @@ export class element extends Component {
     }
 
 
-    protected navigationSpaceTime=200;
+    protected navigationSpaceTime = 200;
 
     //坦克移动单元格时间
     protected moveSpeed = 0.1;
@@ -210,6 +210,19 @@ export class element extends Component {
         this._isPause = v;
     }
 
+
+
+    //用于对象池 是否休眠
+    private _isSleep: boolean = false;
+    public set sleep(v: boolean) {
+        this.node.active = !v;
+        this._isSleep = v;
+    }
+    public get sleep(): boolean {
+        return this._isSleep;
+    }
+
+
     //获取位置
     protected getPosition(g: grid_c) {
         return this.node.parent.parent.getComponent(gridManager).gridComponentArr[g.cellX][g.cellX].node.getPosition();
@@ -254,7 +267,8 @@ export class element extends Component {
         var destoryFun = () => {
             if (this.node) {
                 tManager.synGridCollectionRemove(star);
-                this.node.destroy();
+                //this.node.destroy();
+                this.sleep = true;
             }
         }
 

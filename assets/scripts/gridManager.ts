@@ -20,10 +20,27 @@ export class gridManager extends Component {
     @property(Prefab) trees: Prefab;
 
     //默认资源
-    @property(SpriteFrame) gSprite:SpriteFrame;
+    @property(SpriteFrame) gSprite: SpriteFrame;
+
+
+    constructor() {
+        super();
+        gridManager._instance = this;
+    }
+
+    private static _instance: gridManager = null;
+    // 只能通过自身进行初始化
+    public static get Instance() {
+        if (this._instance == null) {
+            //获取单例失败
+            alert("获取gridManager单例失败")
+        }
+        return this._instance;
+    }
+
     //tank管理类
     private _tankManager: tankManager;
-    private _util:util;
+    private _util: util;
     //格子组件数组
     private _gridComponentArr: grid[][] = [];
     public get gridComponentArr(): grid[][] {
@@ -70,10 +87,10 @@ export class gridManager extends Component {
         this.gridInit();
     }
 
-    gridInit(){
+    gridInit() {
         //生成网格
         this.spawnGrid();
-        this._tankManager=this.getComponent(tankManager);
+        this._tankManager = this.getComponent(tankManager);
         setTimeout(() => {
             this._tankManager.gameInit();
         }, 100);
@@ -84,7 +101,7 @@ export class gridManager extends Component {
     //初始化挂载组件
     initAttatchComponent() {
         this._tankManager = this.node.getComponent(tankManager);
-        this._util= this.node.getComponent(util);
+        this._util = this.node.getComponent(util);
     }
 
     //初始化网格
@@ -164,7 +181,7 @@ export class gridManager extends Component {
                 console.log(err);
                 return;
             }
-          
+
         })
 
     }

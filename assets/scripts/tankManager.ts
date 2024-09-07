@@ -7,6 +7,7 @@ import { element } from './node/element';
 import { boy01 } from './node/boy01';
 import { grid_c } from './core/grid_c';
 import { pig } from './node/pig';
+import { pool } from './core/pool';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
@@ -21,6 +22,22 @@ export class tankManager extends Component {
 
     //特效
     @property(Prefab) expolisinPrefab: Prefab;
+
+
+    constructor() {
+        super();
+        tankManager._instance = this;
+    }
+
+    private static _instance: tankManager = null;
+    // 只能通过自身进行初始化
+    public static get Instance() {
+        if (this._instance == null) {
+            //获取单例失败
+            alert("获取TankManager单例失败")
+        }
+        return this._instance;
+    }
 
 
     private _gManager: gridManager;
@@ -50,11 +67,6 @@ export class tankManager extends Component {
 
     //生成函数
     private _spawnInterval;
-    //配置表
-    private _config = {};
-    public get config(): any {
-        return this._config;
-    }
 
 
     //树木
@@ -63,26 +75,11 @@ export class tankManager extends Component {
 
 
     start() {
-        //设置帧率30
-        game.setFrameRate(30);
-        
+
         input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
         //初始化gManager;
         this._gManager = this.node.getComponent(gridManager);
-        //初始化Config
-        this._config = {
-            tank: {
-                prefab: this.tankPrefab,
-                component: tank,
-            },
-            boy01: {
-                prefab: this.boy01Prefab,
-                component: boy01,
-            }, pig: {
-                prefab: this.PigPrefab,
-                component: pig,
-            }
-        }
+
     }
 
 
@@ -202,11 +199,11 @@ export class tankManager extends Component {
                 key = "pig"
             }
             //获取对应的类和Prefab
-            var cofResult = this._config[key]
+            var cofResult = pool.Instance.actorConfig[key]
             //生成实例
-            var tankNode: Node = instantiate(cofResult.prefab);
-
-            this.node.getChildByName("tankLayer").addChild(tankNode);
+            //var tankNode: Node = instantiate(cofResult.prefab);
+            var tankLayer = this.node.getChildByName("tankLayer")
+            var tankNode: Node = pool.Instance.spawnActor(key, tankLayer);
             //tankNode.active=false;
             //先隐藏对象(因为寻路还需要时间运算，使用了settimeout,寻路完成后再显示对象,参考aStart.showPath)
             //tankNode.active = false;
@@ -241,7 +238,13 @@ export class tankManager extends Component {
                     break;
             }
 
+
+            setTimeout(() => {
+                star.startNav();
+            }, 200);
         }
+
+
     }
 
 

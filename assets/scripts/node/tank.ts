@@ -115,12 +115,13 @@ export class tank extends element {
                                 this.node.eulerAngles = new Vec3(0, 0, targetRot);
                                 //攻击
                                 if (targetTank) {
-                                    if (targetTank.getComponent(aStar).nodeInGridCellIndex) {
-                                        this._stopIndex = nextIndex;
-                                        this._closeList = closeList;
-                                        var EZ = Number(targetRot + "");
-                                        this.attackTarget(targetTank);
-                                        return;
+                                    if (targetTank.sleep == false) {
+                                        if (targetTank.getComponent(aStar).nodeInGridCellIndex) {
+                                            this._stopIndex = nextIndex;
+                                            this._closeList = closeList;
+                                            this.attackTarget(targetTank);
+                                            return;
+                                        }
                                     }
                                 } else {
                                     //炮筒转到正向(局部eular角)
@@ -176,10 +177,16 @@ export class tank extends element {
             this._fireInterval = setInterval(() => {
                 //自身存在&&目标也存在
                 if (this.node && target.node) {
-                    //播放炮动画
-                    var anim: Animation = this._gun.getComponent(Animation);
-                    anim.play("fire_t001")
-                    this.spawnBullet(target);
+                    if (target.sleep == false) {
+                        //播放炮动画
+                        var anim: Animation = this._gun.getComponent(Animation);
+                        anim.play("fire_t001")
+                        this.spawnBullet(target);
+                    } else {
+                        //停止射击  继续前进
+                        clearInterval(this._fireInterval);
+                        this.tweenMove(this.stopIndex, this.closeList);
+                    }
                 }
                 else {
                     //停止射击  继续前进
@@ -295,9 +302,7 @@ export class tank extends element {
 
 
     protected override pause(p: boolean): void {
-        console.log("暂停1")
         if (p) {
-            console.log("暂停2")
             if (this._fireInterval) {
                 clearInterval(this._fireInterval);
             }
