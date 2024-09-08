@@ -6,9 +6,9 @@ const { ccclass, property } = _decorator;
 @ccclass('util')
 export class util extends Component {
 
-    constructor(){
+    constructor() {
         super();
-        util._instance=this;
+        util._instance = this;
     }
 
     start() {
@@ -36,7 +36,8 @@ export class util extends Component {
     public static get Instance() {
         if (this._instance == null) {
             //获取单例失败
-            alert("获取UIManager单例失败")
+            console.log("获取UIManager单例失败");
+
         }
         return this._instance;
     }
@@ -90,7 +91,8 @@ export class util extends Component {
             if (element.isPause == false) {
                 if (element) {
                     //有数据再继续移动
-                    element.tweenMoveOn();
+                    if (!element.sleep)
+                        element.tweenMoveOn();
                 }
             }
         });

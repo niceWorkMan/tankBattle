@@ -81,18 +81,15 @@ export class aStar extends Component {
 
 
     public startNav() {
-
         //重置数据
         this.resetGridArr();
         this.tManager.synCurrentState(this);
-        //----------------------------------------------------
         //同步基础网格状态
         //寻路
         this.startGrid.cellX = this.nodeInGridCellIndex.x;
         this.startGrid.cellY = this.nodeInGridCellIndex.y;
 
         this.getPriceMixNeighborGrid(this.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY])
-
     }
 
 
@@ -204,7 +201,10 @@ export class aStar extends Component {
         if (this.tManager.node.getComponent(util)._isPause == true) {
             return;
         }
-       
+        if(this.tk.sleep){
+            return;
+        }
+
         var mIdx = new Vec2(startGrid.cellX, startGrid.cellY);
         var limitMatrix: Vec2[] = this.getNeighborMitrax(mIdx);
 
@@ -338,13 +338,14 @@ export class aStar extends Component {
             }
         }
         //显示对象
-        this.node.active = true;
         //开始导航
         if (this.tk) {
+            this.node.active = true;
             this.tk.navigationMove(this._closeList);
         }
         else {
-            alert("漏网之鱼")
+            console.log("漏网之鱼");
+
         }
 
     }
@@ -545,23 +546,14 @@ export class aStar extends Component {
 
     //重置格子的数据
     public resetGridArr() {
-        if(!this.node){
-            return;
-        }
-        this._gridMatrix=gridManager.Instance.getGridMatrix;
+        if (this._closeList)
+            this._closeList.length = 0
+        this._gridMatrix = gridManager.Instance.getGridMatrix;
         for (var i = 0; i < this._gridMatrix.row; i++) {
             for (var j = 0; j < this._gridMatrix.colum; j++) {
-                this._gridNodeArr[i][j].parent = null;
-                this._gridNodeArr[i][j].next = null;
-                //isSearch=false很重要
-                this._gridNodeArr[i][j].isObstacle = false;
-                this._gridNodeArr[i][j].isStatic=false;
-                this._gridNodeArr[i][j].isSearch = false;
-                this._gridNodeArr[i][j].backCheck = false;
-                this._gridNodeArr[i][j].neighorGrid = [];
+                this._gridNodeArr[i][j].resetProperty();
             }
         }
-        this._closeList = [];
     }
 
 

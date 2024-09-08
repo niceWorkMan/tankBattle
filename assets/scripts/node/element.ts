@@ -1,4 +1,4 @@
-import { _decorator, Collider2D, Color, Component, Contact2DType, IPhysics2DContact, Node, Sprite, Vec2 } from 'cc';
+import { _decorator, BoxCollider2D, Collider2D, Color, Component, Contact2DType, IPhysics2DContact, Node, Sprite, Tween, Vec2, Vec3 } from 'cc';
 import { aStar } from '../core/aStar';
 import { grid } from '../grid';
 import { gridManager } from '../gridManager';
@@ -28,12 +28,6 @@ export class element extends Component {
         var star = this.getComponent(aStar);
         star.tk = this;
         star.tManager = this.tManager;
-        //添加至导航集合
-        var dex = this.tManager.aStartCollection.indexOf(star);
-        if (dex == -1) {
-            this.tManager.aStartCollection.push(star);
-        }
-
     }
 
     //移动
@@ -43,8 +37,9 @@ export class element extends Component {
     //外部调用 继续移动
     public tweenMoveOn() {
         if (this._closeList) {
-            if (this.stopIndex <= this._closeList.length - 1)
+            if (this.stopIndex <= this._closeList.length - 1) {
                 this.tweenMove(this.stopIndex, this._closeList);
+            }
         }
     }
 
@@ -52,7 +47,7 @@ export class element extends Component {
     protected navigationSpaceTime = 200;
 
     //坦克移动单元格时间
-    protected moveSpeed = 0.1;
+    protected moveSpeed = 0.5;
     //坦克转向时间
     protected rotateSpeed = 0.2;
     //等待障碍物时间 单位/秒
@@ -144,7 +139,7 @@ export class element extends Component {
 
 
     //路径
-    protected _closeList: grid_c[];
+    protected _closeList: grid_c[] = [];
     public set closeList(v: grid_c[]) {
         this._closeList = v;
     }
@@ -169,7 +164,9 @@ export class element extends Component {
             hpComp.active = true;
             hpComp.getChildByName("forward").getComponent(Sprite).fillStart = 1 - v / 100;
         } else {
+            //清空状态
             hpComp.active = false;
+            this.clearElement()
         }
         this._hp = v;
     }
@@ -212,21 +209,51 @@ export class element extends Component {
 
 
 
+
+
     //用于对象池 是否休眠
     private _isSleep: boolean = false;
     public set sleep(v: boolean) {
-        this.node.active = !v;
+        //this.node.active = !v;
+        this.getComponent(BoxCollider2D).enabled = !v;
+
+        if (v == true) {
+            this.realSleep = v;
+        }
+        else {
+            setTimeout(() => {
+                this.realSleep = v;
+            }, 2000);
+        }
+
         this._isSleep = v;
     }
     public get sleep(): boolean {
         return this._isSleep;
     }
 
+    public realSleep: boolean = false;
+
 
     //获取位置
     protected getPosition(g: grid_c) {
         return this.node.parent.parent.getComponent(gridManager).gridComponentArr[g.cellX][g.cellX].node.getPosition();
     }
+
+
+    //最近一次动画
+    protected lastTweenMove: Tween<Node> = null;
+
+
+
+
+    //清除障碍的
+    public clearElement() {
+        this._closeList.length = 0;
+        this.getComponent(aStar).closeList.length = 0;
+        this.stopIndex = 0;
+    }
+
 
 
 
@@ -240,45 +267,71 @@ export class element extends Component {
         //从第0个点开始移动
         var moveIndex = 0;
         setTimeout(() => {
-            this.tweenMove(moveIndex, closeList);
+            if (!this.sleep)
+                this.tweenMove(moveIndex, closeList);
             //console.warn("导航结束:", moveIndex, closeList.length);
         }, 0);
 
     }
 
+    public destroyTarget() {
+        this.destorySelf();
+    }
+
 
     //销毁
     protected destorySelf() {
+        this.sleep = true;
+
+        if (this.lastTweenMove) {
+            this.lastTweenMove.removeSelf();
+            this.lastTweenMove = null;
+        }
         var star = this.getComponent(aStar);
+        //设置到屏幕外的位置
+        this.node.position = new Vec3(-200, 500, 0)
+
+        //停止索引
+        //star.resetGridArr();
         var tManager = this.node.parent.parent.getComponent(tankManager);
         var gManager = this.node.parent.parent.getComponent(gridManager);
         //销毁当前网格障碍
         if (star.nodeInGridCellIndex)
             gManager.gridComponentArr[this, star.nodeInGridCellIndex.x][this, star.nodeInGridCellIndex.y].isObstacle = false;
 
-        tManager.synGridCollectionState();
-        //从数组中移除
-        var dex = tManager.nodeCollection.indexOf(this);
-        if (dex != -1) {
-            tManager.nodeCollection.splice(dex, 1);
-        }
-
+        // tManager.synGridCollectionState();
         //销毁自己
         var destoryFun = () => {
             if (this.node) {
-                tManager.synGridCollectionRemove(star);
-                //this.node.destroy();
-                this.sleep = true;
+               
+                //移除---------------------------------------------
+                var index = tManager.nodeCollection.indexOf(this);
+                if (index != -1) {
+                    tManager.nodeCollection.splice(index, 1);
+                    console.log("销毁移除了:", index);
+                }
+                //-------------------------------------------------
+                //清空对象
+                for (var i = 0; i < tManager.nodeCollection.length; i++) {
+                    var target = tManager.nodeCollection[i].targetNode;
+                    if (target == this) {
+                        target = null;
+                        break;
+                    }
+                }
             }
         }
-
+        //隐藏
+        this.node.active = false;
+        //设置大小为0 避免tween出现飞跃现象
+        this.node.scale=new Vec3(0,0,0);
         //生成爆炸
         switch (this.key) {
             case "tank":
                 tManager.expolision(new Vec2(star.nodeInGridCellIndex.x, star.nodeInGridCellIndex.y));
                 this.getComponent(Sprite).color = new Color(0, 0, 0, 255);
-                this.node.getChildByName("root").active = false;
-                this.isPause = true;
+                //this.node.getChildByName("root").active = false;
+                this.isPause = false;
                 setTimeout(() => {
                     destoryFun();
                 }, 1500);
@@ -291,6 +344,7 @@ export class element extends Component {
             //     break;
 
             default:
+                this.isPause = false;
                 destoryFun();
         }
 

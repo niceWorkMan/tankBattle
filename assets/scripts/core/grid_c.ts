@@ -17,15 +17,6 @@ export class grid_c {
         this._cellY = v;
     }
 
-    //运动产生的障碍的父对象（产生障碍的对象）
-    private _moveObstaleParent: any = null;
-    public set moveObstaleParent(v: any) {
-        this._moveObstaleParent = v;
-    }
-    public get moveObstaleParent(): any {
-        return this._moveObstaleParent
-    }
-
     //是否是障碍物
     private _isObstacle: boolean;
     public set isObstacle(v: boolean) {
@@ -124,6 +115,17 @@ export class grid_c {
         return new Vec2(this._cellX, this._cellY);
     }
 
+
+
+    public resetProperty(){
+        this._isObstacle=false;
+        this._isStatic=false;
+        this._parent=null;
+        this._next=null;
+        this._price=10000;
+        this._backCheck=false;
+        this._isSearch=false;
+    }
 }
 
 

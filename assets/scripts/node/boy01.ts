@@ -50,13 +50,16 @@ export class boy01 extends element {
         //设置下一个起点  不然不连续
         if (closeList[nextIndex])
             star.startGrid = this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY];
-        else
-            alert("起点未设置")
+        else {
+            console.log("起点未设置");
+        }
+
 
 
 
         if (closeList.length == 0) {
-            alert("错误的closeList长度")
+            console.log("错误的closeList长度");
+
         }
         //到达最后一个点,移动结束
         //到达最后一个点,移动结束

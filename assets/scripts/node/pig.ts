@@ -49,7 +49,8 @@ export class pig extends element {
         }
         star.startGrid = this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY];
         if (closeList.length == 0) {
-            alert("错误的closeList长度")
+            console.log("错误的closeList长度");
+
         }
         //到达最后一个点,移动结束
         if (nextIndex == closeList.length - 1) {

@@ -26,7 +26,8 @@ export class UIManager extends Component {
     public static get Instance() {
         if (this._instance == null) {
             //获取单例失败
-            alert("获取UIManager单例失败")
+            console.log("获取UIManager单例失败");
+
         }
         return this._instance;
     }

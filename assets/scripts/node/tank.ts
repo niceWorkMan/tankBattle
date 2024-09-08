@@ -1,4 +1,4 @@
-import { _decorator, Animation, Collider2D, color, Color, Component, Contact2DType, instantiate, IPhysics2DContact, log, math, Node, resources, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Animation, Collider2D, color, Color, Component, Contact2DType, instantiate, IPhysics2DContact, lerp, log, math, Node, resources, Sprite, TERRAIN_SOUTH_INDEX, tween, Vec2, Vec3 } from 'cc';
 import { grid } from '../grid';
 import { enumTeam } from '../common/enumTeam';
 import { bullet } from '../bullet';
@@ -33,6 +33,11 @@ export class tank extends element {
 
     //移动核心逻辑
     override tweenMove(nextIndex: number, closeList: grid_c[]) {
+        //对象池中跳出
+        if (this.sleep) {
+            return;
+        }
+
         if (!this.node) {
             return;
         }
@@ -43,6 +48,11 @@ export class tank extends element {
             this._closeList = closeList;
             return;
         }
+        //如果不存在
+        if (!closeList[nextIndex]) {
+            return;
+        }
+
         var star = this.getComponent(aStar);
         this._gManager = this.node.parent.parent.getComponent(gridManager)
         this._tankManager = this.node.parent.parent.getComponent(tankManager);
@@ -54,24 +64,9 @@ export class tank extends element {
         }
         star.startGrid = this._gManager.gridComponentArr[closeList[nextIndex].cellX][closeList[nextIndex].cellY];
         if (closeList.length == 0) {
-            alert("错误的closeList长度")
+            console.log("错误的closeList长度");
         }
         //到达最后一个点,移动结束
-        if (nextIndex == closeList.length - 1) {
-            this.node.active = false;
-            //判断是否真的移动到终点
-            if (star.endGrid == star.finalGrid) {
-                if (this.node)
-                    this.destorySelf();
-            }
-            else {
-                //设置结束点为最终终点
-                star.endGrid = star.finalGrid
-                //继续导航
-                star.startNav();
-            }
-            return;
-        }
         //如果下一个目标点是障碍
         if (nextIndex + 1 <= closeList.length - 1) {
             //更新当前坐标
@@ -91,22 +86,41 @@ export class tank extends element {
                     return;
                 }
                 //位移
-                var twMove = tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
+                if (this.lastTweenMove) {
+                    this.lastTweenMove.removeSelf();
+                    this.lastTweenMove = null;
+                }
+                this.lastTweenMove = tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
                     onUpdate: () => {
                     },
                     onComplete: () => {
-                        if (this.isPause) {
-                            this._stopIndex = nextIndex;
-                            this._closeList = closeList;
+                        if (this.isPause || this.sleep) {
+                            // this._stopIndex = nextIndex;
+                            // this._closeList = closeList;
+                            return;
+                        }
+                        //不存在了
+                        if (!closeList[nextIndex]) {
                             return;
                         }
                         //射击部分---------------------------------------
                         //设置当前tank坐标
                         star.nodeInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY)
+                        //移除动画
+                        if (this.lastTweenMove) {
+                            this.lastTweenMove.removeSelf();
+                            this.lastTweenMove = null;
+                        }
+                        else {
+                            //没有动画了就清空了
+                            this.stopIndex = null;
+                            nextIndex = closeList.length - 1;
+                            closeList.length = 0;
+                            return;
+                        }
                         //目标坦克
-                        var targetTank = this.tManager.searchAttakTarget(this);
                         //攻击源坦克
-                        twMove.removeSelf();
+
                         if (nextIndex + 1 <= closeList.length - 1) {
                             //车辆转弯   
                             var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
@@ -114,27 +128,33 @@ export class tank extends element {
                             if (this.node.eulerAngles.z !== targetRot) {
                                 this.node.eulerAngles = new Vec3(0, 0, targetRot);
                                 //攻击
+                                var targetTank = this.tManager.searchAttakTarget(this);
                                 if (targetTank) {
                                     if (targetTank.sleep == false) {
                                         if (targetTank.getComponent(aStar).nodeInGridCellIndex) {
                                             this._stopIndex = nextIndex;
                                             this._closeList = closeList;
-                                            this.attackTarget(targetTank);
+                                            //攻击
+                                            this.attackTarget(targetTank, nextIndex, closeList);
                                             return;
                                         }
                                     }
+                                    targetTank.destroyTarget();
                                 } else {
                                     //炮筒转到正向(局部eular角)
                                     var root: Node = this.node.getChildByName("root");
                                     root.eulerAngles = new Vec3(0, 0, 0);
                                 }
                             }
-                            //继续移动
-                            nextIndex++;
-                            this.tweenMove(nextIndex, closeList);
+
+                            //不是
+                            if (!this.sleep) {
+                                //继续移动
+                                nextIndex++;
+                                this.tweenMove(nextIndex, closeList);
+                            }
                         }
                         else {
-
                         }
                         //-----------------------------------------------
 
@@ -145,9 +165,21 @@ export class tank extends element {
             //this._gManager.upDataObstale();
 
         }
-        //list最后一个不设置Obstale
+        //最后一个格子
         else {
-            star.nodeInGridCellIndex = new Vec2(-1, -1);
+            //判断是否真的移动到终点
+            if (star.endGrid == star.finalGrid) {
+                if (this.node) {
+                    this.destorySelf();
+                }
+            }
+            else {
+                //设置结束点为最终终点
+                star.endGrid = star.finalGrid
+                star.nodeInGridCellIndex = new Vec2(star.endGrid.cellX, star.endGrid.cellY);
+                //继续导航
+                star.startNav();
+            }
         }
 
 
@@ -158,65 +190,94 @@ export class tank extends element {
     }
 
 
+
+    public generateBullet(target, stopIndex, closeList) {
+        //红方生成子弹
+        if (this.team == enumTeam.teamRed) {
+            //下一帧执行 物理逻辑 不能在碰撞回调中调用
+        }
+        //随机开炮速度
+        //this._fireSpace = Math.random();
+        if (this._fireInterval) {
+            clearInterval(this._fireSpace);
+        }
+        this._fireInterval = setInterval(() => {
+            //自身存在&&目标也存在
+            if (this.node && target.node) {
+                if (target.sleep == false) {
+                    //播放炮动画
+                    var anim: Animation = this._gun.getComponent(Animation);
+                    anim.play("fire_t001")
+                    this.spawnBullet(target);
+                } else {
+                    //停止射击  继续前进
+                    clearInterval(this._fireInterval);
+                    if (!this.sleep)
+                        this.tweenMove(stopIndex, closeList);
+                }
+            }
+            else {
+                //停止射击  继续前进
+                clearInterval(this._fireInterval);
+                if (!this.sleep)
+                    this.tweenMove(stopIndex, closeList);
+            }
+        }, this._fireSpace * 1000);
+
+    }
+
+
     //攻击
-    public attackTarget(target: element) {
+    public attackTarget(target: element, stopIndex: number, closeList: grid_c[]) {
         if (this.isPause) {
             return;
         }
-        //开炮逻辑
-        var attackFunc = () => {
-            //红方生成子弹
-            if (this.team == enumTeam.teamRed) {
-                //下一帧执行 物理逻辑 不能在碰撞回调中调用
-            }
-            //随机开炮速度
-            //this._fireSpace = Math.random();
-            if (this._fireInterval) {
-                clearInterval(this._fireSpace);
-            }
+
+        var root: Node = this.node.getChildByName("root");
+        if (target.getComponent(aStar).nodeInGridCellIndex) {
+            var targetEular: Vec3 = this.tManager.convertEularForParent(root);
+            root.setWorldRotationFromEuler(0, 0, targetEular.z)
+        }
+
+        if (target.sleep == false) {
+            //生成子弹
             this._fireInterval = setInterval(() => {
                 //自身存在&&目标也存在
-                if (this.node && target.node) {
-                    if (target.sleep == false) {
-                        //播放炮动画
-                        var anim: Animation = this._gun.getComponent(Animation);
-                        anim.play("fire_t001")
-                        this.spawnBullet(target);
-                    } else {
-                        //停止射击  继续前进
+                if (this.tManager.nodeCollection.indexOf(target) != -1) {
+                    if (target.sleep || this.sleep) {
+                        this._targetNode = null;
                         clearInterval(this._fireInterval);
-                        this.tweenMove(this.stopIndex, this.closeList);
+                        //移动
+                        if (target.sleep) {
+                            this.tweenMove(stopIndex, closeList);
+                        }
+                        return
                     }
+                    var anim: Animation = this._gun.getComponent(Animation);
+                    anim.play("fire_t001")
+                    this.spawnBullet(target);
                 }
                 else {
-                    //停止射击  继续前进
+                    this._targetNode = null;
                     clearInterval(this._fireInterval);
-                    this.tweenMove(this.stopIndex, this.closeList);
+                    //移动
+                    this.tweenMove(stopIndex, closeList);
                 }
-            }, this._fireSpace * 200);
+
+            }, this._fireSpace * 100);
         }
-
-        //开炮和转向炮管逻辑
-        if (target.node) {
-            var root: Node = this.node.getChildByName("root");
-            if (target.getComponent(aStar).nodeInGridCellIndex) {
-                var radian = Math.atan2(target.node.position.y - this.node.position.y, target.node.position.x - this.node.position.x);
-                var targetRot = radian * (180 / Math.PI);
-
-                var targetEular: Vec3 = this.tManager.convertEularForParent(root);
-                root.setWorldRotationFromEuler(0, 0, targetEular.z)
-                attackFunc();
-            } else {
-                //没有打击点
-                this.tweenMove(this.stopIndex, this.closeList);
-            }
-        } else {
-            //打击点已摧毁
-            this.tweenMove(this.stopIndex, this.closeList);
+        else {
+            this._targetNode = null;
+            clearInterval(this._fireInterval);
+            //移动
+            this.tweenMove(stopIndex, closeList);
         }
-
-
     }
+
+
+
+
+
     //旋转对方炮筒
     public gunRote(target: element) {
         var root: Node = this.node.getChildByName("root");
@@ -242,6 +303,8 @@ export class tank extends element {
 
     //生成子弹
     public spawnBullet(target: element) {
+        if (this.sleep)
+            return;
         var nodeLayer = this.node.parent.parent.getChildByName("tankLayer");
         var bulletNode: Node = instantiate(this.tManager.bulletPrefab);
         //设置父类
@@ -257,8 +320,8 @@ export class tank extends element {
         bulletNode.worldPosition = this.node.getChildByName("root").getChildByName("gun").getChildByName("point").worldPosition;
 
         //子弹运动方向
-        if (this.targetNode.node) {
-            var twLast = tween(bulletNode).to(0.3, { position: this.targetNode.node.position }, {
+        if (target) {
+            var twLast = tween(bulletNode).to(0.3, { position: target.node.position }, {
                 onComplete: () => {
                     if (bulletNode)
                         bulletNode.destroy();
@@ -273,23 +336,24 @@ export class tank extends element {
         if (this.isPause) {
             return;
         }
+        var hp = this.node.getChildByName("hp");
         var bu: bullet = otherCollider.getComponent(bullet);
         if (bu.tankParent != this) {
             //不是一队的 产生伤害
-            if (bu.bulletType != this._team) {
+            if (bu.bulletType != this._team && !this.sleep) {
                 setTimeout(() => {
-                    this.hp -= 30;
+                    this.hp -= 10;
                 }, 0);
                 if (this.hp > 0) {
+                    hp.active = true;
                     //还可以扛
                 } else {
                     //停止连续射击  等待一帧
-                    if (!this.die) {
-                        this.die = true;
-                        setTimeout(() => {
-                            this.destorySelf();
-                        }, 0);
-                    }
+                    setTimeout(() => {
+                        //设置
+                        this.destorySelf();
+                    }, 0);
+
                 }
                 //下一帧执行 物理逻辑 不能在碰撞回调中调用(不能放在最外层 会被同队伍的对象截断碰撞)
                 setTimeout(() => {
@@ -319,8 +383,9 @@ export class tank extends element {
     //更新炮口旋转
     updateGunRotation(deltaTime: number) {
         if (this.targetNode) {
-            if (!this.isPause)
+            if (!this.isPause && !this.sleep) {
                 this.gunRote(this.targetNode);
+            }
         }
     }
 }

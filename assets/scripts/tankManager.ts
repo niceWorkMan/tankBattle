@@ -4,9 +4,6 @@ import { aStar } from './core/aStar';
 import { tank } from './node/tank';
 import { enumTeam } from './common/enumTeam';
 import { element } from './node/element';
-import { boy01 } from './node/boy01';
-import { grid_c } from './core/grid_c';
-import { pig } from './node/pig';
 import { pool } from './core/pool';
 const { ccclass, property } = _decorator;
 
@@ -34,7 +31,8 @@ export class tankManager extends Component {
     public static get Instance() {
         if (this._instance == null) {
             //获取单例失败
-            alert("获取TankManager单例失败")
+            console.log("获取TankManager单例失败");
+
         }
         return this._instance;
     }
@@ -183,27 +181,26 @@ export class tankManager extends Component {
         //设置起始位置结束位置
         var startGrid = this._gManager.getGridByCellIndex(start.x, start.y);
         var endGrid = this._gManager.getGridByCellIndex(end.x, end.y);
-
+        var po = this.getComponent(pool);
         //过滤当前位置是否被占用
         if (startGrid.isObstacle == false) {
             //随机模拟生成
             var key = "tank";
             var rand = Math.random()
-            if (rand < 0.3) {
+            if (rand > 0) {
                 key = "tank"
             }
-            else if (rand >= 0.3 && rand <= 0.6) {
-                key = "boy01"
-            }
-            else {
-                key = "pig"
-            }
+            // else if (rand >= 0.3 && rand <= 0.6) {
+            //     key = "boy01"
+            // }
+            // else {
+            //     key = "pig"
+            // }
             //获取对应的类和Prefab
-            var cofResult = pool.Instance.actorConfig[key]
-            //生成实例
-            //var tankNode: Node = instantiate(cofResult.prefab);
+            var cofResult = po.actorConfig[key]
             var tankLayer = this.node.getChildByName("tankLayer")
-            var tankNode: Node = pool.Instance.spawnActor(key, tankLayer);
+            //是否从对象池抽取实例
+            var tankNode: Node = po.spawnActor(key, tankLayer);
             //tankNode.active=false;
             //先隐藏对象(因为寻路还需要时间运算，使用了settimeout,寻路完成后再显示对象,参考aStart.showPath)
             //tankNode.active = false;
@@ -216,10 +213,16 @@ export class tankManager extends Component {
             star.endGrid = endGrid;
             star.finalGrid = endGrid;
 
+
+            tankNode.active = true;
             tankNode.getComponent(aStar).nodeInGridCellIndex = new Vec2(startGrid.cellX, startGrid.cellY)
-            el.node.position = this._gManager.getPositionByCellIndex(start.x, start.y);
+            tankNode.position = this._gManager.getPositionByCellIndex(start.x, start.y);
+            tankNode.scale=new Vec3(1,1,1);
+            //
+            el.getComponent(Sprite).color = new Color(100, 152, 0, 150)
             //加入集合
-            this.nodeCollection.push(el);
+            if (this.nodeCollection.indexOf(el) == -1)
+                this.nodeCollection.push(el);
 
             switch (team) {
                 case enumTeam.teamRed:
@@ -241,7 +244,7 @@ export class tankManager extends Component {
 
             setTimeout(() => {
                 star.startNav();
-            }, 200);
+            }, 100);
         }
 
 
@@ -299,7 +302,12 @@ export class tankManager extends Component {
 
     //同步添加所有导航网格状态(spawn tank/astar时调用)
     synGridCollectionAdd(astar: aStar) {
-        this.aStartCollection.push(astar)
+
+        if (this.aStartCollection.indexOf(astar) == -1)
+            this.aStartCollection.push(astar)
+
+        console.log("aCollection:", this.aStartCollection.length);
+
     }
 
 
@@ -324,18 +332,17 @@ export class tankManager extends Component {
         var targetCollection: element[] = [];
         //查询
         for (var i = 0; i < this.nodeCollection.length; i++) {
-            if (t.team != this.nodeCollection[i].team) {
+            if (t.team != this.nodeCollection[i].team && this.nodeCollection[i].sleep == false) {
                 var targtPos = this.nodeCollection[i].getComponent(aStar).nodeInGridCellIndex;
                 if (targtPos) {
                     var selfPos = t.getComponent(aStar).nodeInGridCellIndex;
                     var sum = Math.pow((targtPos.x - selfPos.x), 2) + Math.pow((targtPos.y - selfPos.y), 2)
                     var dis = Math.sqrt(sum);
-                    if (dis <= t.attackDis) {
+                    if (dis <= t.attackDis && this.nodeCollection[i].sleep == false) {
                         this.nodeCollection[i].targetDis = dis;
                         targetCollection.push(this.nodeCollection[i])
                     }
                 }
-
             }
         }
         //排序
