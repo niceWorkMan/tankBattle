@@ -1,12 +1,12 @@
-import { _decorator, Animation, Collider2D, color, Color, Component, Contact2DType, instantiate, IPhysics2DContact, lerp, log, math, Node, resources, Sprite, TERRAIN_SOUTH_INDEX, tween, Vec2, Vec3 } from 'cc';
-import { grid } from '../grid';
+import { _decorator, Animation, Collider2D, color, Color, Component, Contact2DType, instantiate, IPhysics2DContact, lerp, log, math, Node, resources, Sprite, TERRAIN_SOUTH_INDEX, Tween, tween, Vec2, Vec3 } from 'cc';
 import { enumTeam } from '../common/enumTeam';
-import { bullet } from '../bullet';
 import { element } from './element';
 import { aStar } from '../core/aStar';
 import { gridManager } from '../gridManager';
 import { tankManager } from '../tankManager';
 import { grid_c } from '../core/grid_c';
+import { bullet } from '../bullet/bullet';
+import { pool } from '../core/pool';
 const { ccclass, property } = _decorator;
 
 @ccclass('tank')
@@ -17,7 +17,6 @@ export class tank extends element {
         this._key = "tank";
     }
 
-
     private _gun: Node
 
     start(): void {
@@ -26,7 +25,6 @@ export class tank extends element {
         this.nodeCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
 
         this.getComponent(aStar).key = this._key
-
         this._gun = this.node.getChildByName("root").getChildByName("gun");
     }
 
@@ -264,7 +262,7 @@ export class tank extends element {
                     this.tweenMove(stopIndex, closeList);
                 }
 
-            }, this._fireSpace * 100);
+            }, this._fireSpace * 200);
         }
         else {
             this._targetNode = null;
@@ -306,30 +304,44 @@ export class tank extends element {
         if (this.sleep)
             return;
         var nodeLayer = this.node.parent.parent.getChildByName("tankLayer");
-        var bulletNode: Node = instantiate(this.tManager.bulletPrefab);
+        //对象池
+        var po: pool = this.node.parent.parent.getComponent(pool)
+        //获取对应的类和Prefab
+        var key = "bulletTank";
+        var cofResult = po.actorConfig[key]
+        var bulletNode: Node = po.spawnBullet("bulletTank", nodeLayer)
+        //获取类型
+        var bClass: any = bulletNode.getComponent(cofResult.component);
         //设置父类
         var targetPos = target.node.getPosition();
         var selfPos = this.node.getPosition();
         var radian = Math.atan2(targetPos.y - selfPos.y, targetPos.x - selfPos.x);
         var targetRot = radian * (180 / Math.PI);
-        //
-        nodeLayer.addChild(bulletNode);
         bulletNode.eulerAngles = new Vec3(0, 0, targetRot)
         bulletNode.getComponent(bullet).bulletType = this.team;
-        bulletNode.getComponent(bullet).tankParent = this;
+        bulletNode.getComponent(bullet).attackParent = this;
         bulletNode.worldPosition = this.node.getChildByName("root").getChildByName("gun").getChildByName("point").worldPosition;
 
-        //子弹运动方向
+        //子弹运动方向(运动到目标点)
         if (target) {
-            var twLast = tween(bulletNode).to(0.3, { position: target.node.position }, {
+            if (bClass.bTween != null) {
+                bClass.bTween.removeSelf();
+            }
+            bClass.bTween = tween(bulletNode).to(0.5, { position: target.node.position }, {
                 onComplete: () => {
-                    if (bulletNode)
-                        bulletNode.destroy();
-                    twLast.removeSelf();
+                    if (bulletNode) {
+                        bClass.bTween.removeSelf();
+                        var b: any = bulletNode.getComponent(cofResult.component);
+                        if (b.sleep == false) {
+                            b.sleep = true;
+                        }
+
+                    }
                 },
             }).start();
         }
     }
+
 
     //碰撞检测函数
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
@@ -338,7 +350,7 @@ export class tank extends element {
         }
         var hp = this.node.getChildByName("hp");
         var bu: bullet = otherCollider.getComponent(bullet);
-        if (bu.tankParent != this) {
+        if (bu.attackParent != this) {
             //不是一队的 产生伤害
             if (bu.bulletType != this._team && !this.sleep) {
                 setTimeout(() => {
@@ -357,8 +369,15 @@ export class tank extends element {
                 }
                 //下一帧执行 物理逻辑 不能在碰撞回调中调用(不能放在最外层 会被同队伍的对象截断碰撞)
                 setTimeout(() => {
-                    if (bu)
-                        bu.node.destroy();
+                    if (bu) {
+                        //子弹销毁 加入对象池
+                        var po=this.node.parent.parent.getComponent(pool);
+                        var cofResult = po.actorConfig[bu.node.name];
+                        var b: any = bu.getComponent(cofResult.component);
+                        if (b.sleep == false) {
+                            b.sleep = true;
+                        }
+                    }
                 }, 0);
             }
         }

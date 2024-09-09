@@ -603,7 +603,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "bulletPrefab": {
+    "bulletTankPrefab": {
       "__uuid__": "2df72478-8b56-4470-ab7e-2b79e822f41d",
       "__expectedType__": "cc.Prefab"
     },

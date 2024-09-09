@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.Prefab",
-    "_name": "bullet",
+    "_name": "bulletTank",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_native": "",
@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "bullet",
+    "_name": "bulletTank",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,
@@ -210,7 +210,7 @@
     "fileId": "11/qoTujFAI6AjM4W+u0w2"
   },
   {
-    "__type__": "75c042FFrFKfoIl0kFPCiR+",
+    "__type__": "32f5aoxIzNI8pdLYx860M5o",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -225,7 +225,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "0f+a+qCTtJM7qYjX9GFu7E"
+    "fileId": "5aluLpvmhBFqoVAv6iJRz9"
   },
   {
     "__type__": "cc.PrefabInfo",

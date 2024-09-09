@@ -148,7 +148,7 @@ export class tankManager extends Component {
                 this.spawnActor(pos0, pos1, gteam);
                 spawnTime++;
             }
-        }, 100);
+        }, 300);
     }
 
 
@@ -187,15 +187,15 @@ export class tankManager extends Component {
             //随机模拟生成
             var key = "tank";
             var rand = Math.random()
-            if (rand > 0) {
+            if (rand <0.3) {
                 key = "tank"
             }
-            // else if (rand >= 0.3 && rand <= 0.6) {
-            //     key = "boy01"
-            // }
-            // else {
-            //     key = "pig"
-            // }
+            else if (rand >= 0.3 && rand <= 0.6) {
+                key = "boy01"
+            }
+            else {
+                key = "pig"
+            }
             //获取对应的类和Prefab
             var cofResult = po.actorConfig[key]
             var tankLayer = this.node.getChildByName("tankLayer")
@@ -305,7 +305,7 @@ export class tankManager extends Component {
         if (this.aStartCollection.indexOf(astar) == -1)
             this.aStartCollection.push(astar)
 
-        console.log("aCollection:", this.aStartCollection.length);
+        //console.log("aCollection:", this.aStartCollection.length);
 
     }
 

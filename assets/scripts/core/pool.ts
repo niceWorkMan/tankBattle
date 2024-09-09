@@ -5,13 +5,15 @@ import { pig } from '../node/pig';
 import { aStar } from './aStar';
 import { tankManager } from '../tankManager';
 import { element } from '../node/element';
+import { bullet } from '../bullet/bullet';
+import { bulletTank } from '../bullet/bulletTank';
 const { ccclass, property } = _decorator;
 
 @ccclass('pool')
 export class pool extends Component {
 
     //对象
-    @property(Prefab) bulletPrefab: Prefab;
+    @property(Prefab) bulletTankPrefab: Prefab;
     @property(Prefab) tankPrefab: Prefab;
     @property(Prefab) boy01Prefab: Prefab;
     @property(Prefab) PigPrefab: Prefab;
@@ -41,6 +43,10 @@ export class pool extends Component {
     start() {
         //初始化Config
         this._actorConfig = {
+            bulletTank: {
+                prefab: this.bulletTankPrefab,
+                component: bulletTank,
+            },
             tank: {
                 prefab: this.tankPrefab,
                 component: tank,
@@ -48,7 +54,8 @@ export class pool extends Component {
             boy01: {
                 prefab: this.boy01Prefab,
                 component: boy01,
-            }, pig: {
+            },
+            pig: {
                 prefab: this.PigPrefab,
                 component: pig,
             }
@@ -75,7 +82,7 @@ export class pool extends Component {
             this.removeTargetFormPool(ac);
             //显示
             ac.active = true;
-            //console.log("使用对象池的:" + this._elPool.tank.length);
+            console.log("使用坦克对象池的:" + this._elPool.tank.length);
             ac.getComponent(this._actorConfig[name].component).sleep = false;
             ac.die = false;
             //重新赋值血量
@@ -97,7 +104,7 @@ export class pool extends Component {
             obj = instantiate(this._actorConfig[name].prefab)
             parent.addChild(obj);
             this._elPool[name].push(obj);
-            //console.log("使用新对象:"+obj.name);
+            console.log("使用tank新对象:"+obj.name);
             return obj;
         }
     }
@@ -124,7 +131,7 @@ export class pool extends Component {
             for (var i = 0; i < arr.length; i++) {
                 if (arr[i].targetNode == target) {
                     arr[i].targetNode = null;
-                    console.log("移除了targetNode:",key,i);   
+                    //console.log("移除了targetNode:", key, i);
                 }
             }
         }
@@ -136,52 +143,38 @@ export class pool extends Component {
 
 
 
-    //人物对象池
-    private _blPool = { tankBullet: [] };
-    //生成对象
-    // public spawnBullet(name: string, parent: Node): any {
-    //     var ac = this.getSleepBullet(name);
-    //     if (ac) {
-    //         ac.sleep = false;
-    //         ac.stopIndex = 0;
-    //         return ac;
-    //     }
-
-    //     var obj = null;
-    //     switch (name) {
-    //         case "tank":
-    //             obj = instantiate(this.tankPrefab)
-    //             break;
-
-    //         case "pig":
-    //             obj = instantiate(this.PigPrefab)
-    //             break;
-
-
-    //         case "boy01":
-    //             obj = instantiate(this.boy01Prefab)
-    //             break;
-    //     }
-    //     this._blPool[name].push(obj);
-    //     parent.addChild(obj);
-    //     return obj;
-    // }
+    //子弹对象池
+    private _blPool = { bulletTank: [] };
+    //生成子弹对象
+    public spawnBullet(name: string, parent: Node): any {
+        var ac = this.getSleepBullet(name);
+        if (ac) {
+            //显示
+            ac.getComponent(this._actorConfig[name].component).sleep = false;
+            console.log("使用子弹对象池的:" + this._blPool.bulletTank.length);
+            return ac;
+        }
+        else {
+            var obj = null;
+            obj = instantiate(this._actorConfig[name].prefab)
+            parent.addChild(obj);
+            this._blPool[name].push(obj);
+            console.log("使用子弹新对象:" + obj.name);
+            return obj;
+        }
+    }
 
 
-    // private getSleepBullet(name: string): any {
-    //     var arr = this._blPool[name];
-    //     for (var i = 0; i < arr.length; i++) {
-    //         var isSleep = arr[i].sleep == true;
-    //         if (isSleep) {
-    //             return arr[i];
-    //         }
-    //     }
-    //     return null;
-    // }
-
-
-
-    ;
+    private getSleepBullet(name: string): any {
+        var arr = this._blPool[name];
+        for (var i = 0; i < arr.length; i++) {
+            var sl = arr[i].getComponent(this._actorConfig[name].component).sleep;
+            if (sl == true) {
+                return arr[i];
+            }
+        }
+        return null;
+    }
 }
 
 

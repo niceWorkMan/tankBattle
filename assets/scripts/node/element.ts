@@ -176,16 +176,6 @@ export class element extends Component {
 
 
 
-    //死亡状态
-    protected _die: boolean = false;
-
-    public set die(v: boolean) {
-        this._die = v;
-    }
-    public get die(): boolean {
-        return this._die
-    }
-
 
     //开火间隔时间
     protected _fireSpace: number = 1;

@@ -4,8 +4,9 @@ import { grid } from '../grid';
 import { aStar } from '../core/aStar';
 import { gridManager } from '../gridManager';
 import { tankManager } from '../tankManager';
-import { bullet } from '../bullet';
 import { grid_c } from '../core/grid_c';
+import { bullet } from '../bullet/bullet';
+import { pool } from '../core/pool';
 const { ccclass, property } = _decorator;
 
 @ccclass('boy01')
@@ -31,18 +32,31 @@ export class boy01 extends element {
 
     //移动核心逻辑
     override tweenMove(nextIndex: number, closeList: grid_c[]) {
+        var star = this.getComponent(aStar);
+        //对象池中跳出
+        if (this.sleep) {
+            return;
+        }
+
         if (!this.node) {
             return;
         }
+
         //是否暂停
         if (this.isPause) {
             this._stopIndex = nextIndex;
             this._closeList = closeList;
             return;
         }
-        var star = this.getComponent(aStar);
+        //如果不存在
+        if (!closeList[nextIndex]) {
+            return;
+        }
+
         this._gManager = this.node.parent.parent.getComponent(gridManager)
         this._tankManager = this.node.parent.parent.getComponent(tankManager);
+
+
         //判断当前tank是否存在
         if (!this.node) {
             return;
@@ -53,9 +67,6 @@ export class boy01 extends element {
         else {
             console.log("起点未设置");
         }
-
-
-
 
         if (closeList.length == 0) {
             console.log("错误的closeList长度");
@@ -104,6 +115,14 @@ export class boy01 extends element {
                     onUpdate: () => {
                     },
                     onComplete: () => {
+                        if (this.isPause || this.sleep) {
+                            // 动画带delay 再次判断是否需要跳出
+                            return;
+                        }
+                        //不存在了
+                        if (!closeList[nextIndex]) {
+                            return;
+                        }
                         //射击部分---------------------------------------
                         //设置当前tank坐标
                         star.nodeInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY)
@@ -148,7 +167,19 @@ export class boy01 extends element {
         }
         //list最后一个不设置Obstale
         else {
-            star.nodeInGridCellIndex = new Vec2(-1, -1);
+             //判断是否真的移动到终点
+             if (star.endGrid == star.finalGrid) {
+                if (this.node) {
+                    this.destorySelf();
+                }
+            }
+            else {
+                //设置结束点为最终终点
+                star.endGrid = star.finalGrid
+                star.nodeInGridCellIndex = new Vec2(star.endGrid.cellX, star.endGrid.cellY);
+                //继续导航
+                star.startNav();
+            }
         }
 
 
@@ -158,7 +189,7 @@ export class boy01 extends element {
     //碰撞检测函数
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
         var bu: bullet = otherCollider.getComponent(bullet);
-        if (bu.tankParent != this) {
+        if (bu.attackParent != this) {
             //不是一队的 产生伤害
             if (bu.bulletType != this._team) {
                 setTimeout(() => {
@@ -168,16 +199,21 @@ export class boy01 extends element {
                     //还可以扛
                 } else {
                     //停止连续射击  等待一帧
-                    if (!this.die) {
-                        this.die = true;
-                        setTimeout(() => {
-                            this.destorySelf();
-                        }, 0);
-                    }
+                    setTimeout(() => {
+                        this.destorySelf();
+                    }, 0);
                 }
                 //下一帧执行 物理逻辑 不能在碰撞回调中调用(不能放在最外层 会被同队伍的对象截断碰撞)
                 setTimeout(() => {
-                    bu.node.destroy();
+                    if (bu) {
+                        //子弹销毁 加入对象池
+                        var po=this.node.parent.parent.getComponent(pool);
+                        var cofResult = po.actorConfig[bu.node.name];
+                        var b: any = bu.getComponent(cofResult.component);
+                        if (b.sleep == false) {
+                            b.sleep = true;
+                        }
+                    }
                 }, 0);
             }
         }
