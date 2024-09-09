@@ -216,16 +216,15 @@ export class element extends Component {
     public set sleep(v: boolean) {
         //this.node.active = !v;
         this.getComponent(BoxCollider2D).enabled = !v;
-
         if (v == true) {
-            this.realSleep = v;
-        }
-        else {
+            //延迟1s设置realSleep=true,让sleep打断的递归都跳出
             setTimeout(() => {
-                this.realSleep = v;
+                this.realSleep = true;
             }, 2000);
         }
-
+        else {
+            this.realSleep = v;
+        }
         this._isSleep = v;
     }
     public get sleep(): boolean {
@@ -288,11 +287,14 @@ export class element extends Component {
             this.lastTweenMove = null;
         }
         var star = this.getComponent(aStar);
+
+
         //设置到屏幕外的位置
         this.node.position = new Vec3(-200, 500, 0)
 
         //停止索引
-        //star.resetGridArr();
+        this.closeList.length = 0;
+        star.resetGridArr();
         var tManager = this.node.parent.parent.getComponent(tankManager);
         var gManager = this.node.parent.parent.getComponent(gridManager);
         //销毁当前网格障碍
@@ -302,29 +304,12 @@ export class element extends Component {
         // tManager.synGridCollectionState();
         //销毁自己
         var destoryFun = () => {
-            if (this.node) {
-               
-                //移除---------------------------------------------
-                var index = tManager.nodeCollection.indexOf(this);
-                if (index != -1) {
-                    tManager.nodeCollection.splice(index, 1);
-                    console.log("销毁移除了:", index);
-                }
-                //-------------------------------------------------
-                //清空对象
-                for (var i = 0; i < tManager.nodeCollection.length; i++) {
-                    var target = tManager.nodeCollection[i].targetNode;
-                    if (target == this) {
-                        target = null;
-                        break;
-                    }
-                }
-            }
+
         }
         //隐藏
         this.node.active = false;
         //设置大小为0 避免tween出现飞跃现象
-        this.node.scale=new Vec3(0,0,0);
+        this.node.scale = new Vec3(0, 0, 0);
         //生成爆炸
         switch (this.key) {
             case "tank":

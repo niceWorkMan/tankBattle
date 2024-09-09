@@ -62,6 +62,7 @@ export class aStar extends Component {
     }
 
 
+
     start() {
         //保证在element的Start()函数后执行
         this.initComponent();

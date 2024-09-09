@@ -33,6 +33,8 @@ export class tank extends element {
 
     //移动核心逻辑
     override tweenMove(nextIndex: number, closeList: grid_c[]) {
+
+        var star = this.getComponent(aStar);
         //对象池中跳出
         if (this.sleep) {
             return;
@@ -53,7 +55,6 @@ export class tank extends element {
             return;
         }
 
-        var star = this.getComponent(aStar);
         this._gManager = this.node.parent.parent.getComponent(gridManager)
         this._tankManager = this.node.parent.parent.getComponent(tankManager);
 
@@ -95,8 +96,7 @@ export class tank extends element {
                     },
                     onComplete: () => {
                         if (this.isPause || this.sleep) {
-                            // this._stopIndex = nextIndex;
-                            // this._closeList = closeList;
+                            // 动画带delay 再次判断是否需要跳出
                             return;
                         }
                         //不存在了

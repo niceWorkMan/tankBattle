@@ -82,7 +82,6 @@ export class UIManager extends Component {
         // }
     }
 
-
     public showPop(popName: string) {
         if (!this.checkPopExist(this._popConfig[popName].component)) {
             var pop = instantiate(this._popConfig[popName].prefab);

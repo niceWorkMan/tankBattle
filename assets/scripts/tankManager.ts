@@ -101,7 +101,7 @@ export class tankManager extends Component {
             case KeyCode.KEY_A:
                 console.log("TankManagerKeyDownA");
                 //生成tank
-                // this.spawnActor(new Vec2(0,9),new Vec2(23,9));
+                //this.spawnActor(new Vec2(0,9),new Vec2(23,9));
                 this.battleStart();
                 break;
 
@@ -214,12 +214,11 @@ export class tankManager extends Component {
             star.finalGrid = endGrid;
 
 
-            tankNode.active = true;
+           // tankNode.active = true;
             tankNode.getComponent(aStar).nodeInGridCellIndex = new Vec2(startGrid.cellX, startGrid.cellY)
-            tankNode.position = this._gManager.getPositionByCellIndex(start.x, start.y);
+            tankNode.position = this._gManager.getPositionByCellIndex(startGrid.cellX,  startGrid.cellY);
             tankNode.scale=new Vec3(1,1,1);
-            //
-            el.getComponent(Sprite).color = new Color(100, 152, 0, 150)
+           // el.getComponent(Sprite).color = new Color(100, 152, 0, 150)
             //加入集合
             if (this.nodeCollection.indexOf(el) == -1)
                 this.nodeCollection.push(el);
