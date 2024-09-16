@@ -193,7 +193,7 @@ export class boy01 extends element {
             //不是一队的 产生伤害
             if (bu.bulletType != this._team) {
                 setTimeout(() => {
-                    this.hp -= 50;
+                    this.hp -= bu.damage;
                 }, 0);
                 if (this.hp > 0) {
                     //还可以扛

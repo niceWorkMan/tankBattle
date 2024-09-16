@@ -9,6 +9,8 @@ export class bulletTank extends bullet {
         super();
             //初始化config的key
             this._key = "bulletTank";
+            //初始化子弹伤害
+            this._damage=50;
     }
 
     start() {

@@ -21,7 +21,12 @@ export class bullet extends Component {
     }
 
 
-
+    //伤害
+    protected _damage:number=1;
+    public get damage() : number {
+        return this._damage;
+    }
+    
     //父类tank
     private _attackParent: element;
     public set attackParent(v: element) {

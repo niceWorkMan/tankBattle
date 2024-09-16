@@ -1,6 +1,7 @@
 //队伍枚举
 export enum buildType{
-    build=0,
-    tower=1,
+    none=0,
+    build=1,
+    tower=2,
     wall=3
 }

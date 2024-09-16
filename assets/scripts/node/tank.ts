@@ -354,7 +354,7 @@ export class tank extends element {
             //不是一队的 产生伤害
             if (bu.bulletType != this._team && !this.sleep) {
                 setTimeout(() => {
-                    this.hp -= 10;
+                    this.hp -= bu.damage;
                 }, 0);
                 if (this.hp > 0) {
                     hp.active = true;

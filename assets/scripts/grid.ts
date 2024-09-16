@@ -1,7 +1,7 @@
 import { _decorator, Color, Component, Label, Node, NodeEventType, Sprite, tween, Vec2 } from 'cc';
 import { gridManager } from './gridManager';
-import { build } from './building/build';
 import { UIManager } from './UIManager';
+import { editorManager } from './editorManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('grid')
@@ -96,20 +96,6 @@ export class grid extends Component {
     }
 
 
-    //格子上层建筑
-    private _buiding: build;
-
-    public set buiding(v: build) {
-        this._buiding = v;
-    }
-    public get buiding(): build {
-        return this._buiding;
-    }
-
-
-
-
-
 
     start() {
         this._sprite = this.getComponent(Sprite)
@@ -124,7 +110,10 @@ export class grid extends Component {
     }
 
     touchGrid(e) {
-        UIManager.Instance.showPop("buildPanel")
+        //UIManager.Instance.showPop("buildPanel")
+        var editor=this.node.parent.parent.getComponent(editorManager);
+        //当前格子生成
+        editor.spawnEditors([new Vec2(this.cellX,this.cellY)]);
     }
 
 
