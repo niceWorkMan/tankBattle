@@ -1,7 +1,6 @@
 import { _decorator, Color, Component, instantiate, log, math, Node, Sprite, SpriteFrame, Vec2, Vec3 } from 'cc';
 import { grid } from '../grid';
 import { gridManager } from '../gridManager';
-import { tank } from '../node/tank';
 import { tankManager } from '../tankManager';
 import { element } from '../node/element';
 import { grid_c } from './grid_c';

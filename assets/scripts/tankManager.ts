@@ -5,6 +5,7 @@ import { tank } from './node/tank';
 import { enumTeam } from './common/enumTeam';
 import { element } from './node/element';
 import { pool } from './core/pool';
+import { tree } from './obstale/tree';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
@@ -87,8 +88,6 @@ export class tankManager extends Component {
         // 处理触摸事件
         // const touchPos = event.getLocation(); // 获取触摸位置
         // console.log(`Touch started at: x=${touchPos.x}, y=${touchPos.y}`);
-        // //测试代码
-        // this.battleStart();
 
     }
 
@@ -100,9 +99,7 @@ export class tankManager extends Component {
         switch (event.keyCode) {
             case KeyCode.KEY_A:
                 console.log("TankManagerKeyDownA");
-                //生成tank
-                //this.spawnActor(new Vec2(0,9),new Vec2(23,9));
-                this.battleStart();
+
                 break;
 
 
@@ -261,6 +258,8 @@ export class tankManager extends Component {
                     this._gManager.gridComponentArr[i][j].isStatic = true;
                     var trees: Node = instantiate(this._gManager.trees);
                     obstaleLayer.addChild(trees);
+                    //初始化树的数据
+                    trees.getComponent(tree).init(new Vec2(i,j))
                     this._tress.push(trees);
                     trees.position = this._gManager.gridComponentArr[i][j].node.getPosition();
                 }

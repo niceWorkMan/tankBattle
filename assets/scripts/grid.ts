@@ -101,9 +101,15 @@ export class grid extends Component {
         this._sprite = this.getComponent(Sprite)
         //
         this.node.on(NodeEventType.MOUSE_DOWN, (e) => {
+            //不向上冒泡
+            e.bubbles = false;
+            
             this.touchGrid(e);
         })
         this.node.on(NodeEventType.TOUCH_START, (e) => {
+            //不向上冒泡
+            e.bubbles = false;
+
             this.touchGrid(e);
         })
 
@@ -111,9 +117,13 @@ export class grid extends Component {
 
     touchGrid(e) {
         //UIManager.Instance.showPop("buildPanel")
-        var editor=this.node.parent.parent.getComponent(editorManager);
+        //var editor=this.node.parent.parent.getComponent(editorManager);
         //当前格子生成
-        editor.spawnEditors([new Vec2(this.cellX,this.cellY)]);
+        //editor.spawnEditors([new Vec2(this.cellX,this.cellY)]);
+
+        //添加建筑UI
+        UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY));
+
     }
 
 
@@ -144,7 +154,7 @@ export class grid extends Component {
         this._cellY = y;
         var indexLabelNode = this.node.getChildByName("indexLabel");
         this._indexLabel = indexLabelNode.getComponent(Label);
-        //this._indexLabel.string = "[" + xLabel + "," + yLable + "]";
+        this._indexLabel.string = "[" + xLabel + "," + yLable + "]";
     }
 
     setLabel(str) {

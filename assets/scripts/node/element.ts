@@ -1,22 +1,20 @@
 import { _decorator, BoxCollider2D, Collider2D, Color, Component, Contact2DType, IPhysics2DContact, Node, Sprite, Tween, Vec2, Vec3 } from 'cc';
 import { aStar } from '../core/aStar';
-import { grid } from '../grid';
 import { gridManager } from '../gridManager';
 import { tankManager } from '../tankManager';
 import { enumTeam } from '../common/enumTeam';
 import { grid_c } from '../core/grid_c';
 import { buildType } from '../common/buildType';
+import { base } from './base';
 const { ccclass, property } = _decorator;
 
 @ccclass('element')
-export class element extends Component {
+export class element extends base {
     constructor() {
         super();
     }
 
-
     protected nodeCollider: Collider2D;
-
     start() {
         this.initComponent();
     }
@@ -57,29 +55,7 @@ export class element extends Component {
         return this._waitObsTime;
     }
 
-    //配置键
-    protected _key: string;
-    public set key(v: string) {
-        this._key = v;
-    }
-    public get key(): string {
-        return this._key
-    }
-
-    //建筑类型
-    protected _buildType:buildType=buildType.none;
-    public get buildType() : buildType {
-        return this._buildType;
-    }
-    
-    //当前所属队伍
-    protected _team: enumTeam;
-    public get team(): enumTeam {
-        return this._team
-    }
-    public set team(v: enumTeam) {
-        this._team = v;
-    }
+  
 
     //坦克管理类
     protected _tankManager: tankManager
@@ -242,7 +218,9 @@ export class element extends Component {
     //清除障碍的
     public clearElement() {
         this._closeList.length = 0;
-        this.getComponent(aStar).closeList.length = 0;
+        var star = this.getComponent(aStar);
+        if (star)
+            star.closeList.length = 0;
         this.stopIndex = 0;
     }
 
@@ -280,7 +258,6 @@ export class element extends Component {
             this.lastTweenMove = null;
         }
         var star = this.getComponent(aStar);
-
 
         //设置到屏幕外的位置
         this.node.position = new Vec3(-200, 500, 0)

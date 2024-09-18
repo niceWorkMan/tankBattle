@@ -13,21 +13,21 @@ export class util extends Component {
 
     start() {
         this.tManager = this.getComponent(tankManager);
-        //失去焦点监听
-        window.addEventListener("blur", this.onWindowBlur.bind(this));
-        window.addEventListener("focus", this.onWindowFocus.bind(this));
+        // //失去焦点监听
+        // window.addEventListener("blur", this.onWindowBlur.bind(this));
+        // window.addEventListener("focus", this.onWindowFocus.bind(this));
 
-        //最小化监听
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                //浏览器最小化或页面不可见
-                this.gamepause(true);
-                // 执行最小化时的逻辑，比如暂停游戏
-            } else {
-                //浏览器恢复或页面可见
-                this.gamepause(false);
-            }
-        });
+        // //最小化监听
+        // document.addEventListener("visibilitychange", () => {
+        //     if (document.hidden) {
+        //         //浏览器最小化或页面不可见
+        //         this.gamepause(true);
+        //         // 执行最小化时的逻辑，比如暂停游戏
+        //     } else {
+        //         //浏览器恢复或页面可见
+        //         this.gamepause(false);
+        //     }
+        // });
     }
 
 

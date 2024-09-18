@@ -134,12 +134,21 @@ export class pig extends element {
                                     case 90:
                                         this.animClip.play('pig_up');
                                         break;
-                                    case 0:
-                                        this.animClip.play('pig_right');
-                                        break
                                     case 180:
-                                        this.animClip.play('pig_left');
+                                        if (nextIndex > 0) {
+                                            if (closeList[nextIndex].cellX > closeList[nextIndex - 1].cellX) {
+                                                this.animClip.play('pig_right');
+                                            }
+                                            else if (closeList[nextIndex].cellX < closeList[nextIndex - 1].cellX) {
+                                                this.animClip.play('pig_left');
+                                            }
+                                        }
+
+                                        break;
                                 }
+
+                                //console.log("targetRot:", targetRot);
+
                             }
                             //继续移动
                             nextIndex++;
@@ -159,8 +168,8 @@ export class pig extends element {
         }
         //list最后一个不设置Obstale
         else {
-              //判断是否真的移动到终点
-              if (star.endGrid == star.finalGrid) {
+            //判断是否真的移动到终点
+            if (star.endGrid == star.finalGrid) {
                 if (this.node) {
                     this.destorySelf();
                 }
@@ -199,7 +208,7 @@ export class pig extends element {
                 setTimeout(() => {
                     if (bu) {
                         //子弹销毁 加入对象池
-                        var po=this.node.parent.parent.getComponent(pool);
+                        var po = this.node.parent.parent.getComponent(pool);
                         var cofResult = po.actorConfig[bu.node.name];
                         var b: any = bu.getComponent(cofResult.component);
                         if (b.sleep == false) {

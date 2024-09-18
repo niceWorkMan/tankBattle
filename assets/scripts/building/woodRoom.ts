@@ -1,10 +1,11 @@
 import { _decorator, Collider2D, Component, IPhysics2DContact, Node } from 'cc';
 import { element } from '../node/element';
 import { buildType } from '../common/buildType';
+import { buildBase } from './buildBase';
 const { ccclass, property } = _decorator;
 
 @ccclass('woodRoom')
-export class woodRoom extends element {
+export class woodRoom extends buildBase {
 
     constructor() {
         super();

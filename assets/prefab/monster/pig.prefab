@@ -654,7 +654,7 @@
       }
     ],
     "_defaultClip": {
-      "__uuid__": "a472c866-f687-471b-b28b-bdcb5e5a10a0",
+      "__uuid__": "4466c2d6-cf87-4821-8d8e-4e96569a7cb4",
       "__expectedType__": "cc.AnimationClip"
     },
     "_id": ""
@@ -671,6 +671,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "7fI7dZWGRGw7ahbglMMBAE"
+    "fileId": "7fI7dZWGRGw7ahbglMMBAE",
+    "targetOverrides": null
   }
 ]

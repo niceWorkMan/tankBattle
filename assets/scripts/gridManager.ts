@@ -5,7 +5,7 @@
 */
 
 
-import { _decorator, Component, EventKeyboard, ImageAsset, Input, input, instantiate, JsonAsset, KeyCode, loader, math, Node, Prefab, random, resources, Sprite, SpriteFrame, SystemEvent, Vec2, Vec3 } from 'cc';
+import { _decorator, Component, EventKeyboard, ImageAsset, Input, input, instantiate, KeyCode, Node, Prefab, resources, Sprite, SpriteFrame, Vec2, Vec3 } from 'cc';
 import { grid } from './grid';
 import { tankManager } from './tankManager';
 import { util } from './common/util';
@@ -114,7 +114,7 @@ export class gridManager extends Component {
                 this.node.getChildByName("mapLayer").addChild(_grid);
                 var _gridSprite = _grid.getComponent(Sprite);
                 _gridSprite.spriteFrame = this.gSprite;
-                _grid.setPosition(new Vec3(this.gridStartPos.x + i * 50, this.gridStartPos.y + j * (1334 / 26)));
+                _grid.setPosition(new Vec3(this.gridStartPos.x + i * 50, this.gridStartPos.y + j * (1334 / this._gridMatrix.colum)));
                 var gScript = _grid.getComponent(grid)
 
                 //加入一维数组
@@ -156,6 +156,13 @@ export class gridManager extends Component {
         var originPos = this._gridComponentArr[x][y].node.getPosition();
         return originPos;
     }
+
+    //通过ID获取世界位置
+    getWorldPositionByCellIndex(x, y) {
+        var originPos = this._gridComponentArr[x][y].node.getWorldPosition();
+        return originPos;
+    }
+
     //通过ID获取Grid对象
     getGridByCellIndex(x, y) {
         return this._gridComponentArr[x][y].getComponent(grid);

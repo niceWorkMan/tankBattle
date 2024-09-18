@@ -1,13 +1,17 @@
-import { _decorator, Button, Component, instantiate, Label, Node, Prefab } from 'cc';
+import { _decorator, Button, Component, instantiate, Label, Node, Prefab, Vec2 } from 'cc';
 import { tankManager } from './tankManager';
 import { buildPop } from './ui/buildPop';
 import { util } from './common/util';
+import { gridManager } from './gridManager';
+import { addElementManager } from './ui/add/addElementManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('UIManager')
 export class UIManager extends Component {
     @property(Node) gameNode: Node;
     @property(Prefab) buildPanel: Prefab;
+    //添加BuildUI
+    @property(Prefab) addbuildUIPrefab: Prefab;
     private _buildPanel: Node;
     //弹窗节点
     private _popContain: Node;
@@ -69,6 +73,7 @@ export class UIManager extends Component {
         var tManager: tankManager = this.gameNode.getComponent(tankManager);
 
         tManager.battleStart();
+
         // 在这里写你的处理逻辑
         // if (util.Instance._isPause) {
         //     util.Instance.gamepause(!util.Instance._isPause)
@@ -94,6 +99,37 @@ export class UIManager extends Component {
 
     checkPopExist(tp: any) {
         return this.getComponentsInChildren(tp).length > 0 ? true : false;
+    }
+
+
+
+
+    //buildUi的存储集合 便于删除
+    private _buildUIArr: Node[] = [];
+
+    //建造
+    public addBuildUI(center: Vec2) {
+        //清除
+        this.clearBuildUI();
+        //添加
+        var buildUI = this.node.getChildByName("buildUI")
+        var bUI = instantiate(this.addbuildUIPrefab);
+        buildUI.addChild(bUI);
+        var gmamager = this.gameNode.getComponent(gridManager)
+        bUI.position = gmamager.getPositionByCellIndex(center.x, center.y);
+        this._buildUIArr.push(bUI);
+        //初始化周边UI
+        var aem = bUI.getComponent(addElementManager)
+        aem.initAddUI(center)
+    }
+    //清除建造UI
+    public clearBuildUI() {
+        if (this._buildUIArr.length > 0) {
+            this._buildUIArr.forEach(element => {
+                element.destroy();
+            });
+        }
+        this._buildUIArr.length = 0;
     }
 
     update(deltaTime: number) {
