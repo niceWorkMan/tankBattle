@@ -103,7 +103,7 @@ export class grid extends Component {
         this.node.on(NodeEventType.MOUSE_DOWN, (e) => {
             //不向上冒泡
             e.bubbles = false;
-            
+
             this.touchGrid(e);
         })
         this.node.on(NodeEventType.TOUCH_START, (e) => {
@@ -123,8 +123,8 @@ export class grid extends Component {
 
         //添加建筑UI
         UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY));
-
     }
+
 
 
     tweenColor() {
