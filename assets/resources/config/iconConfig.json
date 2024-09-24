@@ -1,0 +1,47 @@
+{
+    "data": [
+        {
+            "name": "hammer",
+            "path": "image/build/hammer",
+            "des": "锤子代表建造"
+        },
+        {
+            "name": "tBase",
+            "path": "image/build/tBaseColor",
+            "des": "塔基",
+            "zw": {
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "name": "repair",
+            "path": "image/build/repair",
+            "des": "修复"
+        },
+        {
+            "name": "levelUp",
+            "path": "image/build/levelUp",
+            "des": "升级"
+        },
+        {
+            "name": "cancel",
+            "path": "image/build/cancel",
+            "des": "取消操作"
+        },
+        {
+            "name": "delect",
+            "path": "image/build/delect",
+            "des": "删除当前对象(回收)"
+        },
+        {
+            "name": "woodBox",
+            "path": "image/build/hammer",
+            "des": "伐木场",
+            "zw": {
+                "x": 2,
+                "y": 1
+            }
+        }
+    ]
+}

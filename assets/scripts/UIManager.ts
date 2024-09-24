@@ -1,4 +1,4 @@
-import { _decorator, Button, Component, instantiate, Label, Node, Prefab, Vec2 } from 'cc';
+import { _decorator, Button, Component, instantiate, JsonAsset, Label, Node, Prefab, resources, Sprite, Vec2 } from 'cc';
 import { tankManager } from './tankManager';
 import { buildPop } from './ui/buildPop';
 import { util } from './common/util';
@@ -12,9 +12,21 @@ export class UIManager extends Component {
     @property(Prefab) buildPanel: Prefab;
     //添加BuildUI
     @property(Prefab) addbuildUIPrefab: Prefab;
+
+
+    public ps: Sprite[] = [];
+
     private _buildPanel: Node;
     //弹窗节点
     private _popContain: Node;
+
+
+    //配置文件
+    private _buildMenuConfig: any;
+    public get bMenuConfig(): any {
+        return this._buildMenuConfig;
+    }
+
 
     //窗口配置
     private _popConfig;
@@ -39,6 +51,7 @@ export class UIManager extends Component {
     start() {
         this.addListener();
         this.initComponent();
+        this.loadMenuConfig();
     }
 
     initComponent() {
@@ -55,7 +68,28 @@ export class UIManager extends Component {
     }
 
 
+    //加载配置文件
+    loadMenuConfig() {
+        //加载json例子
+        resources.load("config/iconConfig", JsonAsset, (err, res) => {
+            var jsonObj = res.json;
+            this._buildMenuConfig = jsonObj;
+        });
+    }
 
+    public getMenuArr(param: string[]) {
+        var cof=[];
+        for (var i = 0; i < param.length; i++) {
+            for (var j = 0; j < this._buildMenuConfig.data.length; j++) {
+                var item = this._buildMenuConfig.data[j];
+                if(item.name==param[i]){
+                    cof.push(item);
+                }
+                continue;
+            }
+        }
+        return cof;
+    }
 
 
     addListener() {
@@ -108,7 +142,7 @@ export class UIManager extends Component {
     private _buildUIArr: Node[] = [];
 
     //建造
-    public addBuildUI(center: Vec2) {
+    public addBuildUI(center: Vec2,conf) {
         //清除
         this.clearBuildUI();
         //添加
@@ -120,7 +154,7 @@ export class UIManager extends Component {
         this._buildUIArr.push(bUI);
         //初始化周边UI
         var aem = bUI.getComponent(addElementManager)
-        aem.initAddUI(center)
+        aem.initAddUI(center,conf)
     }
     //清除建造UI
     public clearBuildUI() {

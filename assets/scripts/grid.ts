@@ -122,7 +122,7 @@ export class grid extends Component {
         //editor.spawnEditors([new Vec2(this.cellX,this.cellY)]);
 
         //添加建筑UI
-        UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY));
+        UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer","tBase","cancel"]));
     }
 
 
