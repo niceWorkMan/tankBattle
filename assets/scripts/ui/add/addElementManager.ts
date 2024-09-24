@@ -36,19 +36,23 @@ export class addElementManager extends Component {
     private _UiArr: Node[] = [];
     //存储建造格子位置
     private _gridArr: Vec2[] = [];
+    //中间位置
+    private _lastCenter: Vec2;
+    public get lastCenter(): Vec2 {
+        return this._lastCenter;
+    }
 
-    private _lastCenter:Vec2;
 
     //重新设置menu
-    public reInitAddUI(conf){
-        this.initAddUI(this._lastCenter,conf);
+    public reInitAddUI(conf) {
+        this.initAddUI(this._lastCenter, conf);
     }
 
 
     public initAddUI(center: Vec2, conf) {
         this.clearUI();
 
-        this._lastCenter=center;
+        this._lastCenter = center;
         var matrix = gridManager.Instance.getGridMatrix;
         var gridArr: Vec2[] = [];
 
@@ -131,8 +135,6 @@ export class addElementManager extends Component {
         });
         //存储建造位置
         this._gridArr = gridArr;
-        console.log("conf:", conf);
-
     }
 
 
@@ -211,7 +213,6 @@ export class addElementManager extends Component {
     //螺旋矩阵添加
     private push(_posArr: Vec2[], pos: Vec2) {
         var matrix = gridManager.Instance.getGridMatrix;
-        console.log("matrix:", matrix);
         if ((pos.x >= 0 && pos.x < matrix.row) && (pos.y >= 0 && pos.y < matrix.colum)) {
             _posArr.push(pos)
         }

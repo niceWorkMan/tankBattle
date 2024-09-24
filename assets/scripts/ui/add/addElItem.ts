@@ -1,6 +1,8 @@
 import { _decorator, Button, Color, Component, ImageAsset, Label, Node, resources, Sprite, SpriteFrame, Texture2D, Vec2 } from 'cc';
 import { addElementManager } from './addElementManager';
 import { UIManager } from '../../UIManager';
+import { gridManager } from '../../gridManager';
+import { editorManager } from '../../editorManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('addElItem')
@@ -41,9 +43,60 @@ export class addElItem extends Component {
                 this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]))
                 break;
             case "woodBox":
+                this.placeBuild(this._data);
                 break;
 
         }
+    }
+
+
+
+
+    //放置
+    placeBuild(data) {
+        var parent = this.node.parent.getComponent(addElementManager);
+
+        //if(parent.lastCenter.x>)
+        if (this._data.zw) {
+            // 1x2的建筑
+            if (this._data.zw.x == 2, this._data.zw.y == 1) {
+                gridManager.Instance.gridComponentArr[parent.lastCenter.x][parent.lastCenter.y]
+                if (this.checkCellPosIsValue(new Vec2(parent.lastCenter.x + 1, parent.lastCenter.y))) {
+                    if (gridManager.Instance.gridComponentArr[parent.lastCenter.x + 1][parent.lastCenter.y].isStatic == false) {
+                        editorManager.Instance.placeBuild(parent.lastCenter, this._data.name);
+                    }
+                    else {
+                        //当前位置不可
+                        console.log("当前位置不可");
+                        
+                    }
+                } else {
+                    if (this.checkCellPosIsValue(new Vec2(parent.lastCenter.x - 1, parent.lastCenter.y))) {
+                        if (gridManager.Instance.gridComponentArr[parent.lastCenter.x - 1][parent.lastCenter.y].isStatic == false) {
+                            editorManager.Instance.placeBuild(new Vec2(parent.lastCenter.x - 1,parent.lastCenter.y), this._data.name);
+                        }
+                        else{
+                            //当前位置不可
+                            console.log("当前位置不可");
+                        }
+                    }
+                    else {
+                        //当前位置不可
+                        console.log("当前位置不可");
+                    }
+                }
+
+            }
+        }
+
+        //清除
+        this.node.parent.getComponent(addElementManager).clear();
+
+    }
+
+    checkCellPosIsValue(pos: Vec2) {
+        var Matrix = gridManager.Instance.getGridMatrix;
+        return pos.x >= 0 && pos.x < Matrix.row && pos.y >= 0 && pos.y < Matrix.colum;
     }
 
     //存储菜单数据

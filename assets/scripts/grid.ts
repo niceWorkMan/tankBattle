@@ -59,7 +59,7 @@ export class grid extends Component {
 
 
     //障碍物是否是静态的
-    private _isStatic: boolean
+    private _isStatic: boolean=false;
     public set isStatic(v: boolean) {
         this._isStatic = v;
     }

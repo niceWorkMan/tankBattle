@@ -708,6 +708,10 @@
       "__uuid__": "762adf16-b670-4891-8621-d2c799ee156a",
       "__expectedType__": "cc.Prefab"
     },
+    "woodbox_b": {
+      "__uuid__": "0f2f863f-1b53-4588-884b-d7863648315f",
+      "__expectedType__": "cc.Prefab"
+    },
     "_id": "eev/DYTXlPKoT8zjim/kkr"
   },
   {
