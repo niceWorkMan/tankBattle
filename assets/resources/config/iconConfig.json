@@ -30,13 +30,18 @@
             "des": "取消操作"
         },
         {
+            "name": "last",
+            "path": "image/build/last",
+            "des": "返回上一级"
+        },
+        {
             "name": "delect",
             "path": "image/build/delect",
             "des": "删除当前对象(回收)"
         },
         {
             "name": "woodBox",
-            "path": "image/build/hammer",
+            "path": "image/build/woodBox",
             "des": "伐木场",
             "zw": {
                 "x": 2,

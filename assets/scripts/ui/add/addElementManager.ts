@@ -37,10 +37,18 @@ export class addElementManager extends Component {
     //存储建造格子位置
     private _gridArr: Vec2[] = [];
 
+    private _lastCenter:Vec2;
+
+    //重新设置menu
+    public reInitAddUI(conf){
+        this.initAddUI(this._lastCenter,conf);
+    }
+
 
     public initAddUI(center: Vec2, conf) {
         this.clearUI();
 
+        this._lastCenter=center;
         var matrix = gridManager.Instance.getGridMatrix;
         var gridArr: Vec2[] = [];
 
@@ -105,7 +113,6 @@ export class addElementManager extends Component {
         }
         //生成对应物品
         gridArr.forEach(element => {
-
             var index = gridArr.indexOf(element);
             //只生成有数据的
             if (index < conf.length) {
@@ -121,12 +128,9 @@ export class addElementManager extends Component {
                 //索引测试
                 a.updateLab(gridArr.indexOf(element) + "");
             }
-
         });
         //存储建造位置
         this._gridArr = gridArr;
-
-
         console.log("conf:", conf);
 
     }

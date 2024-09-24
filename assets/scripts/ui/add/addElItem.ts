@@ -1,5 +1,6 @@
 import { _decorator, Button, Color, Component, ImageAsset, Label, Node, resources, Sprite, SpriteFrame, Texture2D, Vec2 } from 'cc';
 import { addElementManager } from './addElementManager';
+import { UIManager } from '../../UIManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('addElItem')
@@ -23,6 +24,7 @@ export class addElItem extends Component {
     onClick() {
         switch (this._data.name) {
             case "hammer":
+                this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["woodBox", "last"]))
                 break;
             case "tBase":
                 break;
@@ -34,6 +36,9 @@ export class addElItem extends Component {
                 this.node.parent.getComponent(addElementManager).clear();
                 break;
             case "delect":
+                break;
+            case "last":
+                this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]))
                 break;
             case "woodBox":
                 break;
