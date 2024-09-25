@@ -58,6 +58,8 @@ export class buildBase extends base {
             element.isStatic = false;
             element.isObstacle = false;
         });
+        this._obGrids.length=0;
+        this.node.destroy();
     }
 
 

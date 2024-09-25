@@ -20,6 +20,25 @@ export class UIManager extends Component {
     //弹窗节点
     private _popContain: Node;
 
+    //当前菜单
+    private _addMenu: addElementManager;
+    public get addMenu(): addElementManager {
+        return this._addMenu
+    }
+
+
+
+    //设置操作对象
+    private _optionBuildData: any = { key: "", node: null, class: null }
+    public get optionBuildData(): any {
+        return this._optionBuildData
+    }
+    public set optionBuildData(v: any) {
+        this._optionBuildData = v;
+    }
+
+
+
 
     //配置文件
     private _buildMenuConfig: any;
@@ -78,11 +97,11 @@ export class UIManager extends Component {
     }
 
     public getMenuArr(param: string[]) {
-        var cof=[];
+        var cof = [];
         for (var i = 0; i < param.length; i++) {
             for (var j = 0; j < this._buildMenuConfig.data.length; j++) {
                 var item = this._buildMenuConfig.data[j];
-                if(item.name==param[i]){
+                if (item.name == param[i]) {
                     cof.push(item);
                 }
                 continue;
@@ -142,7 +161,7 @@ export class UIManager extends Component {
     private _buildUIArr: Node[] = [];
 
     //建造
-    public addBuildUI(center: Vec2,conf) {
+    public addBuildUI(center: Vec2, conf) {
         //清除
         this.clearBuildUI();
         //添加
@@ -154,7 +173,8 @@ export class UIManager extends Component {
         this._buildUIArr.push(bUI);
         //初始化周边UI
         var aem = bUI.getComponent(addElementManager)
-        aem.initAddUI(center,conf)
+        this._addMenu=aem;
+        aem.initAddUI(center, conf)
     }
     //清除建造UI
     public clearBuildUI() {

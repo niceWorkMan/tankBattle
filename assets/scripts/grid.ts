@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, Label, Node, NodeEventType, Sprite, tween, Vec2 } from 'cc';
+import { _decorator, Color, Component, Label, log, Node, NodeEventType, Sprite, tween, Vec2 } from 'cc';
 import { gridManager } from './gridManager';
 import { UIManager } from './UIManager';
 import { editorManager } from './editorManager';
@@ -59,7 +59,7 @@ export class grid extends Component {
 
 
     //障碍物是否是静态的
-    private _isStatic: boolean=false;
+    private _isStatic: boolean = false;
     public set isStatic(v: boolean) {
         this._isStatic = v;
     }
@@ -99,32 +99,24 @@ export class grid extends Component {
 
     start() {
         this._sprite = this.getComponent(Sprite)
-        //
-        this.node.on(NodeEventType.MOUSE_DOWN, (e) => {
-            //不向上冒泡
-            e.bubbles = false;
 
-            this.touchGrid(e);
-        })
         this.node.on(NodeEventType.TOUCH_START, (e) => {
             //不向上冒泡
             e.bubbles = false;
-
             this.touchGrid(e);
         })
 
     }
 
     touchGrid(e) {
-        //UIManager.Instance.showPop("buildPanel")
-        //var editor=this.node.parent.parent.getComponent(editorManager);
-        //当前格子生成
-        //editor.spawnEditors([new Vec2(this.cellX,this.cellY)]);
-
         //添加建筑UI
-        UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer","tBase","cancel"]));
+        if (this.isStatic == false) {
+            UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]));
+        }
+        else {
+            console.log("不可操作地形");
+        }
 
-        console.log(this.node.position)
     }
 
 

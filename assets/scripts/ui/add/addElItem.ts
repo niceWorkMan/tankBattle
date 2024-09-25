@@ -39,6 +39,15 @@ export class addElItem extends Component {
                 this.node.parent.getComponent(addElementManager).clear();
                 break;
             case "delect":
+                //消除对象
+                UIManager.Instance.optionBuildData.node.getComponent(UIManager.Instance.optionBuildData.class).clearObGrids();
+                //消除UI
+                UIManager.Instance.addMenu.clear();
+
+                console.log("消除");
+                console.log(UIManager.Instance.optionBuildData.node.name);
+                
+                
                 break;
             case "last":
                 this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]))
@@ -58,7 +67,6 @@ export class addElItem extends Component {
         var parent = this.node.parent.getComponent(addElementManager);
         //清除UI
         this.node.parent.getComponent(addElementManager).clear();
-
 
         if (this._data.zw) {
             // 1x2的建筑

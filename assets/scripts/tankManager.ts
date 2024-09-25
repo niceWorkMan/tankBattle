@@ -7,7 +7,7 @@ import { element } from './node/element';
 import { pool } from './core/pool';
 import { tree } from './obstale/tree';
 import { grid } from './grid';
-import { woodRoom } from './building/woodRoom';
+import { woodBox } from './building/woodBox';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
@@ -98,7 +98,7 @@ export class tankManager extends Component {
                 class: tree,
             },
             "woodBox": {
-                class: woodRoom
+                class: woodBox
             }
         }
     }

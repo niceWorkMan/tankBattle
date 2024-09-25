@@ -1,6 +1,6 @@
 import { _decorator, Color, Component, instantiate, Node, Prefab, settings, Sprite, Vec2 } from 'cc';
 import { gridManager } from './gridManager';
-import { woodRoom } from './building/woodRoom';
+import { woodBox } from './building/woodBox';
 import { tankManager } from './tankManager';
 const { ccclass, property } = _decorator;
 
@@ -9,6 +9,8 @@ export class editorManager extends Component {
     @property(Prefab) edtorNode: Prefab;
 
     @property(Prefab) woodbox_b: Prefab;
+
+
 
     constructor() {
         super();
@@ -27,7 +29,7 @@ export class editorManager extends Component {
         this._buildPlaceConfig={
             "woodBox":{
                 "prefab":this.woodbox_b,
-                "class":woodRoom
+                "class":woodBox
             }
         };
     }
@@ -85,12 +87,14 @@ export class editorManager extends Component {
         editorLayer.addChild(obj)
         this._edtorNodeArr.push(obj);
         obj.position = gManager.gridComponentArr[pos.x][pos.y].node.position;
+        //不允许建造
         if (!isAllown) {
             obj.getComponent(Sprite).color = new Color(255, 0, 102);
             setTimeout(() => {
                 obj.destroy();
             }, 1000);
         }
+        //允许
         else {
             obj.getComponent(Sprite).color = new Color(0, 255, 153);
         }
