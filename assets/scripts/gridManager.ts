@@ -17,7 +17,7 @@ export class gridManager extends Component {
     @property(Prefab) gridPrefab: Prefab;
     @property(Prefab) tankBase: Prefab;
     //障碍树
-    @property(Prefab) trees: Prefab;
+    @property(Prefab) tree: Prefab;
 
     //默认资源
     @property(SpriteFrame) gSprite: SpriteFrame;

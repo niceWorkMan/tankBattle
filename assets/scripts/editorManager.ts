@@ -1,5 +1,7 @@
 import { _decorator, Color, Component, instantiate, Node, Prefab, settings, Sprite, Vec2 } from 'cc';
 import { gridManager } from './gridManager';
+import { woodRoom } from './building/woodRoom';
+import { tankManager } from './tankManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('editorManager')
@@ -23,7 +25,10 @@ export class editorManager extends Component {
     //初始化配置表
     initComponent() {
         this._buildPlaceConfig={
-            "woodBox":this.woodbox_b,
+            "woodBox":{
+                "prefab":this.woodbox_b,
+                "class":woodRoom
+            }
         };
     }
 
@@ -31,14 +36,21 @@ export class editorManager extends Component {
 
     //放置
     public placeBuild(center: Vec2, name: string) {
+        var obj=null;
         if (this._buildPlaceConfig[name]) {
-            var obj = instantiate(this._buildPlaceConfig[name]);
-            this.node.getChildByName("obstaleLayer").addChild(obj);
+            obj = instantiate(this._buildPlaceConfig[name].prefab);
+            var obstaleLayer= this.node.getChildByName("obstaleLayer")
+            obstaleLayer.addChild(obj);
             obj.position=this.getComponent(gridManager).gridComponentArr[center.x][center.y].node.position;
-            alert("生成")
+            //初始化位置Index
+            obj.getComponent(this._buildPlaceConfig[name].class).init(center);
+            //排序(遮挡关系)
+            this.node.getComponent(tankManager).setSiblingIndex_Layer(obstaleLayer)
         } else {
             alert("生成失败")
+            return null;
         }
+        return obj.getComponent(this._buildPlaceConfig[name].class)
     }
 
 

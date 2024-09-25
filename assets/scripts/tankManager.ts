@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventKeyboard, EventTouch, game, Input, input, instantiate, KeyCode, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Label, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { aStar } from './core/aStar';
 import { tank } from './node/tank';
@@ -6,6 +6,8 @@ import { enumTeam } from './common/enumTeam';
 import { element } from './node/element';
 import { pool } from './core/pool';
 import { tree } from './obstale/tree';
+import { grid } from './grid';
+import { woodRoom } from './building/woodRoom';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
@@ -18,8 +20,14 @@ export class tankManager extends Component {
     @property(Prefab) PigPrefab: Prefab;
 
 
+    @property(Prefab) tl: Prefab;
+
     //特效
     @property(Prefab) expolisinPrefab: Prefab;
+
+
+    //障碍物配置 包含建筑
+    private _obstaleConfig = {};
 
 
     constructor() {
@@ -79,6 +87,20 @@ export class tankManager extends Component {
         //初始化gManager;
         this._gManager = this.node.getComponent(gridManager);
 
+        this.initComponent();
+
+    }
+
+
+    initComponent() {
+        this._obstaleConfig = {
+            "tree": {
+                class: tree,
+            },
+            "woodBox": {
+                class: woodRoom
+            }
+        }
     }
 
 
@@ -184,7 +206,7 @@ export class tankManager extends Component {
             //随机模拟生成
             var key = "tank";
             var rand = Math.random()
-            if (rand <0.3) {
+            if (rand < 0.3) {
                 key = "tank"
             }
             else if (rand >= 0.3 && rand <= 0.6) {
@@ -211,11 +233,11 @@ export class tankManager extends Component {
             star.finalGrid = endGrid;
 
 
-           // tankNode.active = true;
+            // tankNode.active = true;
             tankNode.getComponent(aStar).nodeInGridCellIndex = new Vec2(startGrid.cellX, startGrid.cellY)
-            tankNode.position = this._gManager.getPositionByCellIndex(startGrid.cellX,  startGrid.cellY);
-            tankNode.scale=new Vec3(1,1,1);
-           // el.getComponent(Sprite).color = new Color(100, 152, 0, 150)
+            tankNode.position = this._gManager.getPositionByCellIndex(startGrid.cellX, startGrid.cellY);
+            tankNode.scale = new Vec3(1, 1, 1);
+            // el.getComponent(Sprite).color = new Color(100, 152, 0, 150)
             //加入集合
             if (this.nodeCollection.indexOf(el) == -1)
                 this.nodeCollection.push(el);
@@ -256,22 +278,62 @@ export class tankManager extends Component {
                 if (Math.random() > 0.9) {
                     this._gManager.gridComponentArr[i][j].setObstacle(true);
                     this._gManager.gridComponentArr[i][j].isStatic = true;
-                    var trees: Node = instantiate(this._gManager.trees);
+                    var trees: Node = instantiate(this._gManager.tree);
                     obstaleLayer.addChild(trees);
                     //初始化树的数据
-                    trees.getComponent(tree).init(new Vec2(i,j))
+                    trees.getComponent(tree).init(new Vec2(i, j))
                     this._tress.push(trees);
                     trees.position = this._gManager.gridComponentArr[i][j].node.getPosition();
                 }
             }
         }
-        //设置层级（反转）
-        for (var i = 0; i < this._tress.length; i++) {
-            this._tress[i].setSiblingIndex(this._tress.length - 1 - i);
-        }
+        //遮挡关系排序
+        this.setSiblingIndex_Layer(obstaleLayer)
         //同步所有导航网格的障碍
         this.synGridCollectionState();
     }
+    //设置层级
+    setSiblingIndex_Layer(layer: Node) {
+        var nodes: Node[] = layer.children;
+        //调换位置
+        for (var i = 0; i < nodes.length; i++) {
+            for (var j = i; j < nodes.length; j++) {
+                var jj = this.getOneIndex(nodes[j])
+                var ii = this.getOneIndex(nodes[i])
+                // console.log("交换前:", ii, jj);
+                if (ii != -1 && jj != -1) {
+                    if (jj > ii) {
+                        //并且j层级比i大
+                        //交换
+                        //   console.log("交换:",i,j);
+                        var temp = nodes[i];
+                        nodes[i] = nodes[j];
+                        nodes[j] = temp;
+                    }
+                } else {
+                    console.log("获取索引失败");
+                    alert("获取索引失败")
+                }
+
+            }
+        }
+
+        // 2 排序
+        for (var i = 0; i < nodes.length; i++) {
+            //使用+1 就可排序 原因未知
+            nodes[i].setSiblingIndex(i+1);
+        }
+    }
+
+    //获取在数组中的索引
+    getOneIndex(n: Node): number {
+        var cls: any = n.getComponent(this._obstaleConfig[n.name].class)
+        var Matrix = this._gManager.getGridMatrix;
+        return Matrix.row * cls.cellY + cls.cellX;
+    }
+
+
+
 
     //同步所有导航网格状态
     public synGridCollectionState() {

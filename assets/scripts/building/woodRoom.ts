@@ -1,4 +1,4 @@
-import { _decorator, Collider2D, Component, IPhysics2DContact, Node } from 'cc';
+import { _decorator, Collider2D, Component, IPhysics2DContact, math, Node } from 'cc';
 import { element } from '../node/element';
 import { buildType } from '../common/buildType';
 import { buildBase } from './buildBase';
@@ -17,6 +17,10 @@ export class woodRoom extends buildBase {
 
     start() {
 
+    }
+
+    public init(pos: math.Vec2): void {
+        super.init(pos);
     }
 
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {

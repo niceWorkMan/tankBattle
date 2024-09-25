@@ -8,10 +8,28 @@ export class obstaleBase extends Component {
 
     }
 
+    //所在索引
+    protected _cellX:number;
+    protected _cellY:number
+    public get cellX() : number {
+        return this._cellX;
+    }
+    
+    public get cellY() : number {
+        return this._cellY
+    }
+    
+    
+
 
     protected isAllow(pos:Vec2,isAllow){
         var editor=editorManager.Instance;
         editor.spawnEditors([new Vec2(pos.x,pos.y)],isAllow);
+    }
+
+    public init(pos:Vec2){
+        this._cellX=pos.x;
+        this._cellY=pos.y;
     }
 
 

@@ -464,10 +464,10 @@ export class aStar extends Component {
         //排序
         for (var i = 0; i < gArr.length; i++) {
             for (var j = 0; j < gArr.length - i - 1; j++) {
-                if (gArr[j].price > gArr[j + 1].price) {
+                if (gArr[j].price > gArr[i].price) {
                     var temp = gArr[j];
-                    gArr[j] = gArr[j + 1];
-                    gArr[j + 1] = temp;
+                    gArr[j] = gArr[i];
+                    gArr[i] = temp;
                 }
             }
         }

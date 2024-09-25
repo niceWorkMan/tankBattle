@@ -7,6 +7,7 @@ import { tankManager } from '../tankManager';
 import { element } from '../node/element';
 import { bullet } from '../bullet/bullet';
 import { bulletTank } from '../bullet/bulletTank';
+import { tree } from '../obstale/tree';
 const { ccclass, property } = _decorator;
 
 @ccclass('pool')

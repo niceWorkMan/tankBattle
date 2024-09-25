@@ -14,8 +14,7 @@ export class addElementManager extends Component {
             //不向上冒泡
             e.bubbles = false;
             //再次点击删除建造菜单
-            this.clearUI();
-            this.node.destroy();
+           this.clear();
         })
 
     }
@@ -23,6 +22,7 @@ export class addElementManager extends Component {
     //对外暴露清除
     public clear() {
         this.clearUI();
+        if (this.node)
         this.node.destroy();
     }
 

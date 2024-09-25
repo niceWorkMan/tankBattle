@@ -612,7 +612,7 @@
       "__uuid__": "fa8a0437-d431-4782-9118-12a38726529a",
       "__expectedType__": "cc.Prefab"
     },
-    "trees": {
+    "tree": {
       "__uuid__": "d0401ca3-f78d-4485-9a2b-acf8887ecfad",
       "__expectedType__": "cc.Prefab"
     },
@@ -646,6 +646,10 @@
     },
     "PigPrefab": {
       "__uuid__": "c46421ba-3c52-49a0-a429-25a7df0e8bd4",
+      "__expectedType__": "cc.Prefab"
+    },
+    "tl": {
+      "__uuid__": "bfa7a71c-d75f-4d41-95b7-41fe8ecf4c95",
       "__expectedType__": "cc.Prefab"
     },
     "expolisinPrefab": {

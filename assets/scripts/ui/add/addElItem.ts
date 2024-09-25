@@ -3,6 +3,7 @@ import { addElementManager } from './addElementManager';
 import { UIManager } from '../../UIManager';
 import { gridManager } from '../../gridManager';
 import { editorManager } from '../../editorManager';
+import { tankManager } from '../../tankManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('addElItem')
@@ -55,27 +56,41 @@ export class addElItem extends Component {
     //放置
     placeBuild(data) {
         var parent = this.node.parent.getComponent(addElementManager);
+        //清除UI
+        this.node.parent.getComponent(addElementManager).clear();
 
-        //if(parent.lastCenter.x>)
+
         if (this._data.zw) {
             // 1x2的建筑
             if (this._data.zw.x == 2, this._data.zw.y == 1) {
                 gridManager.Instance.gridComponentArr[parent.lastCenter.x][parent.lastCenter.y]
+                //向右
                 if (this.checkCellPosIsValue(new Vec2(parent.lastCenter.x + 1, parent.lastCenter.y))) {
                     if (gridManager.Instance.gridComponentArr[parent.lastCenter.x + 1][parent.lastCenter.y].isStatic == false) {
-                        editorManager.Instance.placeBuild(parent.lastCenter, this._data.name);
+                        //生成
+                        var build = editorManager.Instance.placeBuild(parent.lastCenter, this._data.name);
+                        //标记
+                        build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x][parent.lastCenter.y]);
+                        build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x + 1][parent.lastCenter.y]);
+                        return;
                     }
                     else {
                         //当前位置不可
                         console.log("当前位置不可");
-                        
                     }
-                } else {
+                }
+                //向左
+                if (this.checkCellPosIsValue(new Vec2(parent.lastCenter.x - 1, parent.lastCenter.y))) {
                     if (this.checkCellPosIsValue(new Vec2(parent.lastCenter.x - 1, parent.lastCenter.y))) {
                         if (gridManager.Instance.gridComponentArr[parent.lastCenter.x - 1][parent.lastCenter.y].isStatic == false) {
-                            editorManager.Instance.placeBuild(new Vec2(parent.lastCenter.x - 1,parent.lastCenter.y), this._data.name);
+                            //生成
+                            var build = editorManager.Instance.placeBuild(new Vec2(parent.lastCenter.x - 1, parent.lastCenter.y), this._data.name);
+                            //标记
+                            build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x][parent.lastCenter.y]);
+                            build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x - 1][parent.lastCenter.y]);
+                            return;
                         }
-                        else{
+                        else {
                             //当前位置不可
                             console.log("当前位置不可");
                         }
@@ -89,8 +104,7 @@ export class addElItem extends Component {
             }
         }
 
-        //清除
-        this.node.parent.getComponent(addElementManager).clear();
+
 
     }
 

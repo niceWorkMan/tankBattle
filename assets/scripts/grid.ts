@@ -123,6 +123,8 @@ export class grid extends Component {
 
         //添加建筑UI
         UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer","tBase","cancel"]));
+
+        console.log(this.node.position)
     }
 
 
