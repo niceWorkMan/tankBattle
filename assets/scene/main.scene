@@ -1682,6 +1682,14 @@
       "__uuid__": "a99757aa-ad35-4223-a826-5c4cdc6d11f9",
       "__expectedType__": "cc.Prefab"
     },
+    "rect_alpha0": {
+      "__uuid__": "d13ba8bf-9b75-4a6c-9451-0e9d573fc0b2@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "rect_green": {
+      "__uuid__": "00254c06-19d4-4377-8571-630fa91e5045@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
     "_id": "745z9gZZJC5K8PMVox8Wrg"
   },
   {

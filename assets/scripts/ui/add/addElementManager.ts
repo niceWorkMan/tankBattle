@@ -1,7 +1,8 @@
-import { _decorator, Component, instantiate, log, Node, NodeEventType, Prefab, Vec2, Vec3 } from 'cc';
+import { _decorator, Component, instantiate, log, misc, Node, NodeEventType, Prefab, Vec2, Vec3 } from 'cc';
 import { gridManager } from '../../gridManager';
 import { addElItem } from './addElItem';
 import { grid } from '../../grid';
+import { UIManager } from '../../UIManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('addElementManager')
@@ -14,7 +15,7 @@ export class addElementManager extends Component {
             //不向上冒泡
             e.bubbles = false;
             //再次点击删除建造菜单
-           this.clear();
+            this.clear();
         })
 
     }
@@ -23,7 +24,7 @@ export class addElementManager extends Component {
     public clear() {
         this.clearUI();
         if (this.node)
-        this.node.destroy();
+            this.node.destroy();
     }
 
     update(deltaTime: number) {
@@ -227,6 +228,12 @@ export class addElementManager extends Component {
         this._UiArr.length = 0;
         this._gridArr.length = 0;
     }
+
+    protected onDestroy(): void {
+        //清除 上一个的选中状态
+        
+    }
+
 
     getUIPosArr() {
 

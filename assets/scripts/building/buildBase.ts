@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Vec2 } from 'cc';
+import { _decorator, color, Color, Component, Node, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { base } from '../node/base';
 import { grid } from '../grid';
 const { ccclass, property } = _decorator;
@@ -7,6 +7,42 @@ const { ccclass, property } = _decorator;
 export class buildBase extends base {
 
     protected _data: any;
+    //选中动画
+    protected _tweenSelect: any;
+
+    public selectAnim(isSelect: boolean) {
+        var icon = this.node.getChildByName("Icon")
+        var iconSprite: Sprite = icon.getComponent(Sprite)
+        iconSprite.color = new Color(225, 225, 255, 255)
+        const cor = { optcity: 225 }
+        if (isSelect) {
+            if (iconSprite.color) {
+                this._tweenSelect = tween(cor)
+                    .to(1, { optcity: 0 }, {
+                        onUpdate: () => {
+                            if (this.node)
+                                iconSprite.color = new Color(225, 225, 225, cor.optcity);
+                        }
+                    }).to(1, { optcity: 225 }, {
+                        onUpdate: () => {
+                            if (this.node)
+                                iconSprite.color = new Color(225, 225, 225, cor.optcity);
+                        }
+                    })
+                    // 逐渐透明
+                    .start(); // 启动动画
+                iconSprite.color = new Color(225, 225, 255, 100)
+            }
+
+            else {
+                console.log("当前选中设置UI名称或父子节点出错");
+            }
+        }
+        else {
+            iconSprite.color = new Color(225, 225, 225, 225)
+        }
+    }
+
     public get data(): any {
         return this._data;
     }
@@ -58,8 +94,14 @@ export class buildBase extends base {
             element.isStatic = false;
             element.isObstacle = false;
         });
-        this._obGrids.length=0;
-        this.node.destroy();
+        this._obGrids.length = 0;
+        //移除动画
+        if (this._tweenSelect) {
+            this._tweenSelect.stop();
+            this._tweenSelect = null;
+        }
+        if (this.node)
+            this.node.destroy();
     }
 
 
@@ -71,6 +113,9 @@ export class buildBase extends base {
     update(deltaTime: number) {
 
     }
+
+
+    public getOptionBuildData(): any { }
 }
 
 

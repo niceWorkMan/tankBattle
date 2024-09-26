@@ -41,7 +41,6 @@ export class tankManager extends Component {
         if (this._instance == null) {
             //获取单例失败
             console.log("获取TankManager单例失败");
-
         }
         return this._instance;
     }
@@ -305,7 +304,6 @@ export class tankManager extends Component {
                     if (jj > ii) {
                         //并且j层级比i大
                         //交换
-                        //   console.log("交换:",i,j);
                         var temp = nodes[i];
                         nodes[i] = nodes[j];
                         nodes[j] = temp;
@@ -314,7 +312,6 @@ export class tankManager extends Component {
                     console.log("获取索引失败");
                     alert("获取索引失败")
                 }
-
             }
         }
 

@@ -20,9 +20,11 @@ export class woodBox extends buildBase {
             //不向上冒泡
             e.bubbles = false;
             //生成操作菜单
-            UIManager.Instance.addBuildUI(new Vec2(this.cellX,this.cellY),UIManager.Instance.getMenuArr(["levelUp","delect","cancel"]))
+            UIManager.Instance.addBuildUI(new Vec2(this.cellX,this.cellY),UIManager.Instance.getMenuArr(["levelUp","delect","cancel"]),false)
             //存储
-            UIManager.Instance.optionBuildData={key:this._key,node:this.node,class:woodBox}
+            UIManager.Instance.optionBuildData=this.getOptionBuildData();
+            //动画
+            this.selectAnim(true);
         })
     }
 
@@ -36,6 +38,10 @@ export class woodBox extends buildBase {
 
     update(deltaTime: number) {
 
+    }
+
+    public getOptionBuildData() {
+        return {key:this._key,component:this,class:this.constructor}
     }
 }
 

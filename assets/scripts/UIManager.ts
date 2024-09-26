@@ -1,4 +1,4 @@
-import { _decorator, Button, Component, instantiate, JsonAsset, Label, Node, Prefab, resources, Sprite, Vec2 } from 'cc';
+import { _decorator, Button, Color, Component, instantiate, JsonAsset, Label, Node, Prefab, resources, Sprite, SpriteFrame, Vec2 } from 'cc';
 import { tankManager } from './tankManager';
 import { buildPop } from './ui/buildPop';
 import { util } from './common/util';
@@ -14,9 +14,12 @@ export class UIManager extends Component {
     @property(Prefab) addbuildUIPrefab: Prefab;
 
 
+    @property(SpriteFrame) rect_alpha0:SpriteFrame
+    @property(SpriteFrame) rect_green:SpriteFrame
+
+
     public ps: Sprite[] = [];
 
-    private _buildPanel: Node;
     //弹窗节点
     private _popContain: Node;
 
@@ -28,8 +31,8 @@ export class UIManager extends Component {
 
 
 
-    //设置操作对象
-    private _optionBuildData: any = { key: "", node: null, class: null }
+    //设置操作对象     //key:名字标识   component:挂载类实例   class:挂载类
+    private _optionBuildData: any = { key: "", component: null, class: null }
     public get optionBuildData(): any {
         return this._optionBuildData
     }
@@ -161,7 +164,7 @@ export class UIManager extends Component {
     private _buildUIArr: Node[] = [];
 
     //建造
-    public addBuildUI(center: Vec2, conf) {
+    public addBuildUI(center: Vec2, conf,showSelectGrid=true) {
         //清除
         this.clearBuildUI();
         //添加
@@ -173,8 +176,17 @@ export class UIManager extends Component {
         this._buildUIArr.push(bUI);
         //初始化周边UI
         var aem = bUI.getComponent(addElementManager)
-        this._addMenu=aem;
+        this._addMenu = aem;
         aem.initAddUI(center, conf)
+
+        //是否显示绿框
+        if(showSelectGrid){
+            bUI.getComponent(Sprite).spriteFrame=UIManager.Instance.rect_green;
+        }
+        else{
+            bUI.getComponent(Sprite).spriteFrame=UIManager.Instance.rect_alpha0;
+        }
+
     }
     //清除建造UI
     public clearBuildUI() {
@@ -183,6 +195,7 @@ export class UIManager extends Component {
                 element.destroy();
             });
         }
+        this._addMenu = null;
         this._buildUIArr.length = 0;
     }
 

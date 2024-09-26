@@ -40,14 +40,14 @@ export class addElItem extends Component {
                 break;
             case "delect":
                 //消除对象
-                UIManager.Instance.optionBuildData.node.getComponent(UIManager.Instance.optionBuildData.class).clearObGrids();
-                //消除UI
-                UIManager.Instance.addMenu.clear();
+                if (UIManager.Instance.optionBuildData.component) {
+                    //消除属性
+                    UIManager.Instance.optionBuildData.component.clearObGrids();
+                    //消除UI
+                    UIManager.Instance.addMenu.clear();
+                }
 
-                console.log("消除");
-                console.log(UIManager.Instance.optionBuildData.node.name);
-                
-                
+
                 break;
             case "last":
                 this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]))

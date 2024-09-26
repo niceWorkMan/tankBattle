@@ -123,13 +123,13 @@ export class grid extends Component {
 
     tweenColor() {
         //this._sprite = this.getComponent(Sprite)
-        const cor = { r: 255, g: 255, b: 255, a: 255 };
-        var tw = tween(cor).to(1, { r: 255, g: 255, b: 255, a: 0 }, {
+        const cor = { r: 225, g: 225, b: 225, a: 225 };
+        var tw = tween(cor).to(1, { r: 225, g: 225, b: 225, a: 0 }, {
             onUpdate: () => {
                 this._sprite.color = cor;
                 //console.log("cor.a", this._sprite.color, cor.a)
             }
-        }).to(1, { r: 255, g: 255, b: 255, a: 50 }, {
+        }).to(1, { r: 225, g: 225, b: 225, a: 50 }, {
             onUpdate: () => {
                 this._sprite.color = cor;
                 //console.log("cor.a", this._sprite.color, cor.a)
