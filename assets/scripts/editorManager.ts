@@ -5,17 +5,29 @@ import { tankManager } from './tankManager';
 import { tBase } from './building/tower/tBase';
 import { tree } from './obstale/tree';
 import { tArrow } from './building/tower/tArrow';
+import { bulletTArrow } from './bullet/bulletTArrow';
+import { tank } from './node/tank';
+import { boy01 } from './node/boy01';
+import { pig } from './node/pig';
+import { bulletTank } from './bullet/bulletTank';
 const { ccclass, property } = _decorator;
 
 @ccclass('editorManager')
 export class editorManager extends Component {
     @property(Prefab) edtorNode: Prefab;
 
-    @property(Prefab) woodbox_b: Prefab;
-    @property(Prefab) tBase_t: Prefab;
-    @property(Prefab) tArrow_t: Prefab;
+    @property(Prefab) obs_tree: Prefab;
 
+    @property(Prefab) build_woodbox: Prefab;
+    @property(Prefab) tower_base: Prefab;
+    @property(Prefab) tower_arrow: Prefab;
 
+    @property(Prefab) bullet_tank: Prefab;
+    @property(Prefab) bullet_tArrow: Prefab;
+
+    @property(Prefab) el_tank: Prefab;
+    @property(Prefab) el_pig: Prefab;
+    @property(Prefab) el_boy01: Prefab;
 
     constructor() {
         super();
@@ -28,30 +40,54 @@ export class editorManager extends Component {
     }
 
     //配置表
-    private _buildPlaceConfig = {};
-    public get buildPlaceConfig(): any {
-        return this._buildPlaceConfig;
+    private _propertyConfig = {};
+    public get propertyConfig(): any {
+        return this._propertyConfig;
     }
 
-    //初始化配置表
+    //初始化配置表(核心配置)
     initComponent() {
-        this._buildPlaceConfig = {
+        this._propertyConfig = {
+            //障碍物
             "tree": {
-                "prefab": gridManager.Instance.tree,
+                "prefab": this.obs_tree,
                 "class": tree
             },
+            //建筑
             "tBase": {
-                "prefab": this.tBase_t,
+                "prefab": this.tower_base,
                 "class": tBase
             },
             "woodBox": {
-                "prefab": this.woodbox_b,
+                "prefab": this.build_woodbox,
                 "class": woodBox
             },
             "tArrow": {
-                "prefab": this.tArrow_t,
+                "prefab": this.tower_arrow,
                 "class": tArrow
-            }
+            },
+            //移动人物
+            "tank": {
+                "prefab": this.el_tank,
+                "class": tank,
+            },
+            "boy01": {
+                "prefab": this.el_boy01,
+                "class": boy01,
+            },
+            "pig": {
+                "prefab": this.el_pig,
+                "class": pig,
+            },
+            //子弹
+            "bulletTank": {
+                "prefab": this.bullet_tank,
+                "class": bulletTank
+            },
+            "bulletTArrow": {
+                "prefab": this.bullet_tArrow,
+                "class": bulletTArrow
+            },
         };
     }
 
@@ -60,8 +96,8 @@ export class editorManager extends Component {
     //放置
     public placeBuild(center: Vec2, name: string, parent: Node) {
         var obj = null;
-        if (this._buildPlaceConfig[name]) {
-            obj = instantiate(this._buildPlaceConfig[name].prefab);
+        if (this._propertyConfig[name]) {
+            obj = instantiate(this._propertyConfig[name].prefab);
             var obstaleLayer = this.node.getChildByName("obstaleLayer")
             if (!parent) {
                 obstaleLayer.addChild(obj);
@@ -69,20 +105,20 @@ export class editorManager extends Component {
             }
             else {
                 parent.addChild(obj);
-                obj.position = new Vec3(0,0,0);
+                obj.position = new Vec3(0, 0, 0);
             }
-          
+
             //初始化位置Index
-            
-            obj.getComponent(this._buildPlaceConfig[name].class).init(center);
-            console.log("设置了", this._buildPlaceConfig[name],center);
+
+            obj.getComponent(this._propertyConfig[name].class).init(center);
+            console.log("设置了", this._propertyConfig[name], center);
             //排序(遮挡关系)
             this.node.getComponent(tankManager).setSiblingIndex_Layer(obstaleLayer)
         } else {
             alert("生成失败")
             return null;
         }
-        return obj.getComponent(this._buildPlaceConfig[name].class)
+        return obj.getComponent(this._propertyConfig[name].class)
     }
 
 

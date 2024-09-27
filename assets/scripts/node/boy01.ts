@@ -7,6 +7,8 @@ import { tankManager } from '../tankManager';
 import { grid_c } from '../core/grid_c';
 import { bullet } from '../bullet/bullet';
 import { pool } from '../core/pool';
+import { buildType } from '../common/buildType';
+import { editorManager } from '../editorManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('boy01')
@@ -16,6 +18,8 @@ export class boy01 extends element {
         super();
         //初始化config的key
         this._key = "boy01";
+        //不属于建筑类型
+        this.buildType = buildType.none;
     }
     private animClip: Animation;
 
@@ -167,8 +171,8 @@ export class boy01 extends element {
         }
         //list最后一个不设置Obstale
         else {
-             //判断是否真的移动到终点
-             if (star.endGrid == star.finalGrid) {
+            //判断是否真的移动到终点
+            if (star.endGrid == star.finalGrid) {
                 if (this.node) {
                     this.destorySelf();
                 }
@@ -207,9 +211,9 @@ export class boy01 extends element {
                 setTimeout(() => {
                     if (bu) {
                         //子弹销毁 加入对象池
-                        var po=this.node.parent.parent.getComponent(pool);
-                        var cofResult = po.actorConfig[bu.node.name];
-                        var b: any = bu.getComponent(cofResult.component);
+                        var edt=this.node.parent.parent.getComponent(editorManager);
+                        var cofResult = edt.propertyConfig[bu.node.name];
+                        var b: any = bu.getComponent(cofResult.class);
                         if (b.sleep == false) {
                             b.sleep = true;
                         }

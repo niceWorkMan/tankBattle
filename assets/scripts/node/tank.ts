@@ -9,6 +9,7 @@ import { bullet } from '../bullet/bullet';
 import { pool } from '../core/pool';
 import { base } from './base';
 import { buildType } from '../common/buildType';
+import { editorManager } from '../editorManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('tank')
@@ -17,8 +18,10 @@ export class tank extends element {
         super();
         //初始化config的key
         this._key = "tank";
+        //不属于建筑类型
+        this.buildType = buildType.none;
         //设置射程
-        this._attackDis=6
+        this._attackDis = 6
     }
 
     private _gun: Node
@@ -301,12 +304,13 @@ export class tank extends element {
         var nodeLayer = this.node.parent.parent.getChildByName("tankLayer");
         //对象池
         var po: pool = this.node.parent.parent.getComponent(pool)
+        var edt:editorManager=this.node.parent.parent.getComponent(editorManager)
         //获取对应的类和Prefab
         var key = "bulletTank";
-        var cofResult = po.actorConfig[key]
+        var cofResult = edt.propertyConfig[key]
         var bulletNode: Node = po.spawnBullet("bulletTank", nodeLayer)
         //获取类型
-        var bClass: any = bulletNode.getComponent(cofResult.component);
+        var bClass: any = bulletNode.getComponent(cofResult.class);
         //设置父类
         var targetPos = target.node.getPosition();
         var selfPos = this.node.getPosition();
@@ -326,7 +330,7 @@ export class tank extends element {
                 onComplete: () => {
                     if (bulletNode) {
                         bClass.bTween.removeSelf();
-                        var b: any = bulletNode.getComponent(cofResult.component);
+                        var b: any = bulletNode.getComponent(cofResult.class);
                         if (b.sleep == false) {
                             b.sleep = true;
                         }
@@ -366,9 +370,9 @@ export class tank extends element {
                 setTimeout(() => {
                     if (bu) {
                         //子弹销毁 加入对象池
-                        var po=this.node.parent.parent.getComponent(pool);
-                        var cofResult = po.actorConfig[bu.node.name];
-                        var b: any = bu.getComponent(cofResult.component);
+                        var edt=this.node.parent.parent.getComponent(editorManager);
+                        var cofResult = edt.propertyConfig[bu.node.name];
+                        var b: any = bu.getComponent(cofResult.class);
                         if (b.sleep == false) {
                             b.sleep = true;
                         }

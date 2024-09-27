@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Label, log, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Label, log, Node, Pool, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { aStar } from './core/aStar';
 import { tank } from './node/tank';
@@ -192,7 +192,8 @@ export class tankManager extends Component {
         //设置起始位置结束位置
         var startGrid = this._gManager.getGridByCellIndex(start.x, start.y);
         var endGrid = this._gManager.getGridByCellIndex(end.x, end.y);
-        var po = this.getComponent(pool);
+        var config = this.getComponent(editorManager);
+        var po=this.getComponent(pool);
         //过滤当前位置是否被占用
         if (startGrid.isObstacle == false) {
             //随机模拟生成
@@ -208,7 +209,7 @@ export class tankManager extends Component {
                 key = "pig"
             }
             //获取对应的类和Prefab
-            var cofResult = po.actorConfig[key]
+            var cofResult = config.propertyConfig[key]
             var tankLayer = this.node.getChildByName("tankLayer")
             //是否从对象池抽取实例
             var tankNode: Node = po.spawnActor(key, tankLayer);
@@ -216,7 +217,7 @@ export class tankManager extends Component {
             //先隐藏对象(因为寻路还需要时间运算，使用了settimeout,寻路完成后再显示对象,参考aStart.showPath)
             //tankNode.active = false;
             //赋值属性
-            var el: any = tankNode.getComponent(cofResult.component);
+            var el: any = tankNode.getComponent(cofResult.class);
             el.team = team;
             var star = tankNode.getComponent(aStar);
             star.tk = el;
@@ -314,7 +315,7 @@ export class tankManager extends Component {
 
     //获取在数组中的索引
     getOneIndex(n: Node): number {
-        var config = editorManager.Instance.buildPlaceConfig;
+        var config = editorManager.Instance.propertyConfig;
         var cls: any = n.getComponent(config[n.name].class)
         var Matrix = this._gManager.getGridMatrix;
         return Matrix.row * cls.cellY + cls.cellX;
@@ -376,37 +377,42 @@ export class tankManager extends Component {
 
 
     //查询
-    public searchAttakTarget(t: base) {
+    public searchAttakTarget(_self: base) {
         var targetCollection: base[] = [];
+        var edt:editorManager= this.node.getComponent(editorManager);
         //查询
         for (var i = 0; i < this.nodeCollection.length; i++) {
-            if (t.team != this.nodeCollection[i].team && this.nodeCollection[i].sleep == false) {
+            if (_self.team != this.nodeCollection[i].team && this.nodeCollection[i].sleep == false) {
                 var targtPos;
+
+                var cls = edt.propertyConfig[this.nodeCollection[i].node.name].class;                    ;
+                var nodeObj: any = this.nodeCollection[i].node.getComponent(cls);
+
                 //可移动的
-                if (t.buildType == buildType.none) {
+                if (nodeObj.buildType == buildType.none) {
                     targtPos = this.nodeCollection[i].getComponent(aStar).nodeInGridCellIndex;
                 }
                 //不可移动的
-                else {
-                    console.log("targetPos:",this.nodeCollection[i].cellX,this.nodeCollection[i].cellY);
-                    
-                    targtPos = this._gManager.gridComponentArr[this.nodeCollection[i].cellX][this.nodeCollection[i].cellY].node.position;
+                else {         
+                    targtPos = this._gManager.gridComponentArr[nodeObj.cellX][nodeObj.cellY].node.position;
+                    //          console.log("targetPos:", this.nodeCollection[i].cellX, this.nodeCollection[i].cellY, this.nodeCollection[i].node.name, t.buildType == buildType.none);
                 }
 
                 if (targtPos) {
                     var selfPos
                     //可移动的
-                    if (t.buildType == buildType.none) {
-                        selfPos = t.getComponent(aStar).nodeInGridCellIndex;
+                    if (_self.buildType == buildType.none) {
+                        selfPos = _self.getComponent(aStar).nodeInGridCellIndex;
                     }
                     //不可移动的
                     else {
-                        console.log("selfPos:",t.cellX,t.cellY);
-                        selfPos = this._gManager.gridComponentArr[t.cellX][t.cellY].node.position;
+                        var cls_self = edt.propertyConfig[_self.node.name].class;
+                        var nodeObj_self: any = _self.node.getComponent(cls_self);
+                        selfPos = this._gManager.gridComponentArr[nodeObj_self.cellX][nodeObj_self.cellY].node.position;
                     }
                     var sum = Math.pow((targtPos.x - selfPos.x), 2) + Math.pow((targtPos.y - selfPos.y), 2)
                     var dis = Math.sqrt(sum);
-                    if (dis <= t.attackDis && this.nodeCollection[i].sleep == false) {
+                    if (dis <= _self.attackDis && this.nodeCollection[i].sleep == false) {
                         this.nodeCollection[i].targetDis = dis;
                         targetCollection.push(this.nodeCollection[i])
                     }
@@ -425,10 +431,14 @@ export class tankManager extends Component {
         }
         //返回最近的炮台
         if (targetCollection.length > 0) {
-            t.targetNode = targetCollection[0];
+            
+            _self.targetNode = targetCollection[0];
+            console.log("目标得到:",targetCollection[0].node.name);
+            console.log("返回对象:",targetCollection[0]);
             return targetCollection[0];
         }
         else {
+            console.log("没有返回:",targetCollection[0]);
             return null;
         }
 

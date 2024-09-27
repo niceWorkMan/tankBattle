@@ -9,6 +9,7 @@ import { bullet } from '../../bullet/bullet';
 import { base } from '../../node/base';
 import { gridManager } from '../../gridManager';
 import { tankManager } from '../../tankManager';
+import { editorManager } from '../../editorManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('tArrow')
@@ -18,16 +19,20 @@ export class tArrow extends buildBase {
         //初始化config的key
         this._key = "tArrow";
         //建筑类型
-        this._buildType=buildType.build;
+        this._buildType = buildType.build;
         //攻击距离
-        this.attackDis=8
+        this.attackDis = 6
 
-        this.team=enumTeam.teamBlue;
+        this.team = enumTeam.teamBlue;
     }
 
     public init(pos: math.Vec2): void {
         super.init(pos);
     }
+
+
+
+
 
     start() {
         this.node.on(NodeEventType.TOUCH_START, (e) => {
@@ -46,31 +51,61 @@ export class tArrow extends buildBase {
         this._tankManager = this.node.parent.parent.parent.getComponent(tankManager);
 
         //巡逻
-        setInterval(() => {
-            console.log("this._gManager:",this._gManager,"this._tankManager:",this._tankManager);
-            
-            var targetTank = this.tManager.searchAttakTarget(this);
-            if (targetTank) {
-                if (targetTank.sleep == false) {
-                     //攻击
-                     this.attackTarget(targetTank);
-                     return;
+
+
+
+        var _searchInterval;
+        var _cuurentTarget;
+        if (!this.targetNode) {
+            _searchInterval = setInterval(() => {
+                _cuurentTarget = this.tManager.searchAttakTarget(this);
+                console.log("对象返回在TArrow:", _cuurentTarget);
+                // if (targetTank) {
+                //     console.log("睡眠:",targetTank.sleep);
+                //     if (targetTank.sleep == false) {
+                //          //攻击
+                //          console.log("攻击:",targetTank.node.name);
+
+                //          this.attackTarget(targetTank);
+                //          return;
+                //     }
+                //     targetTank.destroyTarget();
+                // } else {
+                //     console.log("没有目标");         
+                // }
+
+                console.log("setInterval");
+
+            }, 10000);
+        }
+        else {
+            clearInterval(_searchInterval);
+            if (_cuurentTarget) {
+                console.log("睡眠:", _cuurentTarget.sleep);
+                if (_cuurentTarget.sleep == false) {
+                    //攻击
+                    console.log("攻击:", _cuurentTarget.node.name);
+
+                    this.attackTarget(_cuurentTarget);
+                    return;
                 }
-                targetTank.destroyTarget();
-            } else {
-                console.log("没有目标");         
+                _cuurentTarget.destroyTarget();
             }
-        }, 1000);
+
+        }
+
+
     }
 
-     //生成子弹
-     public spawnBullet(target: base) {
+    //生成子弹
+    public spawnBullet(target: base) {
         var nodeLayer = this.node.parent.parent.getChildByName("tankLayer");
         //对象池
         var po: pool = this.node.parent.parent.getComponent(pool)
+        var edt: editorManager = this.node.parent.parent.getComponent(editorManager)
         //获取对应的类和Prefab
         var key = "bulletTArrow";
-        var cofResult = po.actorConfig[key]
+        var cofResult = edt.propertyConfig[key]
         var bulletNode: Node = po.spawnBullet("bulletTArrow", nodeLayer)
         //获取类型
         var bClass: any = bulletNode.getComponent(cofResult.component);
@@ -103,7 +138,7 @@ export class tArrow extends buildBase {
             }).start();
         }
     }
-    
+
     public generateBullet(target, stopIndex, closeList) {
         //随机开炮速度
         //this._fireSpace = Math.random();
@@ -149,7 +184,7 @@ export class tArrow extends buildBase {
                 else {
                     this._targetNode = null;
                     clearInterval(this._fireInterval);
-          
+
                 }
 
             }, this._fireSpace * 200);
@@ -157,7 +192,7 @@ export class tArrow extends buildBase {
         else {
             this._targetNode = null;
             clearInterval(this._fireInterval);
-    
+
         }
     }
 
@@ -179,7 +214,7 @@ export class tArrow extends buildBase {
     }
 
     update(deltaTime: number) {
-        
+
     }
 
     public getOptionBuildData() {

@@ -8,6 +8,7 @@ import { bullet } from '../bullet/bullet';
 import { grid_c } from '../core/grid_c';
 import { pool } from '../core/pool';
 import { buildType } from '../common/buildType';
+import { editorManager } from '../editorManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('pig')
@@ -17,6 +18,8 @@ export class pig extends element {
         super();
         //初始化config的key
         this._key = "pig";
+        //不属于建筑类型
+        this.buildType=buildType.none;
     }
     private animClip: Animation;
 
@@ -209,9 +212,9 @@ export class pig extends element {
                 setTimeout(() => {
                     if (bu) {
                         //子弹销毁 加入对象池
-                        var po = this.node.parent.parent.getComponent(pool);
-                        var cofResult = po.actorConfig[bu.node.name];
-                        var b: any = bu.getComponent(cofResult.component);
+                        var edt=this.node.parent.parent.getComponent(editorManager);
+                        var cofResult = edt.propertyConfig[bu.node.name];
+                        var b: any = bu.getComponent(cofResult.class);
                         if (b.sleep == false) {
                             b.sleep = true;
                         }

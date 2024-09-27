@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, instantiate, Node, Prefab, Sprite } from 'cc';
+import { _decorator, Color, Component, instantiate, log, Node, Prefab, Sprite } from 'cc';
 import { tank } from '../node/tank';
 import { boy01 } from '../node/boy01';
 import { pig } from '../node/pig';
@@ -9,19 +9,11 @@ import { bullet } from '../bullet/bullet';
 import { bulletTank } from '../bullet/bulletTank';
 import { tree } from '../obstale/tree';
 import { bulletTArrow } from '../bullet/bulletTArrow';
+import { editorManager } from '../editorManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('pool')
 export class pool extends Component {
-
-    //对象
-    @property(Prefab) bulletTankPrefab: Prefab;
-    @property(Prefab) bulletTArrowfab: Prefab;
-
-    @property(Prefab) tankPrefab: Prefab;
-    @property(Prefab) boy01Prefab: Prefab;
-    @property(Prefab) PigPrefab: Prefab;
-
     constructor() {
         super();
         pool._instance = this;
@@ -38,38 +30,10 @@ export class pool extends Component {
         return this._instance;
     }
 
-    //配置表
-    private _actorConfig = {};
-    public get actorConfig(): any {
-        return this._actorConfig;
-    }
-
 
 
     start() {
-        //初始化Config
-        this._actorConfig = {
-            bulletTank: {
-                prefab: this.bulletTankPrefab,
-                component: bulletTank,
-            },
-            bulletTArrow: {
-                prefab: this.bulletTArrowfab,
-                component: bulletTArrow,
-            },
-            tank: {
-                prefab: this.tankPrefab,
-                component: tank,
-            },
-            boy01: {
-                prefab: this.boy01Prefab,
-                component: boy01,
-            },
-            pig: {
-                prefab: this.PigPrefab,
-                component: pig,
-            }
-        }
+       
     }
 
 
@@ -80,6 +44,7 @@ export class pool extends Component {
 
     //生成对象
     public spawnActor(name: string, parent: Node): any {
+        var edt:editorManager=this.getComponent(editorManager);
         var ac = this.getSleepActor(name);
         if (ac) {
             //刷新寻路数据
@@ -93,7 +58,7 @@ export class pool extends Component {
             //显示
             ac.active = true;
             //console.log("使用坦克对象池的:" + this._elPool.tank.length);
-            ac.getComponent(this._actorConfig[name].component).sleep = false;
+            ac.getComponent(edt.propertyConfig[name].class).sleep = false;
             ac.die = false;
             //重新赋值血量
             ac.hp = 200;
@@ -111,7 +76,7 @@ export class pool extends Component {
         }
         else {
             var obj = null;
-            obj = instantiate(this._actorConfig[name].prefab)
+            obj = instantiate(edt.propertyConfig[name].prefab)
             parent.addChild(obj);
             this._elPool[name].push(obj);
             //console.log("使用tank新对象:"+obj.name);
@@ -121,12 +86,13 @@ export class pool extends Component {
 
 
     private getSleepActor(name: string): any {
+        var edt:editorManager=this.getComponent(editorManager);
         var arr = this._elPool[name];
         for (var i = 0; i < arr.length; i++) {
-            var sl = arr[i].getComponent(this._actorConfig[name].component).sleep;
-            var sl2 = arr[i].getComponent(this._actorConfig[name].component).realSleep;
+            var sl = arr[i].getComponent(edt.propertyConfig[name].class).sleep;
+            var sl2 = arr[i].getComponent(edt.propertyConfig[name].class).realSleep;
             if (sl == true && sl2 == true) {
-                var k = arr[i].getComponent(this._actorConfig[name].component).key;
+                var k = arr[i].getComponent(edt.propertyConfig[name].class).key;
                 return arr[i];
             }
         }
@@ -154,20 +120,21 @@ export class pool extends Component {
 
 
     //子弹对象池
-    private _blPool = { bulletTank: [],bulletTArrow:[] };
+    private _blPool = { bulletTank: [], bulletTArrow: [] };
     //生成子弹对象
     public spawnBullet(name: string, parent: Node): any {
+        var edt:editorManager=this.getComponent(editorManager);
         var ac = this.getSleepBullet(name);
-        
+
         if (ac) {
             //显示
-            ac.getComponent(this._actorConfig[name].component).sleep = false;
+            ac.getComponent(edt.propertyConfig[name].class).sleep = false;
             //console.log("使用子弹对象池的:" + this._blPool[name].length);
             return ac;
         }
         else {
             var obj = null;
-            obj = instantiate(this._actorConfig[name].prefab)
+            obj = instantiate(edt.propertyConfig[name].prefab)
             parent.addChild(obj);
             this._blPool[name].push(obj);
             //console.log("使用子弹新对象:" + obj.name);
@@ -177,9 +144,10 @@ export class pool extends Component {
 
 
     private getSleepBullet(name: string): any {
+        var edt:editorManager=this.getComponent(editorManager);
         var arr = this._blPool[name];
         for (var i = 0; i < arr.length; i++) {
-            var sl = arr[i].getComponent(this._actorConfig[name].component).sleep;
+            var sl = arr[i].getComponent(edt.propertyConfig[name].class).sleep;
             if (sl == true) {
                 return arr[i];
             }
