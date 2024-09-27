@@ -57,6 +57,11 @@ export class addElItem extends Component {
                 this.placeBuild(this._data);
                 break;
 
+
+            case "tArrow":
+                this.placeBuild(this._data, UIManager.Instance.optionBuildData.component.node);
+                break;
+
         }
     }
 
@@ -64,7 +69,7 @@ export class addElItem extends Component {
 
 
     //放置
-    placeBuild(data) {
+    placeBuild(data, pNode: Node = null) {
         var parent = this.node.parent.getComponent(addElementManager);
         //清除UI
         this.node.parent.getComponent(addElementManager).clear();
@@ -77,7 +82,7 @@ export class addElItem extends Component {
                 if (this.checkCellPosIsValue(new Vec2(parent.lastCenter.x + 1, parent.lastCenter.y))) {
                     if (gridManager.Instance.gridComponentArr[parent.lastCenter.x + 1][parent.lastCenter.y].isStatic == false) {
                         //生成
-                        var build = editorManager.Instance.placeBuild(parent.lastCenter, this._data.name);
+                        var build = editorManager.Instance.placeBuild(parent.lastCenter, this._data.name, pNode);
                         //标记
                         build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x][parent.lastCenter.y]);
                         build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x + 1][parent.lastCenter.y]);
@@ -93,7 +98,7 @@ export class addElItem extends Component {
                     if (this.checkCellPosIsValue(new Vec2(parent.lastCenter.x - 1, parent.lastCenter.y))) {
                         if (gridManager.Instance.gridComponentArr[parent.lastCenter.x - 1][parent.lastCenter.y].isStatic == false) {
                             //生成
-                            var build = editorManager.Instance.placeBuild(new Vec2(parent.lastCenter.x - 1, parent.lastCenter.y), this._data.name);
+                            var build = editorManager.Instance.placeBuild(new Vec2(parent.lastCenter.x - 1, parent.lastCenter.y), this._data.name, pNode);
                             //标记
                             build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x][parent.lastCenter.y]);
                             build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x - 1][parent.lastCenter.y]);
@@ -113,7 +118,7 @@ export class addElItem extends Component {
             }
 
             else if (this._data.zw.x == 1 && this._data.zw.y == 1) {
-                var build = editorManager.Instance.placeBuild(parent.lastCenter, this._data.name);
+                var build = editorManager.Instance.placeBuild(parent.lastCenter, this._data.name, pNode);
                 build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x][parent.lastCenter.y]);
             }
         }

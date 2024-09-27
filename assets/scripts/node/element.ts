@@ -55,57 +55,9 @@ export class element extends base {
         return this._waitObsTime;
     }
 
-  
-
-    //坦克管理类
-    protected _tankManager: tankManager
-    public set tManager(v: tankManager) {
-        this._tankManager = v;
-    }
-    public get tManager(): tankManager {
-        return this._tankManager
-    }
-
-    //网格管理类
-    protected _gManager: gridManager;
-    public set gManager(v: gridManager) {
-        this._gManager = v;
-    }
-    public get gManager(): gridManager {
-        return this._gManager
-    }
 
 
 
-
-
-    //射程
-    protected _attackDis = 6;
-    public set attackDis(v: number) {
-        this._attackDis = v;
-    }
-    public get attackDis(): number {
-        return this._attackDis
-    }
-
-
-    //目标坦克距离(用来存储 做排序继续拿)
-    protected _targetDis;
-    public set targetDis(v: number) {
-        this._targetDis = v;
-    }
-    public get targetDis(): number {
-        return this._targetDis;
-    }
-
-    //目标tank
-    protected _targetNode: element;
-    public set targetNode(v: element) {
-        this._targetNode = v;
-    }
-    public get targetNode(): element {
-        return this._targetNode
-    }
 
     //由于设计停止移动,在closelist中的位置
     protected _stopIndex: number;
@@ -134,75 +86,6 @@ export class element extends base {
     }
 
 
-
-    //Hp(血条)
-    protected _hp: number = 100;
-    public set hp(v: number) {
-        var hpComp = this.node.getChildByName("hp");
-        if (v < 100 && v > 0) {
-            hpComp.active = true;
-            hpComp.getChildByName("forward").getComponent(Sprite).fillStart = 1 - v / 100;
-        } else {
-            //清空状态
-            hpComp.active = false;
-            this.clearElement()
-        }
-        this._hp = v;
-    }
-    public get hp(): number {
-        return this._hp;
-    }
-
-
-
-
-    //开火间隔时间
-    protected _fireSpace: number = 1;
-    public set fireSpace(v: number) {
-        this._fireSpace = v;
-    }
-    public get fireSpace(): number {
-        return this._fireSpace;
-    }
-
-
-    //是否暂停
-    protected _isPause: boolean;
-    public get isPause(): boolean {
-        return this._isPause;
-    }
-    public set isPause(v: boolean) {
-        this.pause(v);
-        this._isPause = v;
-    }
-
-
-
-
-
-    //用于对象池 是否休眠
-    private _isSleep: boolean = false;
-    public set sleep(v: boolean) {
-        //this.node.active = !v;
-        this.getComponent(BoxCollider2D).enabled = !v;
-        if (v == true) {
-            //延迟1s设置realSleep=true,让sleep打断的递归都跳出
-            setTimeout(() => {
-                this.realSleep = true;
-            }, 2000);
-        }
-        else {
-            this.realSleep = v;
-        }
-        this._isSleep = v;
-    }
-    public get sleep(): boolean {
-        return this._isSleep;
-    }
-
-    public realSleep: boolean = false;
-
-
     //获取位置
     protected getPosition(g: grid_c) {
         return this.node.parent.parent.getComponent(gridManager).gridComponentArr[g.cellX][g.cellX].node.getPosition();
@@ -215,16 +98,16 @@ export class element extends base {
 
 
 
+
+
     //清除障碍的
-    public clearElement() {
+    protected clearElement(): void {
         this._closeList.length = 0;
         var star = this.getComponent(aStar);
         if (star)
             star.closeList.length = 0;
         this.stopIndex = 0;
     }
-
-
 
 
     //开始导航
@@ -244,13 +127,15 @@ export class element extends base {
 
     }
 
-    public destroyTarget() {
+
+    //重载函数
+    public destroyTarget(): void {
         this.destorySelf();
     }
 
 
-    //销毁
-    protected destorySelf() {
+    //销毁 element元素的
+     protected destorySelf() {
         this.sleep = true;
 
         if (this.lastTweenMove) {
@@ -308,9 +193,6 @@ export class element extends base {
 
     }
 
-    protected pause(p: boolean) {
-
-    }
 
 
 

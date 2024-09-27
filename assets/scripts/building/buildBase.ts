@@ -66,16 +66,6 @@ export class buildBase extends base {
     }
 
 
-    //所在索引
-    protected _cellX: number;
-    protected _cellY: number
-    public get cellX(): number {
-        return this._cellX;
-    }
-
-    public get cellY(): number {
-        return this._cellY
-    }
 
 
     //初始化
@@ -112,6 +102,11 @@ export class buildBase extends base {
         if (this.node)
             this.node.destroy();
     }
+
+    /**
+     * 默认是半径为1格子的范围=50
+     */
+    protected _attackRadius=50;
 
 
     //初始化数据

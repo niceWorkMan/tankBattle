@@ -7,6 +7,8 @@ import { tankManager } from '../tankManager';
 import { grid_c } from '../core/grid_c';
 import { bullet } from '../bullet/bullet';
 import { pool } from '../core/pool';
+import { base } from './base';
+import { buildType } from '../common/buildType';
 const { ccclass, property } = _decorator;
 
 @ccclass('tank')
@@ -15,6 +17,8 @@ export class tank extends element {
         super();
         //初始化config的key
         this._key = "tank";
+        //设置射程
+        this._attackDis=6
     }
 
     private _gun: Node
@@ -226,7 +230,7 @@ export class tank extends element {
 
 
     //攻击
-    public attackTarget(target: element, stopIndex: number, closeList: grid_c[]) {
+    public attackTarget(target: base, stopIndex: number, closeList: grid_c[]) {
         if (this.isPause) {
             return;
         }
@@ -277,7 +281,7 @@ export class tank extends element {
 
 
     //旋转对方炮筒
-    public gunRote(target: element) {
+    public gunRote(target: base) {
         var root: Node = this.node.getChildByName("root");
         if (target.node) {
             var radian = Math.atan2(target.node.position.y - this.node.position.y, target.node.position.x - this.node.position.x);
@@ -290,17 +294,8 @@ export class tank extends element {
     }
 
 
-    //连续发射函数
-    private _fireInterval = null;
-    public set fireInterva(v: any) {
-        this._fireInterval = v;
-    }
-    public get value(): any {
-        return this._fireInterval;
-    }
-
     //生成子弹
-    public spawnBullet(target: element) {
+    public spawnBullet(target: base) {
         if (this.sleep)
             return;
         var nodeLayer = this.node.parent.parent.getChildByName("tankLayer");

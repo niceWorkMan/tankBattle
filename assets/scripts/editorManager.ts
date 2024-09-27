@@ -1,9 +1,10 @@
-import { _decorator, Color, Component, instantiate, Node, Prefab, settings, Sprite, Vec2 } from 'cc';
+import { _decorator, Color, Component, instantiate, Node, Prefab, settings, Sprite, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { woodBox } from './building/woodBox';
 import { tankManager } from './tankManager';
 import { tBase } from './building/tower/tBase';
 import { tree } from './obstale/tree';
+import { tArrow } from './building/tower/tArrow';
 const { ccclass, property } = _decorator;
 
 @ccclass('editorManager')
@@ -12,6 +13,7 @@ export class editorManager extends Component {
 
     @property(Prefab) woodbox_b: Prefab;
     @property(Prefab) tBase_t: Prefab;
+    @property(Prefab) tArrow_t: Prefab;
 
 
 
@@ -27,10 +29,10 @@ export class editorManager extends Component {
 
     //配置表
     private _buildPlaceConfig = {};
-    public get buildPlaceConfig() : any {
+    public get buildPlaceConfig(): any {
         return this._buildPlaceConfig;
     }
-    
+
     //初始化配置表
     initComponent() {
         this._buildPlaceConfig = {
@@ -45,6 +47,10 @@ export class editorManager extends Component {
             "woodBox": {
                 "prefab": this.woodbox_b,
                 "class": woodBox
+            },
+            "tArrow": {
+                "prefab": this.tArrow_t,
+                "class": tArrow
             }
         };
     }
@@ -52,17 +58,24 @@ export class editorManager extends Component {
 
 
     //放置
-    public placeBuild(center: Vec2, name: string) {
+    public placeBuild(center: Vec2, name: string, parent: Node) {
         var obj = null;
         if (this._buildPlaceConfig[name]) {
             obj = instantiate(this._buildPlaceConfig[name].prefab);
             var obstaleLayer = this.node.getChildByName("obstaleLayer")
-            obstaleLayer.addChild(obj);
-            obj.position = this.getComponent(gridManager).gridComponentArr[center.x][center.y].node.position;
+            if (!parent) {
+                obstaleLayer.addChild(obj);
+                obj.position = this.getComponent(gridManager).gridComponentArr[center.x][center.y].node.position;
+            }
+            else {
+                parent.addChild(obj);
+                obj.position = new Vec3(0,0,0);
+            }
+          
             //初始化位置Index
-            console.log("*****",this._buildPlaceConfig);
             
             obj.getComponent(this._buildPlaceConfig[name].class).init(center);
+            console.log("设置了", this._buildPlaceConfig[name],center);
             //排序(遮挡关系)
             this.node.getComponent(tankManager).setSiblingIndex_Layer(obstaleLayer)
         } else {

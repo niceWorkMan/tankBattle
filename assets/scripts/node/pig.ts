@@ -7,6 +7,7 @@ import { tankManager } from '../tankManager';
 import { bullet } from '../bullet/bullet';
 import { grid_c } from '../core/grid_c';
 import { pool } from '../core/pool';
+import { buildType } from '../common/buildType';
 const { ccclass, property } = _decorator;
 
 @ccclass('pig')

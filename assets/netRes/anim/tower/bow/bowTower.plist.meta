@@ -1,0 +1,155 @@
+{
+  "ver": "1.0.8",
+  "importer": "sprite-atlas",
+  "imported": true,
+  "uuid": "0f69fdcc-f1ee-4dd4-b400-bcb04796d444",
+  "files": [
+    ".json"
+  ],
+  "subMetas": {
+    "b05f4": {
+      "importer": "sprite-frame",
+      "uuid": "0f69fdcc-f1ee-4dd4-b400-bcb04796d444@b05f4",
+      "displayName": "",
+      "id": "b05f4",
+      "name": "bowRead01",
+      "userData": {
+        "trimType": "auto",
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 0,
+        "trimY": 0,
+        "width": 184,
+        "height": 177,
+        "rawWidth": 184,
+        "rawHeight": 177,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "6aa77de1-b8b2-4baa-9969-373d5c79fd42@6c48a",
+        "atlasUuid": "0f69fdcc-f1ee-4dd4-b400-bcb04796d444"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "efafc": {
+      "importer": "sprite-frame",
+      "uuid": "0f69fdcc-f1ee-4dd4-b400-bcb04796d444@efafc",
+      "displayName": "",
+      "id": "efafc",
+      "name": "bowRead02",
+      "userData": {
+        "trimType": "auto",
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 184,
+        "trimY": 0,
+        "width": 184,
+        "height": 177,
+        "rawWidth": 184,
+        "rawHeight": 177,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "6aa77de1-b8b2-4baa-9969-373d5c79fd42@6c48a",
+        "atlasUuid": "0f69fdcc-f1ee-4dd4-b400-bcb04796d444"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "419b8": {
+      "importer": "sprite-frame",
+      "uuid": "0f69fdcc-f1ee-4dd4-b400-bcb04796d444@419b8",
+      "displayName": "",
+      "id": "419b8",
+      "name": "bowRead03",
+      "userData": {
+        "trimType": "auto",
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 368,
+        "trimY": 0,
+        "width": 184,
+        "height": 177,
+        "rawWidth": 184,
+        "rawHeight": 177,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "6aa77de1-b8b2-4baa-9969-373d5c79fd42@6c48a",
+        "atlasUuid": "0f69fdcc-f1ee-4dd4-b400-bcb04796d444"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "atlasTextureName": "bowTower.png",
+    "format": 3,
+    "uuid": "0f69fdcc-f1ee-4dd4-b400-bcb04796d444",
+    "textureUuid": "6aa77de1-b8b2-4baa-9969-373d5c79fd42@6c48a"
+  }
+}

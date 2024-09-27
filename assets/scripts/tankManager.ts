@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Label, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Label, log, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { aStar } from './core/aStar';
 import { tank } from './node/tank';
@@ -9,6 +9,8 @@ import { tree } from './obstale/tree';
 import { grid } from './grid';
 import { woodBox } from './building/woodBox';
 import { editorManager } from './editorManager';
+import { base } from './node/base';
+import { buildType } from './common/buildType';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
@@ -61,12 +63,12 @@ export class tankManager extends Component {
 
 
     //在线坦克集合
-    private _nodeCollection: element[] = [];
+    private _nodeCollection: base[] = [];
 
-    public set nodeCollection(v: element[]) {
+    public set nodeCollection(v: base[]) {
         this._nodeCollection = v;
     }
-    public get nodeCollection(): element[] {
+    public get nodeCollection(): base[] {
         return this._nodeCollection;
     }
 
@@ -146,12 +148,12 @@ export class tankManager extends Component {
             var pos0 = new Vec2(Math.ceil(Math.random() * 14), 0);
             var pos1 = new Vec2(Math.ceil(Math.random() * 14), 25);
             var isFree = (this._gManager.gridComponentArr[pos0.x][pos0.y].isObstacle == false) && (this._gManager.gridComponentArr[pos1.x][pos1.y].isObstacle == false)
-            var gteam: enumTeam = enumTeam.teamRed;
+            var gteam: enumTeam = enumTeam.teamBlue;
             if (spawnTime % 2 == 0) {
                 var tempPos = pos0;
                 pos0 = pos1;
                 pos1 = tempPos;
-                gteam = enumTeam.teamBlue;
+                gteam = enumTeam.teamRed;
             }
             if (isFree) {
                 this.spawnActor(pos0, pos1, gteam);
@@ -306,13 +308,13 @@ export class tankManager extends Component {
         // 2 排序
         for (var i = 0; i < nodes.length; i++) {
             //使用+1 就可排序 原因未知
-            nodes[i].setSiblingIndex(i+1);
+            nodes[i].setSiblingIndex(i + 1);
         }
     }
 
     //获取在数组中的索引
     getOneIndex(n: Node): number {
-        var config=editorManager.Instance.buildPlaceConfig;
+        var config = editorManager.Instance.buildPlaceConfig;
         var cls: any = n.getComponent(config[n.name].class)
         var Matrix = this._gManager.getGridMatrix;
         return Matrix.row * cls.cellY + cls.cellX;
@@ -374,14 +376,34 @@ export class tankManager extends Component {
 
 
     //查询
-    public searchAttakTarget(t: element) {
-        var targetCollection: element[] = [];
+    public searchAttakTarget(t: base) {
+        var targetCollection: base[] = [];
         //查询
         for (var i = 0; i < this.nodeCollection.length; i++) {
             if (t.team != this.nodeCollection[i].team && this.nodeCollection[i].sleep == false) {
-                var targtPos = this.nodeCollection[i].getComponent(aStar).nodeInGridCellIndex;
+                var targtPos;
+                //可移动的
+                if (t.buildType == buildType.none) {
+                    targtPos = this.nodeCollection[i].getComponent(aStar).nodeInGridCellIndex;
+                }
+                //不可移动的
+                else {
+                    console.log("targetPos:",this.nodeCollection[i].cellX,this.nodeCollection[i].cellY);
+                    
+                    targtPos = this._gManager.gridComponentArr[this.nodeCollection[i].cellX][this.nodeCollection[i].cellY].node.position;
+                }
+
                 if (targtPos) {
-                    var selfPos = t.getComponent(aStar).nodeInGridCellIndex;
+                    var selfPos
+                    //可移动的
+                    if (t.buildType == buildType.none) {
+                        selfPos = t.getComponent(aStar).nodeInGridCellIndex;
+                    }
+                    //不可移动的
+                    else {
+                        console.log("selfPos:",t.cellX,t.cellY);
+                        selfPos = this._gManager.gridComponentArr[t.cellX][t.cellY].node.position;
+                    }
                     var sum = Math.pow((targtPos.x - selfPos.x), 2) + Math.pow((targtPos.y - selfPos.y), 2)
                     var dis = Math.sqrt(sum);
                     if (dis <= t.attackDis && this.nodeCollection[i].sleep == false) {

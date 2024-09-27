@@ -8,6 +8,7 @@ import { element } from '../node/element';
 import { bullet } from '../bullet/bullet';
 import { bulletTank } from '../bullet/bulletTank';
 import { tree } from '../obstale/tree';
+import { bulletTArrow } from '../bullet/bulletTArrow';
 const { ccclass, property } = _decorator;
 
 @ccclass('pool')
@@ -15,23 +16,27 @@ export class pool extends Component {
 
     //对象
     @property(Prefab) bulletTankPrefab: Prefab;
+    @property(Prefab) bulletTArrowfab: Prefab;
+
     @property(Prefab) tankPrefab: Prefab;
     @property(Prefab) boy01Prefab: Prefab;
     @property(Prefab) PigPrefab: Prefab;
 
     constructor() {
         super();
-        //pool._instance = this;
+        pool._instance = this;
     }
-    // private static _instance: pool = null;
-    // // 只能通过自身进行初始化
-    // public static get Instance() {
-    //     if (this._instance == null) {
-    //         //获取单例失败
-    //         console.log("获取pool单例失败");
-    //     }
-    //     return this._instance;
-    // }
+
+
+    private static _instance: pool = null;
+    // 只能通过自身进行初始化
+    public static get Instance() {
+        if (this._instance == null) {
+            //获取单例失败
+            console.log("获取pool单例失败");
+        }
+        return this._instance;
+    }
 
     //配置表
     private _actorConfig = {};
@@ -47,6 +52,10 @@ export class pool extends Component {
             bulletTank: {
                 prefab: this.bulletTankPrefab,
                 component: bulletTank,
+            },
+            bulletTArrow: {
+                prefab: this.bulletTArrowfab,
+                component: bulletTArrow,
             },
             tank: {
                 prefab: this.tankPrefab,
@@ -83,7 +92,7 @@ export class pool extends Component {
             this.removeTargetFormPool(ac);
             //显示
             ac.active = true;
-            console.log("使用坦克对象池的:" + this._elPool.tank.length);
+            //console.log("使用坦克对象池的:" + this._elPool.tank.length);
             ac.getComponent(this._actorConfig[name].component).sleep = false;
             ac.die = false;
             //重新赋值血量
@@ -105,7 +114,7 @@ export class pool extends Component {
             obj = instantiate(this._actorConfig[name].prefab)
             parent.addChild(obj);
             this._elPool[name].push(obj);
-            console.log("使用tank新对象:"+obj.name);
+            //console.log("使用tank新对象:"+obj.name);
             return obj;
         }
     }
@@ -145,14 +154,15 @@ export class pool extends Component {
 
 
     //子弹对象池
-    private _blPool = { bulletTank: [] };
+    private _blPool = { bulletTank: [],bulletTArrow:[] };
     //生成子弹对象
     public spawnBullet(name: string, parent: Node): any {
         var ac = this.getSleepBullet(name);
+        
         if (ac) {
             //显示
             ac.getComponent(this._actorConfig[name].component).sleep = false;
-            console.log("使用子弹对象池的:" + this._blPool.bulletTank.length);
+            //console.log("使用子弹对象池的:" + this._blPool[name].length);
             return ac;
         }
         else {
@@ -160,7 +170,7 @@ export class pool extends Component {
             obj = instantiate(this._actorConfig[name].prefab)
             parent.addChild(obj);
             this._blPool[name].push(obj);
-            console.log("使用子弹新对象:" + obj.name);
+            //console.log("使用子弹新对象:" + obj.name);
             return obj;
         }
     }

@@ -1,6 +1,7 @@
 import { _decorator, Component, Node, Tween } from 'cc';
 import { enumTeam } from '../common/enumTeam';
 import { element } from '../node/element';
+import { base } from '../node/base';
 const { ccclass, property } = _decorator;
 
 @ccclass('bullet')
@@ -28,11 +29,11 @@ export class bullet extends Component {
     }
     
     //父类tank
-    private _attackParent: element;
-    public set attackParent(v: element) {
+    private _attackParent: base;
+    public set attackParent(v: base) {
         this._attackParent = v;
     }
-    public get attackParent(): element {
+    public get attackParent(): base {
         return this._attackParent;
     }
 
