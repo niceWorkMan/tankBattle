@@ -4,14 +4,14 @@ import { buildType } from '../../common/buildType';
 import { UIManager } from '../../UIManager';
 const { ccclass, property } = _decorator;
 
-@ccclass('tArrow')
-export class tArrow extends buildBase {
+@ccclass('tBase')
+export class tBase extends buildBase {
     constructor() {
         super();
         //初始化config的key
-        this._key = "tArrow";
+        this._key = "tBase";
         //建筑类型
-        this._buildType=buildType.build;
+        this._buildType = buildType.build;
     }
 
     public init(pos: math.Vec2): void {
@@ -32,7 +32,7 @@ export class tArrow extends buildBase {
     }
 
     update(deltaTime: number) {
-        
+
     }
 
     public getOptionBuildData() {

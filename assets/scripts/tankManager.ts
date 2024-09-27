@@ -8,6 +8,7 @@ import { pool } from './core/pool';
 import { tree } from './obstale/tree';
 import { grid } from './grid';
 import { woodBox } from './building/woodBox';
+import { editorManager } from './editorManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
@@ -26,8 +27,6 @@ export class tankManager extends Component {
     @property(Prefab) expolisinPrefab: Prefab;
 
 
-    //障碍物配置 包含建筑
-    private _obstaleConfig = {};
 
 
     constructor() {
@@ -92,14 +91,6 @@ export class tankManager extends Component {
 
 
     initComponent() {
-        this._obstaleConfig = {
-            "tree": {
-                class: tree,
-            },
-            "woodBox": {
-                class: woodBox
-            }
-        }
     }
 
 
@@ -267,8 +258,6 @@ export class tankManager extends Component {
 
     }
 
-
-
     //生成障碍物
     private exampleSetObstacle() {
         var obstaleLayer: Node = this.node.getChildByName("obstaleLayer");
@@ -314,7 +303,6 @@ export class tankManager extends Component {
                 }
             }
         }
-
         // 2 排序
         for (var i = 0; i < nodes.length; i++) {
             //使用+1 就可排序 原因未知
@@ -324,7 +312,8 @@ export class tankManager extends Component {
 
     //获取在数组中的索引
     getOneIndex(n: Node): number {
-        var cls: any = n.getComponent(this._obstaleConfig[n.name].class)
+        var config=editorManager.Instance.buildPlaceConfig;
+        var cls: any = n.getComponent(config[n.name].class)
         var Matrix = this._gManager.getGridMatrix;
         return Matrix.row * cls.cellY + cls.cellX;
     }

@@ -20,7 +20,7 @@ export class woodBox extends buildBase {
             //不向上冒泡
             e.bubbles = false;
             //生成操作菜单
-            UIManager.Instance.addBuildUI(new Vec2(this.cellX,this.cellY),UIManager.Instance.getMenuArr(["levelUp","delect","cancel"]),false)
+            UIManager.Instance.addBuildUI(new Vec2(this.cellX,this.cellY),UIManager.Instance.getMenuArr(["levelUp","repair","delect","cancel"]),false)
             //存储
             UIManager.Instance.optionBuildData=this.getOptionBuildData();
             //动画

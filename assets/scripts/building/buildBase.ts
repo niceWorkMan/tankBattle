@@ -12,7 +12,16 @@ export class buildBase extends base {
 
     public selectAnim(isSelect: boolean) {
         var icon = this.node.getChildByName("Icon")
-        var iconSprite: Sprite = icon.getComponent(Sprite)
+        var iconSprite: Sprite;
+        //带着子层级
+        if (icon) {
+            iconSprite = icon.getComponent(Sprite)
+        }
+        //没有子层级
+        else{
+            iconSprite = this.node.getComponent(Sprite)
+        }
+
         iconSprite.color = new Color(225, 225, 255, 255)
         const cor = { optcity: 225 }
         if (isSelect) {

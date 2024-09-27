@@ -30,6 +30,7 @@ export class addElItem extends Component {
                 this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["woodBox", "last"]))
                 break;
             case "tBase":
+                this.placeBuild(this._data);
                 break;
             case "repair":
                 break;
@@ -70,7 +71,7 @@ export class addElItem extends Component {
 
         if (this._data.zw) {
             // 1x2的建筑
-            if (this._data.zw.x == 2, this._data.zw.y == 1) {
+            if (this._data.zw.x == 2 && this._data.zw.y == 1) {
                 gridManager.Instance.gridComponentArr[parent.lastCenter.x][parent.lastCenter.y]
                 //向右
                 if (this.checkCellPosIsValue(new Vec2(parent.lastCenter.x + 1, parent.lastCenter.y))) {
@@ -110,7 +111,14 @@ export class addElItem extends Component {
                 }
 
             }
+
+            else if (this._data.zw.x == 1 && this._data.zw.y == 1) {
+                var build = editorManager.Instance.placeBuild(parent.lastCenter, this._data.name);
+                build.signObGrids(gridManager.Instance.gridComponentArr[parent.lastCenter.x][parent.lastCenter.y]);
+            }
         }
+
+
 
 
 

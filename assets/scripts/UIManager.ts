@@ -115,7 +115,6 @@ export class UIManager extends Component {
 
 
     addListener() {
-
         this.node.getChildByName("Btn_Start").getComponent(Button).node.on(Node.EventType.MOUSE_DOWN, (event) => {
             this.click();
         });
@@ -182,9 +181,17 @@ export class UIManager extends Component {
         //是否显示绿框
         if(showSelectGrid){
             bUI.getComponent(Sprite).spriteFrame=UIManager.Instance.rect_green;
+
+            bUI.getComponent(Button).normalSprite=UIManager.Instance.rect_green;
+            bUI.getComponent(Button).hoverSprite=UIManager.Instance.rect_green;
+            bUI.getComponent(Button).pressedSprite=UIManager.Instance.rect_green;
         }
         else{
             bUI.getComponent(Sprite).spriteFrame=UIManager.Instance.rect_alpha0;
+
+            bUI.getComponent(Button).normalSprite=UIManager.Instance.rect_alpha0;
+            bUI.getComponent(Button).hoverSprite=UIManager.Instance.rect_alpha0;
+            bUI.getComponent(Button).pressedSprite=UIManager.Instance.rect_alpha0;
         }
 
     }
