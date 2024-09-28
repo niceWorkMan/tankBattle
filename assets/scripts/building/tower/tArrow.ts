@@ -51,64 +51,46 @@ export class tArrow extends buildBase {
         this._tankManager = this.node.parent.parent.parent.getComponent(tankManager);
 
         //巡逻
-
-
-
-        var _searchInterval;
-        var _cuurentTarget;
-        if (!this.targetNode) {
-            _searchInterval = setInterval(() => {
-                _cuurentTarget = this.tManager.searchAttakTarget(this);
-                console.log("对象返回在TArrow:", _cuurentTarget);
-                // if (targetTank) {
-                //     console.log("睡眠:",targetTank.sleep);
-                //     if (targetTank.sleep == false) {
-                //          //攻击
-                //          console.log("攻击:",targetTank.node.name);
-
-                //          this.attackTarget(targetTank);
-                //          return;
-                //     }
-                //     targetTank.destroyTarget();
-                // } else {
-                //     console.log("没有目标");         
-                // }
-
-                console.log("setInterval");
-
-            }, 10000);
-        }
-        else {
-            clearInterval(_searchInterval);
-            if (_cuurentTarget) {
-                console.log("睡眠:", _cuurentTarget.sleep);
-                if (_cuurentTarget.sleep == false) {
-                    //攻击
-                    console.log("攻击:", _cuurentTarget.node.name);
-
-                    this.attackTarget(_cuurentTarget);
-                    return;
-                }
-                _cuurentTarget.destroyTarget();
-            }
-
-        }
-
+        this.searchTarget();
 
     }
 
+    searchTarget() {
+        var _cuurentTarget = this.tManager.searchAttakTarget(this);
+        if (!_cuurentTarget) {
+            setTimeout(() => {
+                //再次寻找
+                console.log("再次寻找");
+                this.searchTarget();
+            }, 500);
+        }
+        else {
+            if (_cuurentTarget.sleep == false) {
+                //攻击
+                console.log("攻击:", _cuurentTarget.node.name);
+                this.attackTarget(_cuurentTarget);
+            }
+            else{
+                this.searchTarget();
+            }
+        }
+    }
+
+    
     //生成子弹
     public spawnBullet(target: base) {
-        var nodeLayer = this.node.parent.parent.getChildByName("tankLayer");
+        var nodeLayer = this.node.parent.parent.parent.getChildByName("tankLayer");
         //对象池
-        var po: pool = this.node.parent.parent.getComponent(pool)
-        var edt: editorManager = this.node.parent.parent.getComponent(editorManager)
+        var po: pool = this.node.parent.parent.parent.getComponent(pool)
+        var edt: editorManager = this.node.parent.parent.parent.getComponent(editorManager)
         //获取对应的类和Prefab
         var key = "bulletTArrow";
+        console.log(edt.propertyConfig,key);
+        
         var cofResult = edt.propertyConfig[key]
-        var bulletNode: Node = po.spawnBullet("bulletTArrow", nodeLayer)
+        var bulletNode: Node = po.spawnBullet(key, nodeLayer)
         //获取类型
-        var bClass: any = bulletNode.getComponent(cofResult.component);
+        var bClass: any = bulletNode.getComponent(cofResult.class);
         //设置父类
         var targetPos = target.node.getPosition();
         var selfPos = this.node.getPosition();
@@ -116,6 +98,7 @@ export class tArrow extends buildBase {
         var targetRot = radian * (180 / Math.PI);
         bulletNode.eulerAngles = new Vec3(0, 0, targetRot)
         bulletNode.getComponent(bullet).bulletType = this.team;
+        //设置子弹父产生对象
         bulletNode.getComponent(bullet).attackParent = this;
         bulletNode.worldPosition = this.node.worldPosition;
 
@@ -128,7 +111,7 @@ export class tArrow extends buildBase {
                 onComplete: () => {
                     if (bulletNode) {
                         bClass.bTween.removeSelf();
-                        var b: any = bulletNode.getComponent(cofResult.component);
+                        var b: any = bulletNode.getComponent(bClass);
                         if (b.sleep == false) {
                             b.sleep = true;
                         }
@@ -192,7 +175,8 @@ export class tArrow extends buildBase {
         else {
             this._targetNode = null;
             clearInterval(this._fireInterval);
-
+            //重新寻找对象
+            this.searchTarget()
         }
     }
 

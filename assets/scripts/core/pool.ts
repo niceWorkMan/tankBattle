@@ -57,7 +57,7 @@ export class pool extends Component {
             this.removeTargetFormPool(ac);
             //显示
             ac.active = true;
-            //console.log("使用坦克对象池的:" + this._elPool.tank.length);
+            //console.log("使用["+name+"]对象池的:" + this._elPool[name].length);
             ac.getComponent(edt.propertyConfig[name].class).sleep = false;
             ac.die = false;
             //重新赋值血量
@@ -79,7 +79,7 @@ export class pool extends Component {
             obj = instantiate(edt.propertyConfig[name].prefab)
             parent.addChild(obj);
             this._elPool[name].push(obj);
-            //console.log("使用tank新对象:"+obj.name);
+            //console.log("使用["+name+"]新对象:"+obj.name);
             return obj;
         }
     }
@@ -129,7 +129,7 @@ export class pool extends Component {
         if (ac) {
             //显示
             ac.getComponent(edt.propertyConfig[name].class).sleep = false;
-            //console.log("使用子弹对象池的:" + this._blPool[name].length);
+            //console.log("使用子弹["+name+"]对象池的:" + this._blPool[name].length);
             return ac;
         }
         else {
@@ -137,7 +137,7 @@ export class pool extends Component {
             obj = instantiate(edt.propertyConfig[name].prefab)
             parent.addChild(obj);
             this._blPool[name].push(obj);
-            //console.log("使用子弹新对象:" + obj.name);
+            //console.log("使用子弹["+name+"]新对象:" + obj.name);
             return obj;
         }
     }

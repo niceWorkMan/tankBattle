@@ -31,6 +31,9 @@ export class tankManager extends Component {
 
 
 
+
+
+
     constructor() {
         super();
         tankManager._instance = this;
@@ -44,6 +47,10 @@ export class tankManager extends Component {
             console.log("获取TankManager单例失败");
         }
         return this._instance;
+    }
+
+    public getProperotyConfig(){
+        return editorManager.Instance.propertyConfig;
     }
 
 
@@ -378,9 +385,14 @@ export class tankManager extends Component {
 
     //查询
     public searchAttakTarget(_self: base) {
-        var targetCollection: base[] = [];
+            var targetCollection: base[] = [];
         var edt:editorManager= this.node.getComponent(editorManager);
         //查询
+
+
+        if(_self.node.name=="tArrow"){
+            console.log("in Tarrow");   
+        }
         for (var i = 0; i < this.nodeCollection.length; i++) {
             if (_self.team != this.nodeCollection[i].team && this.nodeCollection[i].sleep == false) {
                 var targtPos;
@@ -394,10 +406,10 @@ export class tankManager extends Component {
                 }
                 //不可移动的
                 else {         
-                    targtPos = this._gManager.gridComponentArr[nodeObj.cellX][nodeObj.cellY].node.position;
+                    targtPos = new Vec2(nodeObj.cellX,nodeObj.cellY);
                     //          console.log("targetPos:", this.nodeCollection[i].cellX, this.nodeCollection[i].cellY, this.nodeCollection[i].node.name, t.buildType == buildType.none);
                 }
-
+                
                 if (targtPos) {
                     var selfPos
                     //可移动的
@@ -408,10 +420,12 @@ export class tankManager extends Component {
                     else {
                         var cls_self = edt.propertyConfig[_self.node.name].class;
                         var nodeObj_self: any = _self.node.getComponent(cls_self);
-                        selfPos = this._gManager.gridComponentArr[nodeObj_self.cellX][nodeObj_self.cellY].node.position;
+                        selfPos =   new Vec2(nodeObj_self.cellX,nodeObj_self.cellY);
                     }
                     var sum = Math.pow((targtPos.x - selfPos.x), 2) + Math.pow((targtPos.y - selfPos.y), 2)
                     var dis = Math.sqrt(sum);
+
+
                     if (dis <= _self.attackDis && this.nodeCollection[i].sleep == false) {
                         this.nodeCollection[i].targetDis = dis;
                         targetCollection.push(this.nodeCollection[i])
@@ -431,14 +445,10 @@ export class tankManager extends Component {
         }
         //返回最近的炮台
         if (targetCollection.length > 0) {
-            
             _self.targetNode = targetCollection[0];
-            console.log("目标得到:",targetCollection[0].node.name);
-            console.log("返回对象:",targetCollection[0]);
             return targetCollection[0];
         }
         else {
-            console.log("没有返回:",targetCollection[0]);
             return null;
         }
 

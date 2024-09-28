@@ -344,42 +344,6 @@ export class tank extends element {
 
     //碰撞检测函数
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
-        if (this.isPause) {
-            return;
-        }
-        var hp = this.node.getChildByName("hp");
-        var bu: bullet = otherCollider.getComponent(bullet);
-        if (bu.attackParent != this) {
-            //不是一队的 产生伤害
-            if (bu.bulletType != this._team && !this.sleep) {
-                setTimeout(() => {
-                    this.hp -= bu.damage;
-                }, 0);
-                if (this.hp > 0) {
-                    hp.active = true;
-                    //还可以扛
-                } else {
-                    //停止连续射击  等待一帧
-                    setTimeout(() => {
-                        //设置
-                        this.destorySelf();
-                    }, 0);
-
-                }
-                //下一帧执行 物理逻辑 不能在碰撞回调中调用(不能放在最外层 会被同队伍的对象截断碰撞)
-                setTimeout(() => {
-                    if (bu) {
-                        //子弹销毁 加入对象池
-                        var edt=this.node.parent.parent.getComponent(editorManager);
-                        var cofResult = edt.propertyConfig[bu.node.name];
-                        var b: any = bu.getComponent(cofResult.class);
-                        if (b.sleep == false) {
-                            b.sleep = true;
-                        }
-                    }
-                }, 0);
-            }
-        }
     }
 
 

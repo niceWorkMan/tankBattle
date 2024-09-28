@@ -7,7 +7,7 @@ export class bulletTArrow extends bullet {
     constructor() {
         super();
             //初始化config的key
-            this._key = "bulletTank";
+            this._key = "bulletTArrow";
             //初始化子弹伤害
             this._damage=50;
     }
