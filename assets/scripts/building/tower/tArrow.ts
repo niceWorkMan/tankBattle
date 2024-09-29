@@ -61,7 +61,7 @@ export class tArrow extends buildBase {
             setTimeout(() => {
                 //再次寻找
                 console.log("再次寻找");
-                if (this.sleep == false) {
+                if (this.node) {
                     this.searchTarget();
                 }
             }, 500);
@@ -200,7 +200,7 @@ export class tArrow extends buildBase {
     protected onDestroy(): void {
         //清除持续射击
         clearInterval(this._fireInterval);
-        this._fireInterval=null;
+        this._fireInterval = null;
     }
 
     public getOptionBuildData() {

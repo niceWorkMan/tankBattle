@@ -148,7 +148,7 @@ export class grid extends Component {
         this._cellY = y;
         var indexLabelNode = this.node.getChildByName("indexLabel");
         this._indexLabel = indexLabelNode.getComponent(Label);
-        this._indexLabel.string = "[" + xLabel + "," + yLable + "]";
+       // this._indexLabel.string = "[" + xLabel + "," + yLable + "]";
     }
 
     setLabel(str) {

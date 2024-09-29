@@ -18,34 +18,39 @@ export class buildBase extends base {
             iconSprite = icon.getComponent(Sprite)
         }
         //没有子层级
-        else{
+        else {
             iconSprite = this.node.getComponent(Sprite)
         }
 
         iconSprite.color = new Color(225, 225, 255, 255)
         const cor = { optcity: 225 }
         if (isSelect) {
-            if (iconSprite.color) {
-                this._tweenSelect = tween(cor)
-                    .to(1, { optcity: 0 }, {
-                        onUpdate: () => {
-                            if (this.node)
-                                iconSprite.color = new Color(225, 225, 225, cor.optcity);
-                        }
-                    }).to(1, { optcity: 225 }, {
-                        onUpdate: () => {
-                            if (this.node)
-                                iconSprite.color = new Color(225, 225, 225, cor.optcity);
-                        }
-                    })
-                    // 逐渐透明
-                    .start(); // 启动动画
-                iconSprite.color = new Color(225, 225, 255, 100)
-            }
+            // if (iconSprite.color) {
+            //     this._tweenSelect = tween(cor)
+            //         .to(1, { optcity: 0 }, {
+            //             onUpdate: () => {
+            //                 if (this.node)
+            //                     iconSprite.color = new Color(225, 225, 225, cor.optcity);
+            //             }
+            //         }).to(1, { optcity: 225 }, {
+            //             onUpdate: () => {
+            //                 if (this.node)
+            //                     iconSprite.color = new Color(225, 225, 225, cor.optcity);
+            //             }
+            //         })
+            //         // 逐渐透明
+            //         .start(); // 启动动画
+            //     iconSprite.color = new Color(225, 225, 255, 100)
+            // }
 
-            else {
-                console.log("当前选中设置UI名称或父子节点出错");
-            }
+            // else {
+            //     console.log("当前选中设置UI名称或父子节点出错");
+            // }
+
+
+            this._tweenSelect = tween(iconSprite.node)
+                .to(0.5, {scale:new Vec3(1.3,1.3,1.3)}).to(0.3, {scale:new Vec3(1,1,1)}).start();
+
         }
         else {
             iconSprite.color = new Color(225, 225, 225, 225)
@@ -106,7 +111,7 @@ export class buildBase extends base {
     /**
      * 默认是半径为1格子的范围=50
      */
-    protected _attackRadius=50;
+    protected _attackRadius = 50;
 
 
     //初始化数据
