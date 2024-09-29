@@ -79,13 +79,13 @@ export class base extends Component {
     }
 
 
-    //目标坦克距离(用来存储 做排序继续拿)
-    protected _targetDis;
-    public set targetDis(v: number) {
-        this._targetDis = v;
+    //目标坦克距离(用来存储 做排序继续  选最近对象射击)
+    protected _targetSortDis;
+    public set targetSortDis(v: number) {
+        this._targetSortDis = v;
     }
     public get targetDis(): number {
-        return this._targetDis;
+        return this._targetSortDis;
     }
 
     //目标tank
@@ -116,8 +116,8 @@ export class base extends Component {
     public get fireSpace(): number {
         return this._fireSpace;
     }
-
-
+    //是否在射击僵直
+    protected isFireContrl = false
 
     //Hp(血条)
     protected _hp: number = 100;

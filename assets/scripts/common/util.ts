@@ -92,7 +92,10 @@ export class util extends Component {
                 if (element) {
                     //有数据再继续移动
                     if (!element.sleep)
-                        element.tweenMoveOn();
+                    {
+                        //element.tweenMoveOn();
+
+                    }
                 }
             }
         });

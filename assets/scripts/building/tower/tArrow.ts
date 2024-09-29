@@ -1,4 +1,4 @@
-import { _decorator, Animation, Component, math, Node, NodeEventType, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Animation, Component, log, math, misc, Node, NodeEventType, tween, Vec2, Vec3 } from 'cc';
 import { buildBase } from '../buildBase';
 import { buildType } from '../../common/buildType';
 import { UIManager } from '../../UIManager';
@@ -56,44 +56,48 @@ export class tArrow extends buildBase {
     }
 
     searchTarget() {
-        var _cuurentTarget = this.tManager.searchAttakTarget(this);
-        if (!_cuurentTarget) {
+        this.targetNode = this.tManager.searchAttakTarget(this);
+        if (!this.targetNode) {
             setTimeout(() => {
                 //再次寻找
                 console.log("再次寻找");
-                this.searchTarget();
+                if (this.sleep == false) {
+                    this.searchTarget();
+                }
             }, 500);
         }
         else {
-            if (_cuurentTarget.sleep == false) {
+            if (this.targetNode.sleep == false) {
                 //攻击
-                console.log("攻击:", _cuurentTarget.node.name);
-                this.attackTarget(_cuurentTarget);
+                console.log("攻击:", this.targetNode.node.name);
+                this.attackTarget(this.targetNode);
             }
-            else{
+            else {
                 this.searchTarget();
             }
         }
     }
 
-    
+
+
+
     //生成子弹
-    public spawnBullet(target: base) {
+    public spawnBullet(target: base, distance: number) {
         var nodeLayer = this.node.parent.parent.parent.getChildByName("tankLayer");
         //对象池
         var po: pool = this.node.parent.parent.parent.getComponent(pool)
         var edt: editorManager = this.node.parent.parent.parent.getComponent(editorManager)
         //获取对应的类和Prefab
         var key = "bulletTArrow";
-        console.log(edt.propertyConfig,key);
-        
+        console.log(edt.propertyConfig, key);
+
         var cofResult = edt.propertyConfig[key]
         var bulletNode: Node = po.spawnBullet(key, nodeLayer)
         //获取类型
         var bClass: any = bulletNode.getComponent(cofResult.class);
         //设置父类
-        var targetPos = target.node.getPosition();
-        var selfPos = this.node.getPosition();
+        var targetPos = target.node.getWorldPosition();
+        var selfPos = this.node.getWorldPosition();
         var radian = Math.atan2(targetPos.y - selfPos.y, targetPos.x - selfPos.x);
         var targetRot = radian * (180 / Math.PI);
         bulletNode.eulerAngles = new Vec3(0, 0, targetRot)
@@ -102,16 +106,28 @@ export class tArrow extends buildBase {
         bulletNode.getComponent(bullet).attackParent = this;
         bulletNode.worldPosition = this.node.worldPosition;
 
+
+
+        var pureTargetPos = new Vec3(target.node.worldPosition.x, target.node.worldPosition.y, target.node.worldPosition.z)
+        //设置僵直
+        this.isFireContrl = true;
         //子弹运动方向(运动到目标点)
+
         if (target) {
+            //先移除
             if (bClass.bTween != null) {
                 bClass.bTween.removeSelf();
             }
-            bClass.bTween = tween(bulletNode).to(0.5, { position: target.node.position }, {
+            bClass.bTween = tween(bulletNode).delay(0.5).to(0.5 * (distance / 5), { worldPosition: pureTargetPos }, {
+                onStart: () => {
+                    //取消僵直
+                    this.isFireContrl = false;
+                },
                 onComplete: () => {
                     if (bulletNode) {
                         bClass.bTween.removeSelf();
-                        var b: any = bulletNode.getComponent(bClass);
+
+                        var b: any = bulletNode.getComponent(cofResult.class);
                         if (b.sleep == false) {
                             b.sleep = true;
                         }
@@ -122,55 +138,32 @@ export class tArrow extends buildBase {
         }
     }
 
-    public generateBullet(target, stopIndex, closeList) {
-        //随机开炮速度
-        //this._fireSpace = Math.random();
-        if (this._fireInterval) {
-            clearInterval(this._fireSpace);
-        }
-        this._fireInterval = setInterval(() => {
-            //自身存在&&目标也存在
-            if (this.node && target.node) {
-                //播放炮动画
-                var anim: Animation = this.getComponent(Animation);
-                anim.play("tTowerFire")
-                this.spawnBullet(target);
-            }
-            else {
-                //停止射击  继续前进
-                clearInterval(this._fireInterval);
-            }
-        }, this._fireSpace * 1000);
-
-    }
 
 
     //攻击
     public attackTarget(target: base) {
-        if (this.isPause) {
-            return;
-        }
-
         if (target.sleep == false) {
             //生成子弹
             this._fireInterval = setInterval(() => {
+                //是否在射程内
+                var distance = tankManager.Instance.getDisFromBoth(this, target);
+                var isAttackDis = distance < this.attackDis
                 //自身存在&&目标也存在
-                if (this.tManager.nodeCollection.indexOf(target) != -1) {
-                    if (target.sleep) {
-                        this._targetNode = null;
-                        clearInterval(this._fireInterval);
-                    }
-                    var anim: Animation = this.getComponent(Animation);
+                if (isAttackDis) {
+                    var anim: Animation = this.node.getComponent(Animation);
                     anim.play("tTowerFire")
-                    this.spawnBullet(target);
+                    this.spawnBullet(target, distance);
                 }
                 else {
+                    //当前目标重置
                     this._targetNode = null;
+                    //清除持续射击
                     clearInterval(this._fireInterval);
-
+                    //寻找下一个目标
+                    this.searchTarget();
+                    console.log("寻找下个目标");
                 }
-
-            }, this._fireSpace * 200);
+            }, this._fireSpace * 1000);
         }
         else {
             this._targetNode = null;
@@ -181,24 +174,33 @@ export class tArrow extends buildBase {
     }
 
 
-
-
-
     //旋转对方炮筒
-    public gunRote(target: element) {
+    public gunRote(target: base) {
         var root: Node = this.node
         if (target.node) {
-            var radian = Math.atan2(target.node.position.y - this.node.position.y, target.node.position.x - this.node.position.x);
+            var radian = Math.atan2(target.node.worldPosition.y - this.node.worldPosition.y, target.node.worldPosition.x - this.node.worldPosition.x);
             var targetRot = radian * (180 / Math.PI);
             //目标转角（弧度）
-            root.setWorldRotationFromEuler(0, 0, targetRot);
+            root.setWorldRotationFromEuler(0, 0, targetRot - 90);
         } else {
             //没有打击点
         }
     }
 
     update(deltaTime: number) {
+        //指向
+        if (this.sleep == false) {
+            if (this.targetNode && this.isFireContrl == false) {
+                this.gunRote(this.targetNode);
 
+            }
+        }
+    }
+
+    protected onDestroy(): void {
+        //清除持续射击
+        clearInterval(this._fireInterval);
+        this._fireInterval=null;
     }
 
     public getOptionBuildData() {

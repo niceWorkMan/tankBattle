@@ -49,7 +49,7 @@ export class tankManager extends Component {
         return this._instance;
     }
 
-    public getProperotyConfig(){
+    public getProperotyConfig() {
         return editorManager.Instance.propertyConfig;
     }
 
@@ -200,7 +200,7 @@ export class tankManager extends Component {
         var startGrid = this._gManager.getGridByCellIndex(start.x, start.y);
         var endGrid = this._gManager.getGridByCellIndex(end.x, end.y);
         var config = this.getComponent(editorManager);
-        var po=this.getComponent(pool);
+        var po = this.getComponent(pool);
         //过滤当前位置是否被占用
         if (startGrid.isObstacle == false) {
             //随机模拟生成
@@ -385,19 +385,19 @@ export class tankManager extends Component {
 
     //查询
     public searchAttakTarget(_self: base) {
-            var targetCollection: base[] = [];
-        var edt:editorManager= this.node.getComponent(editorManager);
+        var targetCollection: base[] = [];
+        var edt: editorManager = this.node.getComponent(editorManager);
         //查询
 
 
-        if(_self.node.name=="tArrow"){
-            console.log("in Tarrow");   
+        if (_self.node.name == "tArrow") {
+            console.log("in Tarrow");
         }
         for (var i = 0; i < this.nodeCollection.length; i++) {
             if (_self.team != this.nodeCollection[i].team && this.nodeCollection[i].sleep == false) {
                 var targtPos;
 
-                var cls = edt.propertyConfig[this.nodeCollection[i].node.name].class;                    ;
+                var cls = edt.propertyConfig[this.nodeCollection[i].node.name].class;;
                 var nodeObj: any = this.nodeCollection[i].node.getComponent(cls);
 
                 //可移动的
@@ -405,11 +405,11 @@ export class tankManager extends Component {
                     targtPos = this.nodeCollection[i].getComponent(aStar).nodeInGridCellIndex;
                 }
                 //不可移动的
-                else {         
-                    targtPos = new Vec2(nodeObj.cellX,nodeObj.cellY);
+                else {
+                    targtPos = new Vec2(nodeObj.cellX, nodeObj.cellY);
                     //          console.log("targetPos:", this.nodeCollection[i].cellX, this.nodeCollection[i].cellY, this.nodeCollection[i].node.name, t.buildType == buildType.none);
                 }
-                
+
                 if (targtPos) {
                     var selfPos
                     //可移动的
@@ -420,14 +420,14 @@ export class tankManager extends Component {
                     else {
                         var cls_self = edt.propertyConfig[_self.node.name].class;
                         var nodeObj_self: any = _self.node.getComponent(cls_self);
-                        selfPos =   new Vec2(nodeObj_self.cellX,nodeObj_self.cellY);
+                        selfPos = new Vec2(nodeObj_self.cellX, nodeObj_self.cellY);
                     }
                     var sum = Math.pow((targtPos.x - selfPos.x), 2) + Math.pow((targtPos.y - selfPos.y), 2)
                     var dis = Math.sqrt(sum);
 
 
                     if (dis <= _self.attackDis && this.nodeCollection[i].sleep == false) {
-                        this.nodeCollection[i].targetDis = dis;
+                        this.nodeCollection[i].targetSortDis = dis;
                         targetCollection.push(this.nodeCollection[i])
                     }
                 }
@@ -452,6 +452,38 @@ export class tankManager extends Component {
             return null;
         }
 
+    }
+
+
+    //从两者之间获取距离   null就是获取失败
+    getDisFromBoth(_self: base, _target: base) {
+        var targtPos;
+        //可移动的
+        console.log("目标名称:",_target.node.name);
+        
+        if (_target.buildType == buildType.none) {
+            targtPos = _target.getComponent(aStar).nodeInGridCellIndex;
+        }
+        //不可移动的
+        else {
+            targtPos = new Vec2(_target.cellX, _target.cellY);
+        }
+
+        if (targtPos) {
+            var selfPos
+            //可移动的
+            if (_self.buildType == buildType.none) {
+                selfPos = _self.getComponent(aStar).nodeInGridCellIndex;
+            }
+            //不可移动的
+            else {
+                selfPos = new Vec2(_self.cellX, _self.cellY);
+            }
+            var sum = Math.pow((targtPos.x - selfPos.x), 2) + Math.pow((targtPos.y - selfPos.y), 2)
+            var dis = Math.sqrt(sum)
+            return dis;
+        }
+        return null;
     }
 
     //转成父坐标的Eular角
