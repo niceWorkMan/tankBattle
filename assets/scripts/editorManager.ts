@@ -104,8 +104,16 @@ export class editorManager extends Component {
                 obj.position = this.getComponent(gridManager).gridComponentArr[center.x][center.y].node.position;
             }
             else {
+                
                 parent.addChild(obj);
-                obj.position = new Vec3(0, 0, 0);
+                switch (name) {
+                    case "tArrow":
+                        obj.position = new Vec3(0, 30, 0);
+                        break;
+                    default:
+                        obj.position = new Vec3(0, 0, 0);
+                }
+
             }
 
             //初始化位置Index
