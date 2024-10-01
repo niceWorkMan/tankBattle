@@ -40,6 +40,16 @@
             "des": "删除当前对象(回收)"
         },
         {
+            "name": "accept",
+            "path": "image/build/accept",
+            "des": "接受当前设定"
+        },
+        {
+            "name": "refuse",
+            "path": "image/build/refuse",
+            "des": "拒绝当前设定"
+        },
+        {
             "name": "woodBox",
             "path": "image/build/woodBox",
             "des": "伐木场",

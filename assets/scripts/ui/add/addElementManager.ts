@@ -23,8 +23,10 @@ export class addElementManager extends Component {
     //对外暴露清除
     public clear() {
         this.clearUI();
-        if (this.node)
+        if (this.node) {
+            UIManager.Instance.aem_LastCenter=this.lastCenter;
             this.node.destroy();
+        }
     }
 
     update(deltaTime: number) {
@@ -42,6 +44,7 @@ export class addElementManager extends Component {
     public get lastCenter(): Vec2 {
         return this._lastCenter;
     }
+    
 
 
     //重新设置menu
@@ -129,9 +132,9 @@ export class addElementManager extends Component {
                 this._UiArr.push(g);
                 var a = g.getComponent(addElItem)
                 //初始化图标
-                a.initIcon(conf[index]);
-                //索引测试
+                a.initIconData(conf[index]);
                 a.updateLab(gridArr.indexOf(element) + "");
+                //索引测试
             }
         });
         //存储建造位置
@@ -231,7 +234,7 @@ export class addElementManager extends Component {
 
     protected onDestroy(): void {
         //清除 上一个的选中状态
-        
+
     }
 
 

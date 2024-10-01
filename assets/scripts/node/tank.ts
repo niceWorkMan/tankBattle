@@ -301,7 +301,7 @@ export class tank extends element {
     public spawnBullet(target: base) {
         if (this.sleep)
             return;
-        var nodeLayer = this.node.parent.parent.getChildByName("tankLayer");
+        var nodeLayer = this.node.parent.parent.getChildByName("effectLayer");
         //对象池
         var po: pool = this.node.parent.parent.getComponent(pool)
         var edt:editorManager=this.node.parent.parent.getComponent(editorManager)

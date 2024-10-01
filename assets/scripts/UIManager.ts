@@ -1,9 +1,9 @@
 import { _decorator, Button, Color, Component, instantiate, JsonAsset, Label, Node, Prefab, resources, Sprite, SpriteFrame, Vec2 } from 'cc';
 import { tankManager } from './tankManager';
 import { buildPop } from './ui/buildPop';
-import { util } from './common/util';
 import { gridManager } from './gridManager';
 import { addElementManager } from './ui/add/addElementManager';
+import { buildBase } from './building/buildBase';
 const { ccclass, property } = _decorator;
 
 @ccclass('UIManager')
@@ -14,14 +14,27 @@ export class UIManager extends Component {
     @property(Prefab) addbuildUIPrefab: Prefab;
 
 
-    @property(SpriteFrame) rect_alpha0:SpriteFrame
-    @property(SpriteFrame) rect_green:SpriteFrame
+    @property(SpriteFrame) rect_alpha0: SpriteFrame
+    @property(SpriteFrame) rect_green: SpriteFrame
 
 
     public ps: Sprite[] = [];
 
     //弹窗节点
     private _popContain: Node;
+    //建筑编辑最后一次操作的格子
+    public aem_LastCenter = null;
+
+    //画布中未绑定的建筑
+    private _unPlaceBuild: buildBase = null;
+    public get unPlaceBuild(): buildBase {
+        return this._unPlaceBuild;
+    }
+    public set unPlaceBuild(v: buildBase) {
+        this._unPlaceBuild = v;
+    }
+
+
 
     //当前菜单
     private _addMenu: addElementManager;
@@ -32,11 +45,13 @@ export class UIManager extends Component {
 
 
     //设置操作对象     //key:名字标识   component:挂载类实例   class:挂载类
-    private _optionBuildData: any = { key: "", component: null, class: null }
+    private _optionBuildData: any = null;     // example :{ key: "", component: null, class: null }
     public get optionBuildData(): any {
         return this._optionBuildData
     }
     public set optionBuildData(v: any) {
+        console.log("设置:",v);
+        
         this._optionBuildData = v;
     }
 
@@ -161,9 +176,22 @@ export class UIManager extends Component {
 
     //buildUi的存储集合 便于删除
     private _buildUIArr: Node[] = [];
+    //清除
+    public buildUIClear() {
+        var buildUI = this.node.getChildByName("buildUI")
+        buildUI.children.forEach(element => {
+            element.destroy();
+        });
+        if (UIManager.Instance.optionBuildData.component) {
+            if (UIManager.Instance.optionBuildData.component.node) {
+                UIManager.Instance.optionBuildData.component.node.destroy();
+            }
+        }
+        UIManager.Instance.optionBuildData=null;
+    }
 
     //建造
-    public addBuildUI(center: Vec2, conf,showSelectGrid=true) {
+    public addBuildUI(center: Vec2, conf, showSelectGrid = true) {
         //清除
         this.clearBuildUI();
         //添加
@@ -179,19 +207,19 @@ export class UIManager extends Component {
         aem.initAddUI(center, conf)
 
         //是否显示绿框
-        if(showSelectGrid){
-            bUI.getComponent(Sprite).spriteFrame=UIManager.Instance.rect_green;
+        if (showSelectGrid) {
+            bUI.getComponent(Sprite).spriteFrame = UIManager.Instance.rect_green;
 
-            bUI.getComponent(Button).normalSprite=UIManager.Instance.rect_green;
-            bUI.getComponent(Button).hoverSprite=UIManager.Instance.rect_green;
-            bUI.getComponent(Button).pressedSprite=UIManager.Instance.rect_green;
+            bUI.getComponent(Button).normalSprite = UIManager.Instance.rect_green;
+            bUI.getComponent(Button).hoverSprite = UIManager.Instance.rect_green;
+            bUI.getComponent(Button).pressedSprite = UIManager.Instance.rect_green;
         }
-        else{
-            bUI.getComponent(Sprite).spriteFrame=UIManager.Instance.rect_alpha0;
+        else {
+            bUI.getComponent(Sprite).spriteFrame = UIManager.Instance.rect_alpha0;
 
-            bUI.getComponent(Button).normalSprite=UIManager.Instance.rect_alpha0;
-            bUI.getComponent(Button).hoverSprite=UIManager.Instance.rect_alpha0;
-            bUI.getComponent(Button).pressedSprite=UIManager.Instance.rect_alpha0;
+            bUI.getComponent(Button).normalSprite = UIManager.Instance.rect_alpha0;
+            bUI.getComponent(Button).hoverSprite = UIManager.Instance.rect_alpha0;
+            bUI.getComponent(Button).pressedSprite = UIManager.Instance.rect_alpha0;
         }
 
     }

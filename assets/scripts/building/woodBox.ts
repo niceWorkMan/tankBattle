@@ -12,19 +12,22 @@ export class woodBox extends buildBase {
         //初始化config的key
         this._key = "woodBox";
         //建筑类型
-        this._buildType=buildType.build;
+        this._buildType = buildType.build;
     }
 
     start() {
         this.node.getChildByName("Icon").on(NodeEventType.TOUCH_START, (e) => {
-            //不向上冒泡
-            e.bubbles = false;
-            //生成操作菜单
-            UIManager.Instance.addBuildUI(new Vec2(this.cellX,this.cellY),UIManager.Instance.getMenuArr(["levelUp","repair","delect","cancel"]),false)
-            //存储
-            UIManager.Instance.optionBuildData=this.getOptionBuildData();
-            //动画
-            this.selectAnim(true);
+            //如果已经被放置 可以被选中
+            if (this._isPlace) {
+                //不向上冒泡
+                e.bubbles = false;
+                //生成操作菜单
+                UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["levelUp", "repair", "delect", "cancel"]), false)
+                //存储
+                UIManager.Instance.optionBuildData = this.getOptionBuildData();
+                //动画
+                this.selectAnim(true);
+            }
         })
     }
 
@@ -41,7 +44,7 @@ export class woodBox extends buildBase {
     }
 
     public getOptionBuildData() {
-        return {key:this._key,component:this,class:this.constructor}
+        return { key: this._key, component: this, class: this.constructor }
     }
 }
 

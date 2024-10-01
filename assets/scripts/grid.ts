@@ -111,7 +111,23 @@ export class grid extends Component {
     touchGrid(e) {
         //添加建筑UI
         if (this.isStatic == false) {
-            UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]));
+            //没有正在建造的
+            if (!UIManager.Instance.optionBuildData) {
+                UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]));
+            }
+            //存在正在建造的对象
+            else {
+                console.log("UIManager.Instance.optionBuildData.component._isPlace:", UIManager.Instance.optionBuildData.component);
+
+                //清除动画
+                UIManager.Instance.optionBuildData.component.clearAnim();
+                //清除菜单
+                if (UIManager.Instance.optionBuildData.component._isPlace == false) {
+                    UIManager.Instance.buildUIClear();
+                }
+                //新建菜单
+                UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]));
+            }
         }
         else {
             console.log("不可操作地形");
@@ -148,7 +164,7 @@ export class grid extends Component {
         this._cellY = y;
         var indexLabelNode = this.node.getChildByName("indexLabel");
         this._indexLabel = indexLabelNode.getComponent(Label);
-       // this._indexLabel.string = "[" + xLabel + "," + yLable + "]";
+        // this._indexLabel.string = "[" + xLabel + "," + yLable + "]";
     }
 
     setLabel(str) {

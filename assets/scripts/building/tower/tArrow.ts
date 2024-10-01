@@ -64,17 +64,10 @@ export class tArrow extends buildBase {
                 if (this.node) {
                     this.searchTarget();
                 }
-            }, 500);
+            }, 200);
         }
         else {
-            if (this.targetNode.sleep == false) {
-                //攻击
-                console.log("攻击:", this.targetNode.node.name);
-                this.attackTarget(this.targetNode);
-            }
-            else {
-                this.searchTarget();
-            }
+            this.attackTarget(this.targetNode);
         }
     }
 
@@ -83,7 +76,7 @@ export class tArrow extends buildBase {
 
     //生成子弹
     public spawnBullet(target: base, distance: number) {
-        var nodeLayer = this.node.parent.parent.parent.getChildByName("tankLayer");
+        var nodeLayer = this.node.parent.parent.parent.getChildByName("effectLayer");
         //对象池
         var po: pool = this.node.parent.parent.parent.getComponent(pool)
         var edt: editorManager = this.node.parent.parent.parent.getComponent(editorManager)
@@ -100,7 +93,7 @@ export class tArrow extends buildBase {
         var selfPos = this.node.getWorldPosition();
         var radian = Math.atan2(targetPos.y - selfPos.y, targetPos.x - selfPos.x);
         var targetRot = radian * (180 / Math.PI);
-        bulletNode.eulerAngles = new Vec3(0, 0, targetRot)
+        bulletNode.setRotationFromEuler(0, 0, targetRot)// = new Vec3(0, 0, targetRot)
         bulletNode.getComponent(bullet).bulletType = this.team;
         //设置子弹父产生对象
         bulletNode.getComponent(bullet).attackParent = this;
@@ -114,19 +107,15 @@ export class tArrow extends buildBase {
         //子弹运动方向(运动到目标点)
 
         if (target) {
-            //先移除
-            if (bClass.bTween != null) {
-                bClass.bTween.removeSelf();
-            }
-            bClass.bTween = tween(bulletNode).delay(0.5).to(0.5 * (distance / 5), { worldPosition: pureTargetPos }, {
+            bClass.bTween=  tween(bulletNode).delay(0.5).to(0.5 * (distance / 5), { worldPosition: pureTargetPos }, {
                 onStart: () => {
                     //取消僵直
-                    this.isFireContrl = false;
                 },
                 onComplete: () => {
+                    this.isFireContrl = false;
                     if (bulletNode) {
                         bClass.bTween.removeSelf();
-
+                        //
                         var b: any = bulletNode.getComponent(cofResult.class);
                         if (b.sleep == false) {
                             b.sleep = true;
@@ -149,7 +138,7 @@ export class tArrow extends buildBase {
                 var distance = tankManager.Instance.getDisFromBoth(this, target);
                 var isAttackDis = distance < this.attackDis
                 //自身存在&&目标也存在
-                if (isAttackDis) {
+                if (isAttackDis&&target.sleep==false) {
                     var anim: Animation = this.node.getComponent(Animation);
                     anim.play("tTowerFire")
                     this.spawnBullet(target, distance);
@@ -163,7 +152,7 @@ export class tArrow extends buildBase {
                     this.searchTarget();
                     console.log("寻找下个目标");
                 }
-            }, this._fireSpace * 1000);
+            }, this._fireSpace * 500);
         }
         else {
             this._targetNode = null;
@@ -191,7 +180,9 @@ export class tArrow extends buildBase {
         //指向
         if (this.sleep == false) {
             if (this.targetNode && this.isFireContrl == false) {
-                this.gunRote(this.targetNode);
+                {
+                    this.gunRote(this.targetNode);
+                }
 
             }
         }

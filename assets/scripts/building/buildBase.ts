@@ -10,6 +10,31 @@ export class buildBase extends base {
     //选中动画
     protected _tweenSelect: any;
 
+    //是否已经被放置
+    protected _isPlace: boolean = false;
+    //放置记录占位
+    public _signGrids: grid[] = [];
+
+    //清除动画
+    public clearAnim(){
+        var icon = this.node.getChildByName("Icon")
+        var iconSprite: Sprite;
+        //带着子层级
+        if (icon) {
+            iconSprite = icon.getComponent(Sprite)
+        }
+        //没有子层级
+        else {
+            iconSprite = this.node.getComponent(Sprite)
+        }
+        if(this._tweenSelect){
+            this._tweenSelect.stop();
+            this._tweenSelect.removeSelf();
+            iconSprite.color = new Color(225, 225, 255, 255)
+            iconSprite.node.scale=new Vec3(1,1,1)
+        }
+    }
+    //选中动画
     public selectAnim(isSelect: boolean) {
         var icon = this.node.getChildByName("Icon")
         var iconSprite: Sprite;
@@ -25,37 +50,63 @@ export class buildBase extends base {
         iconSprite.color = new Color(225, 225, 255, 255)
         const cor = { optcity: 225 }
         if (isSelect) {
-            // if (iconSprite.color) {
-            //     this._tweenSelect = tween(cor)
-            //         .to(1, { optcity: 0 }, {
-            //             onUpdate: () => {
-            //                 if (this.node)
-            //                     iconSprite.color = new Color(225, 225, 225, cor.optcity);
-            //             }
-            //         }).to(1, { optcity: 225 }, {
-            //             onUpdate: () => {
-            //                 if (this.node)
-            //                     iconSprite.color = new Color(225, 225, 225, cor.optcity);
-            //             }
-            //         })
-            //         // 逐渐透明
-            //         .start(); // 启动动画
-            //     iconSprite.color = new Color(225, 225, 255, 100)
-            // }
-
-            // else {
-            //     console.log("当前选中设置UI名称或父子节点出错");
-            // }
-
-
             this._tweenSelect = tween(iconSprite.node)
-                .to(0.5, {scale:new Vec3(1.3,1.3,1.3)}).to(0.3, {scale:new Vec3(1,1,1)}).start();
+                .to(0.5, { scale: new Vec3(1.3, 1.3, 1.3) }).to(0.3, { scale: new Vec3(1, 1, 1) }).union().repeatForever().start();
 
         }
         else {
             iconSprite.color = new Color(225, 225, 225, 225)
+            if (this._tweenSelect) {
+                this._tweenSelect.stop();
+                this._tweenSelect.removeSelf();
+            }
         }
     }
+    //放置动画
+    public unPlaceAnim(isSelect: boolean) {
+
+        console.log("unPlaceAnim false");
+
+        var icon = this.node.getChildByName("Icon")
+        var iconSprite: Sprite;
+        //带着子层级
+        if (icon) {
+            iconSprite = icon.getComponent(Sprite)
+        }
+        //没有子层级
+        else {
+            iconSprite = this.node.getComponent(Sprite)
+        }
+        const cor = { optcity: 225 }
+
+        if (isSelect) {
+            this._tweenSelect = tween(cor)
+                .to(1, { optcity: 0 }, {
+                    onUpdate: () => {
+                        if (this.node)
+                            iconSprite.color = new Color(225, 225, 225, cor.optcity);
+                    }
+                }).to(1, { optcity: 225 }, {
+                    onUpdate: () => {
+                        if (this.node)
+                            iconSprite.color = new Color(225, 225, 225, cor.optcity);
+                    }
+                }).union().repeatForever().start(); // 启动动画
+        } else {
+            //调用动画结束 是放置完成
+            console.log("unPlaceAnim false 2");
+            this._isPlace = true;
+            if (this._tweenSelect) {
+                this._tweenSelect.stop();
+                this._tweenSelect.removeSelf();
+            }
+
+            iconSprite.color = new Color(225, 225, 225, 225);
+        }
+
+
+    }
+
 
     public get data(): any {
         return this._data;
@@ -63,11 +114,6 @@ export class buildBase extends base {
 
     start() {
 
-    }
-    //建筑 占用格子
-    private _obGrids: grid[] = []
-    public get obGrids(): grid[] {
-        return this._obGrids;
     }
 
 
@@ -83,22 +129,18 @@ export class buildBase extends base {
 
     //标记格子
     public signObGrids(g: grid) {
-        if (this._obGrids.indexOf(g) == -1) {
-            this._obGrids.push(g)
-            g.isObstacle = true;
-            g.isStatic = true;
-        } else {
-            console.error("销毁建筑时没清除 clearObGrids");
-        }
+        this._signGrids.forEach(element => {
+            element.isStatic = true;
+            element.isObstacle = true;
+        });
     }
 
     //消除格子
     public clearObGrids() {
-        this._obGrids.forEach(element => {
+        this._signGrids.forEach(element => {
             element.isStatic = false;
             element.isObstacle = false;
         });
-        this._obGrids.length = 0;
         //移除动画
         if (this._tweenSelect) {
             this._tweenSelect.stop();
@@ -112,6 +154,9 @@ export class buildBase extends base {
      * 默认是半径为1格子的范围=50
      */
     protected _attackRadius = 50;
+
+
+
 
 
     //初始化数据
