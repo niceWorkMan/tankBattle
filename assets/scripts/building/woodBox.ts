@@ -18,7 +18,7 @@ export class woodBox extends buildBase {
     start() {
         this.node.getChildByName("Icon").on(NodeEventType.TOUCH_START, (e) => {
             //如果已经被放置 可以被选中
-            if (this._isPlace) {
+            if (this.isPlace) {
                 //不向上冒泡
                 e.bubbles = false;
                 //生成操作菜单
@@ -37,6 +37,7 @@ export class woodBox extends buildBase {
                 this.selectAnim(true);
             }
         })
+
     }
 
     public init(pos: math.Vec2): void {
