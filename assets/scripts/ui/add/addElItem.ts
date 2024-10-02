@@ -32,11 +32,16 @@ export class addElItem extends Component {
 
     onClick() {
         var parent = this.node.parent.getComponent(addElementManager);
+        //清除上一个动画
+        if (UIManager.Instance.optionBuildData) {
+            UIManager.Instance.optionBuildData.component.clearAnim();
+        }
         switch (this._data.name) {
             case "hammer":
                 this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["woodBox", "last"]))
                 break;
             case "tBase":
+
                 this.placeBuild(this._data);
                 break;
             case "repair":
@@ -44,6 +49,10 @@ export class addElItem extends Component {
             case "levelUp":
                 break;
             case "cancel":
+                //清除
+                if (UIManager.Instance.optionBuildData) {
+                    UIManager.Instance.optionBuildData.component.unPlaceAnim(false);
+                }
                 parent.clear();
                 break;
             case "delect":
@@ -59,16 +68,26 @@ export class addElItem extends Component {
                 console.log("accept");
                 if (UIManager.Instance.optionBuildData) {
                     //标记占位
-                    var _signGrids: grid[] = UIManager.Instance.optionBuildData.component._signGrids;
+                    var com = UIManager.Instance.optionBuildData.component;
+
+                    var _signGrids: grid[] = com._signGrids;
                     _signGrids.forEach(element => {
-                        UIManager.Instance.optionBuildData.component.signObGrids(element);
+                        com.signObGrids(element);
                         console.log(element.cellX, element.cellY);
                     });
+                    //设置塔基占位特殊属性
+                    if (com.node.parent.name == "tBase") {
+                        var tb: any = com.node.parent.getComponent(editorManager.Instance.propertyConfig[com.node.parent.name].class);
+                        tb.towerObstale = true;
+                        console.log("设置true:", tb);
+                    }
+
                     //清除
                     UIManager.Instance.optionBuildData.component.unPlaceAnim(false);
                     parent.clear();
 
                 }
+
                 break;
             case "refuse":
                 break;
@@ -77,12 +96,13 @@ export class addElItem extends Component {
                 this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]))
                 break;
             case "woodBox":
+                //放置
                 this.placeBuild(this._data);
-                //确认
                 break;
 
 
             case "tArrow":
+                //放置
                 this.placeBuild(this._data, UIManager.Instance.optionBuildData.component.node);
                 break;
 
@@ -110,8 +130,6 @@ export class addElItem extends Component {
                 _b.unPlaceAnim(true);
                 //设置最后一次放置
                 UIManager.Instance.optionBuildData = _b.getOptionBuildData();
-                console.log("UIManager.Instance.optionBuildData:",UIManager.Instance.optionBuildData);
-                
                 //等待确认按钮
                 UIManager.Instance.addBuildUI(UIManager.Instance.aem_LastCenter, UIManager.Instance.getMenuArr(["delect", "accept"]), false);
                 //占位记录

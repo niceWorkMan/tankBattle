@@ -14,7 +14,7 @@ export class tBase extends buildBase {
         //建筑类型
         this._buildType = buildType.build;
 
-        this.team=enumTeam.teamBlue;
+        this.team = enumTeam.teamBlue;
     }
 
     public init(pos: math.Vec2): void {
@@ -25,8 +25,31 @@ export class tBase extends buildBase {
         this.node.on(NodeEventType.TOUCH_START, (e) => {
             //不向上冒泡
             e.bubbles = false;
+
+            if (this.towerObstale == true) {
+                console.log("当前塔基上有对象站位");
+                 //清除上一个选中动画
+                 if (UIManager.Instance.optionBuildData) {
+                    UIManager.Instance.optionBuildData.component.clearAnim();
+                    //清除菜单
+                    if (UIManager.Instance.optionBuildData.component._isPlace == false) {
+                        UIManager.Instance.buildUIClear();
+                    }
+                }
+                //存储
+                UIManager.Instance.optionBuildData = this.getOptionBuildData();
+                return;
+            }
             //生成操作菜单
-            UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["levelUp", "repair","tArrow", "delect", "cancel"]), false)
+            UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["levelUp", "repair", "tArrow", "delect", "cancel"]), false)
+             //清除上一个选中动画
+             if (UIManager.Instance.optionBuildData) {
+                UIManager.Instance.optionBuildData.component.clearAnim();
+                //清除菜单
+                if (UIManager.Instance.optionBuildData.component._isPlace == false) {
+                    UIManager.Instance.buildUIClear();
+                }
+            }
             //存储
             UIManager.Instance.optionBuildData = this.getOptionBuildData();
             //动画

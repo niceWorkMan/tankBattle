@@ -25,6 +25,16 @@ export class tree extends obstaleBase {
             this.isAllow(pos, false);
             //清除建造UI
             UIManager.Instance.clearBuildUI();
+            //清除上一个
+            if (UIManager.Instance.optionBuildData) {
+                //清除动画
+                UIManager.Instance.optionBuildData.component.clearAnim();
+                //清除菜单
+                if (UIManager.Instance.optionBuildData.component._isPlace == false) {
+                    UIManager.Instance.buildUIClear();
+                }
+            }
+
         }, this);
     }
 

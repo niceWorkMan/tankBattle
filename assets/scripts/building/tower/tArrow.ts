@@ -40,10 +40,20 @@ export class tArrow extends buildBase {
             e.bubbles = false;
             //生成操作菜单
             UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["levelUp", "repair", "delect", "cancel"]), false)
-            //存储
-            UIManager.Instance.optionBuildData = this.getOptionBuildData();
             //动画
             this.selectAnim(true);
+            //存储
+            //清除上一个选中动画
+            if (UIManager.Instance.optionBuildData) {
+                UIManager.Instance.optionBuildData.component.clearAnim();
+                //清除菜单
+                if (UIManager.Instance.optionBuildData.component._isPlace == false) {
+                    UIManager.Instance.buildUIClear();
+                }
+            }
+            //存储
+            UIManager.Instance.optionBuildData = this.getOptionBuildData();
+
         })
 
         //查询管理类
@@ -60,7 +70,6 @@ export class tArrow extends buildBase {
         if (!this.targetNode) {
             setTimeout(() => {
                 //再次寻找
-                console.log("再次寻找");
                 if (this.node) {
                     this.searchTarget();
                 }
@@ -107,7 +116,7 @@ export class tArrow extends buildBase {
         //子弹运动方向(运动到目标点)
 
         if (target) {
-            bClass.bTween=  tween(bulletNode).delay(0.5).to(0.5 * (distance / 5), { worldPosition: pureTargetPos }, {
+            bClass.bTween = tween(bulletNode).delay(0.5).to(0.5 * (distance / 5), { worldPosition: pureTargetPos }, {
                 onStart: () => {
                     //取消僵直
                 },
@@ -138,7 +147,7 @@ export class tArrow extends buildBase {
                 var distance = tankManager.Instance.getDisFromBoth(this, target);
                 var isAttackDis = distance < this.attackDis
                 //自身存在&&目标也存在
-                if (isAttackDis&&target.sleep==false) {
+                if (isAttackDis && target.sleep == false) {
                     var anim: Animation = this.node.getComponent(Animation);
                     anim.play("tTowerFire")
                     this.spawnBullet(target, distance);

@@ -7,8 +7,13 @@ const { ccclass, property } = _decorator;
 export class buildBase extends base {
 
     protected _data: any;
+
+
+    //塔基占位
+    protected towerObstale:boolean=false;
     //选中动画
     protected _tweenSelect: any;
+
 
     //是否已经被放置
     protected _isPlace: boolean = false;
@@ -65,7 +70,6 @@ export class buildBase extends base {
     //放置动画
     public unPlaceAnim(isSelect: boolean) {
 
-        console.log("unPlaceAnim false");
 
         var icon = this.node.getChildByName("Icon")
         var iconSprite: Sprite;
@@ -94,7 +98,6 @@ export class buildBase extends base {
                 }).union().repeatForever().start(); // 启动动画
         } else {
             //调用动画结束 是放置完成
-            console.log("unPlaceAnim false 2");
             this._isPlace = true;
             if (this._tweenSelect) {
                 this._tweenSelect.stop();

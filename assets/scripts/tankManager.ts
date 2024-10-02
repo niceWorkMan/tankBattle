@@ -391,7 +391,7 @@ export class tankManager extends Component {
 
 
         if (_self.node.name == "tArrow") {
-            console.log("in Tarrow");
+            //console.log("in Tarrow");
         }
         for (var i = 0; i < this.nodeCollection.length; i++) {
             if (_self.team != this.nodeCollection[i].team && this.nodeCollection[i].sleep == false) {

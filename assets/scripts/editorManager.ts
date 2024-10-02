@@ -40,7 +40,7 @@ export class editorManager extends Component {
     }
 
     //配置表
-    private _propertyConfig = {};
+    private _propertyConfig:any=null;
     public get propertyConfig(): any {
         return this._propertyConfig;
     }
@@ -119,7 +119,7 @@ export class editorManager extends Component {
             //初始化位置Index
 
             obj.getComponent(this._propertyConfig[name].class).init(center);
-            console.log("设置了", this._propertyConfig[name], center);
+            //console.log("设置了", this._propertyConfig[name], center);
             //排序(遮挡关系)
             this.node.getComponent(tankManager).setSiblingIndex_Layer(obstaleLayer)
         } else {

@@ -117,13 +117,13 @@ export class grid extends Component {
             }
             //存在正在建造的对象
             else {
-                console.log("UIManager.Instance.optionBuildData.component._isPlace:", UIManager.Instance.optionBuildData.component);
-
                 //清除动画
-                UIManager.Instance.optionBuildData.component.clearAnim();
-                //清除菜单
-                if (UIManager.Instance.optionBuildData.component._isPlace == false) {
-                    UIManager.Instance.buildUIClear();
+                if (UIManager.Instance.optionBuildData) {
+                    UIManager.Instance.optionBuildData.component.clearAnim();
+                    //清除菜单
+                    if (UIManager.Instance.optionBuildData.component._isPlace == false) {
+                        UIManager.Instance.buildUIClear();
+                    }
                 }
                 //新建菜单
                 UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]));
