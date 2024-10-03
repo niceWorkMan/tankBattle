@@ -40,7 +40,7 @@ export class pool extends Component {
 
 
     //人物对象池
-    private _elPool = { tank: [], pig: [], boy01: [] };
+    private _elPool = { tank: [], pig: [], boy01: [], workWoodCuter:[]};
 
     //生成对象
     public spawnActor(name: string, parent: Node): any {
@@ -57,7 +57,7 @@ export class pool extends Component {
             this.removeTargetFormPool(ac);
             //显示
             ac.active = true;
-            //console.log("使用["+name+"]对象池的:" + this._elPool[name].length);
+            console.log("使用["+name+"]对象池的:" + this._elPool[name].length);
             ac.getComponent(edt.propertyConfig[name].class).sleep = false;
             ac.die = false;
             //重新赋值血量
@@ -79,7 +79,7 @@ export class pool extends Component {
             obj = instantiate(edt.propertyConfig[name].prefab)
             parent.addChild(obj);
             this._elPool[name].push(obj);
-            //console.log("使用["+name+"]新对象:"+obj.name);
+            console.log("使用["+name+"]新对象:"+obj.name);
             return obj;
         }
     }

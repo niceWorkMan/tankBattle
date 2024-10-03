@@ -125,6 +125,21 @@ export class tankManager extends Component {
 
 
             case KeyCode.KEY_B:
+                var parentLayer = this.node.getChildByName("effectLayer")
+                parentLayer.children.forEach(element => {
+                    element.destroy();
+                });
+
+                for (var i = 0; i < gridManager.Instance.getGridMatrix.row; i++) {
+                    for (var j = 0; j < gridManager.Instance.getGridMatrix.colum; j++) {
+                        if (gridManager.Instance.gridComponentArr[i][j].isObstacle == true) {
+                            var obj = instantiate(editorManager.Instance.edtorNode)
+                            parentLayer.addChild(obj)
+                            obj.position = gridManager.Instance.gridComponentArr[i][j].node.position;
+                            obj.getComponent(Sprite).color = new Color(200, 0, 0, 225)
+                        }
+                    }
+                }
                 break;
         }
     }
@@ -373,10 +388,7 @@ export class tankManager extends Component {
         for (var x = 0; x < this._gManager.getGridMatrix.row; x++) {
             for (var y = 0; y < this._gManager.getGridMatrix.colum; y++) {
                 astar.gridNodeArr[x][y].isObstacle = this._gManager.gridComponentArr[x][y].isObstacle;
-                if (astar.gridNodeArr[x][y].isObstacle) {
-                    //astar.gridNodeArr[x][y].setSpriteColor({r:0,g:0,b:0,a:225})
-
-                }
+                astar.gridNodeArr[x][y].isSearch = this._gManager.gridComponentArr[x][y].isStatic;
             }
         }
     }
@@ -459,8 +471,8 @@ export class tankManager extends Component {
     getDisFromBoth(_self: base, _target: base) {
         var targtPos;
         //可移动的
-        console.log("目标名称:",_target.node.name);
-        
+        console.log("目标名称:", _target.node.name);
+
         if (_target.buildType == buildType.none) {
             targtPos = _target.getComponent(aStar).nodeInGridCellIndex;
         }

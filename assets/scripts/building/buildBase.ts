@@ -26,7 +26,8 @@ export class buildBase extends base {
     private _isPlace: boolean = false;
     public set isPlace(v: boolean) {
         if (v) {
-            this.GenerateBElementSpawnPoint();
+            var posArr = this.GenerateBElementSpawnPoint();
+            this.buildStartWork(posArr)
         }
         this._isPlace = v;
     }
@@ -240,8 +241,6 @@ export class buildBase extends base {
 
         var MaxDis = 100;
         var selectNode: any = null;
-        console.log("配置:", key, cls);
-        console.log("树长度:", objs.length);
 
         objs.forEach(element => {
             var sum = Math.pow(Math.abs(element.cellX - this.cellX), 2) + Math.pow(Math.abs(element.cellY - this.cellY), 2)
@@ -253,29 +252,29 @@ export class buildBase extends base {
         });
 
         //图形调试-------------------------------------------------------------
-        var obj = instantiate(editorManager.Instance.edtorNode)
-        parentLayer.addChild(obj)
-        obj.position = gridManager.Instance.gridComponentArr[selectNode.cellX][selectNode.cellY].node.position;
-        obj.getComponent(Sprite).color = new Color(200, 200, 0, 225)
+        // var obj = instantiate(editorManager.Instance.edtorNode)
+        // parentLayer.addChild(obj)
+        // obj.position = gridManager.Instance.gridComponentArr[selectNode.cellX][selectNode.cellY].node.position;
+        // obj.getComponent(Sprite).color = new Color(200, 200, 0, 225)
         //---------------------------------------------------------------------
+
 
         return new Vec2(selectNode.cellX, selectNode.cellY);
     }
 
 
     //生成 两个位置  起点(建筑位置) - 终点(资源位置)
-    protected GenerateBElementSpawnPoint():Vec2[] {
+    protected GenerateBElementSpawnPoint(): Vec2[] {
+        var maxtri = gridManager.Instance.getGridMatrix;
+
         var parentLayer = this.node.parent.parent.getChildByName("effectLayer")
 
         var res = this.getNearestResGrid("tree");
         if (res) {
             var points: Vec2[] = this.getBuildNeighborFreeGrid();
             var MaxDis = 100;
-            var Max2 = 100;
             var selectNode: any = null;
             points.forEach(element => {
-                console.log("树");
-
                 //空闲格子到资源点的距离
                 var sum1 = Math.pow(Math.abs(element.x - res.x), 2) + Math.pow(Math.abs(element.y - res.y), 2)
                 //空闲格子到建筑的距离
@@ -289,14 +288,54 @@ export class buildBase extends base {
                     MaxDis = dis;
                 }
             });
+
+
+            //找目标格子四周空闲
+            var resAroundGrids: Vec2[] = [];
+            for (var i = res.x - 1; i <= res.x + 1; i++) {
+                for (var j = res.y - 1; j <= res.y + 1; j++) {
+                    if ((i >= 0 && i < maxtri.row) && (j >= 0 && j < maxtri.colum)&&!(i==res.x&&j==res.y)&&!(i!=res.x&&j!=res.y)) {
+                        if (gridManager.Instance.gridComponentArr[i][j].isStatic == false) {
+                            resAroundGrids.push(new Vec2(gridManager.Instance.gridComponentArr[i][j].cellX, gridManager.Instance.gridComponentArr[i][j].cellY));
+                       
+                            //图形调试-------------------------------------------------------------
+                            // var obj2 = instantiate(editorManager.Instance.edtorNode)
+                            // parentLayer.addChild(obj2)
+                            // obj2.position = gridManager.Instance.gridComponentArr[i][j].node.position;
+                            // obj2.getComponent(Sprite).color = new Color(200, 100, 0, 225)
+                             //--------------------------------------------------------------------
+                        }
+                    }
+                }
+            }
+            var MaxAroundGridDis = 100;
+            //查询周围格子到建筑最短距离
+            var aroundNode: any = null;
+            resAroundGrids.forEach(element => {
+                //空闲格子到资源点的距离
+                var sum = Math.pow(Math.abs(element.x - selectNode.x), 2) + Math.pow(Math.abs(element.y - selectNode.y), 2)
+                var dis = Math.sqrt(sum);
+                if (dis < MaxAroundGridDis) {
+                    aroundNode = element;
+                    MaxAroundGridDis = dis;
+                }
+            });
+
+
             //图形调试-------------------------------------------------------------
             var obj = instantiate(editorManager.Instance.edtorNode)
             parentLayer.addChild(obj)
             obj.position = gridManager.Instance.gridComponentArr[selectNode.x][selectNode.y].node.position;
             obj.getComponent(Sprite).color = new Color(200, 100, 0, 225)
             //---------------------------------------------------------------------
+            //图形调试-------------------------------------------------------------
+            var obj2 = instantiate(editorManager.Instance.edtorNode)
+            parentLayer.addChild(obj2)
+            obj2.position = gridManager.Instance.gridComponentArr[aroundNode.x][aroundNode.y].node.position;
+            obj2.getComponent(Sprite).color = new Color(200, 100, 0, 225)
+            //---------------------------------------------------------------------
             //[起点(建筑位置) - 终点(资源位置)]
-            return [selectNode,res];
+            return [selectNode, aroundNode];
 
         } else {
             //搜索资源失败
@@ -305,6 +344,10 @@ export class buildBase extends base {
         }
 
     }
+
+
+    //建筑开始工作
+    protected buildStartWork(posArr: Vec2[]) { }
 
 
 

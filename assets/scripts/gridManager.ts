@@ -196,28 +196,28 @@ export class gridManager extends Component {
 
 
     //更新moveObstale占位
-    public upDataObstale() {
-        var tManager: tankManager = this.getComponent(tankManager);
-        var gManager: gridManager = this;
-        for (var i = 0; i < gManager.getGridMatrix.row; i++) {
-            for (var j = 0; j < gManager.getGridMatrix.colum; j++) {
-                //非静态障碍物 才会动态设置障碍属性
-                if (!gManager.gridComponentArr[i][j].isStatic) {
-                    var isObstacle = false;
-                    for (var k = 0; k < tManager.nodeCollection.length; k++) {
-                        if (tManager.nodeCollection[k].getComponent(aStar).nodeInGridCellIndex != new Vec2(-1, -1)) {
-                            var pos: Vec2 = tManager.nodeCollection[k].getComponent(aStar).nodeInGridCellIndex;
-                            if (i == pos.x && j == pos.y) {
-                                isObstacle = true;
-                                break;
-                            }
-                        }
-                    }
-                    gManager.gridComponentArr[i][j].isObstacle = isObstacle;
-                }
-            }
-        }
-    }
+    // public upDataObstale() {
+    //     var tManager: tankManager = this.getComponent(tankManager);
+    //     var gManager: gridManager = this;
+    //     for (var i = 0; i < gManager.getGridMatrix.row; i++) {
+    //         for (var j = 0; j < gManager.getGridMatrix.colum; j++) {
+    //             //非静态障碍物 才会动态设置障碍属性
+    //             if (!gManager.gridComponentArr[i][j].isStatic) {
+    //                 var isObstacle = false;
+    //                 for (var k = 0; k < tManager.nodeCollection.length; k++) {
+    //                     if (tManager.nodeCollection[k].getComponent(aStar).nodeInGridCellIndex != new Vec2(-1, -1)) {
+    //                         var pos: Vec2 = tManager.nodeCollection[k].getComponent(aStar).nodeInGridCellIndex;
+    //                         if (i == pos.x && j == pos.y) {
+    //                             isObstacle = true;
+    //                             break;
+    //                         }
+    //                     }
+    //                 }
+    //                 gManager.gridComponentArr[i][j].isObstacle = isObstacle;
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 

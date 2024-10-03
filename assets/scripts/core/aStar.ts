@@ -86,8 +86,10 @@ export class aStar extends Component {
         this.tManager.synCurrentState(this);
         //同步基础网格状态
         //寻路
-        this.startGrid.cellX = this.nodeInGridCellIndex.x;
-        this.startGrid.cellY = this.nodeInGridCellIndex.y;
+        if (this.nodeInGridCellIndex) {
+            this.startGrid.cellX = this.nodeInGridCellIndex.x;
+            this.startGrid.cellY = this.nodeInGridCellIndex.y;
+        }
 
         this.getPriceMixNeighborGrid(this.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY])
     }
@@ -201,7 +203,7 @@ export class aStar extends Component {
         if (this.tManager.node.getComponent(util)._isPause == true) {
             return;
         }
-        if(this.tk.sleep){
+        if (this.tk.sleep) {
             return;
         }
 
@@ -328,7 +330,7 @@ export class aStar extends Component {
         for (var i = 0; i < this._closeList.length; i++) {
             //this._closeList[i].setLabel("路:" + i)
             //this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setLabel("路:" + i);
-            //this._closeList[i].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
+            //gridManager.Instance.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].setSpriteColor({ r: 0, g: 21, b: 225, a: 255 });
             //this.gManager.gridComponentArr[this._closeList[i].cellX][this._closeList[i].cellY].olor({ r: 0, g: 21, b: 225, a: 255 });
             if (i > 0) {
                 this._closeList[i].parent = this._closeList[i - 1];
@@ -463,8 +465,8 @@ export class aStar extends Component {
     sortPriceOfGrid(gArr: grid_c[]): grid_c[] {
         //排序
         for (var i = 0; i < gArr.length; i++) {
-            for (var j = 0; j < gArr.length - i - 1; j++) {
-                if (gArr[j].price > gArr[i].price) {
+            for (var j = i; j < gArr.length; j++) {
+                if (gArr[j].price <= gArr[i].price) {
                     var temp = gArr[j];
                     gArr[j] = gArr[i];
                     gArr[i] = temp;
@@ -472,27 +474,24 @@ export class aStar extends Component {
             }
         }
         //过滤掉新增的 不可用路径点isObstacle=true的对象
-        for (var i = 0; i < gArr.length; i++) {
-            if (gArr[i].isObstacle) {
-                var index = gArr.indexOf(gArr[i]);
-                gArr.splice(index, 1);
-            }
-        }
+        gArr.filter((item) => {
+            return item.isObstacle == false;
+        })
         return gArr;
     }
 
     //获取格子的代价
     getGridPrice(currentGrid: grid_c, startGrid: grid_c, endGrid: grid_c) {
-        //公式 h=f+g;
-        var f = Math.abs(currentGrid.getCellIndex().x - startGrid.getCellIndex().x) + Math.abs(currentGrid.getCellIndex().y - startGrid.getCellIndex().y);
-        var g = Math.abs(endGrid.getCellIndex().x - currentGrid.getCellIndex().x) + Math.abs(endGrid.getCellIndex().y - currentGrid.getCellIndex().y);
-        var h = f + g;
+        //公式 h=f+g; 错误算法 不是最优路径
+        // var f = Math.abs((currentGrid.getCellIndex().x - this.startGrid.cellX) +(currentGrid.getCellIndex().y - this.startGrid.cellY));
+        // var g = Math.abs((this.endGrid.cellX - currentGrid.getCellIndex().x) + (this.endGrid.cellY - currentGrid.getCellIndex().y));
+        // var h = f + g;
 
-        //斜边算法
-        // var x2 = Math.pow(Math.abs(endGrid.getCellIndex().x - currentGrid.getCellIndex().x), 2);
-        // var y2 = Math.pow(Math.abs(endGrid.getCellIndex().y - currentGrid.getCellIndex().y), 2);
-        // h = Math.sqrt(x2 + y2);
-        return Math.floor(h);
+        //斜边算法 
+        var x2 = Math.pow(this.endGrid.cellX - currentGrid.getCellIndex().x, 2);
+        var y2 = Math.pow(this.endGrid.cellY - currentGrid.getCellIndex().y, 2);
+        var h = Math.sqrt(x2 + y2);
+        return h;
     }
 
 
@@ -567,7 +566,6 @@ export class aStar extends Component {
         var els: element[] = this.findEnemyGrids()
         for (var i = 0; i < els.length; i++) {
             var matixs: grid_c[] = this.getEnemyNeighbor(els[i]);
-
             console.log("可用的格子数:" + matixs.length)
             if (matixs.length > 0) {
                 return matixs[0]

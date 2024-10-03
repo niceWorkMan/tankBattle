@@ -76,13 +76,15 @@ export class workWoodCuter extends element {
         //到达最后一个点,移动结束
         //到达最后一个点,移动结束
         if (nextIndex == closeList.length - 1) {
-            this.node.active = false;
+           
             //判断是否真的移动到终点
             if (star.endGrid == star.finalGrid) {
-                if (this.node)
-                    this.destorySelf();
+                  var twMove = tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex])}).start()
+                  
             }
             else {
+                console.log("重新导航");
+                
                 //设置结束点为最终终点
                 star.endGrid = star.finalGrid
                 //继续导航
@@ -91,6 +93,7 @@ export class workWoodCuter extends element {
             return;
         }
 
+        console.log("移动");
 
         //如果下一个目标点是障碍
         if (nextIndex + 1 <= closeList.length - 1) {
@@ -127,8 +130,6 @@ export class workWoodCuter extends element {
                         //射击部分---------------------------------------
                         //设置当前tank坐标
                         star.nodeInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY)
-                        //目标坦克
-                        var targetTank = this.tManager.searchAttakTarget(this);
                         //攻击源坦克
                         twMove.removeSelf();
                         if (nextIndex + 1 <= closeList.length - 1) {
@@ -171,7 +172,8 @@ export class workWoodCuter extends element {
             //判断是否真的移动到终点
             if (star.endGrid == star.finalGrid) {
                 if (this.node) {
-                    this.destorySelf();
+                    //this.destorySelf();
+                    
                 }
             }
             else {
@@ -180,6 +182,7 @@ export class workWoodCuter extends element {
                 star.nodeInGridCellIndex = new Vec2(star.endGrid.cellX, star.endGrid.cellY);
                 //继续导航
                 star.startNav();
+                alert("重新导航")
             }
         }
 
@@ -189,7 +192,7 @@ export class workWoodCuter extends element {
 
     //碰撞检测函数
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
-       
+
     }
 
     update(deltaTime: number) {

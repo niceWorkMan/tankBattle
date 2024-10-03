@@ -118,13 +118,14 @@ export class grid_c {
 
 
     public resetProperty(){
+        this._backCheck=false;
+        this._isSearch=false;
         this._isObstacle=false;
         this._isStatic=false;
         this._parent=null;
         this._next=null;
         this._price=10000;
-        this._backCheck=false;
-        this._isSearch=false;
+
     }
 }
 
