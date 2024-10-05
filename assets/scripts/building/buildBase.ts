@@ -1,4 +1,4 @@
-import { _decorator, color, Color, Component, instantiate, Node, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, CacheMode, color, Color, Component, instantiate, Node, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { base } from '../node/base';
 import { grid } from '../grid';
 import { gridManager } from '../gridManager';
@@ -23,7 +23,7 @@ export class buildBase extends base {
     /**
      * 默认最大数量3个工人
      */
-    protected _workerNumer:number=3;
+    protected _workerNumer: number = 3;
 
     //当前建筑对应采集资源对象
     protected _digResTarget: obstaleBase = null;
@@ -82,6 +82,8 @@ export class buildBase extends base {
 
     //清除动画
     public clearAnim() {
+        if (!this.node)
+            return;
         var icon = this.node.getChildByName("Icon")
         var iconSprite: Sprite;
         //带着子层级
@@ -101,6 +103,8 @@ export class buildBase extends base {
     }
     //选中动画
     public selectAnim(isSelect: boolean) {
+        if (!this.node)
+            return;
         var icon = this.node.getChildByName("Icon")
         var iconSprite: Sprite;
         //带着子层级
@@ -129,7 +133,8 @@ export class buildBase extends base {
     }
     //放置动画
     public unPlaceAnim(isSelect: boolean) {
-
+        if (!this.node)
+            return;
 
         var icon = this.node.getChildByName("Icon")
         var iconSprite: Sprite;
@@ -200,6 +205,13 @@ export class buildBase extends base {
 
     //消除格子
     public clearObGrids() {
+        //特殊处理
+        if (this.node.parent.name == "tBase") {
+            var cls = editorManager.Instance.propertyConfig["tBase"].class;
+            var com: any = this.node.parent.getComponent(cls);
+            com.towerObstale = false;
+        }
+        //一般站位处理
         this._signGrids.forEach(element => {
             element.isStatic = false;
             element.isObstacle = false;
@@ -269,9 +281,8 @@ export class buildBase extends base {
     //找到当前建筑离得最近的资源
     private getNearestResGrid(key: string): Vec2 {
         var parentLayer = this.node.parent.parent.getChildByName("effectLayer")
-
         var cls = editorManager.Instance.propertyConfig[key].class;
-        var obstaleLayer: Node = this.node.parent.parent.getChildByName("obstaleLayer");
+        var obstaleLayer: Node = editorManager.Instance.node.getChildByName("obstaleLayer");
         var objs: any[] = obstaleLayer.getComponentsInChildren(cls);
 
         var MaxDis = 100;
@@ -309,6 +320,14 @@ export class buildBase extends base {
 
     //生成 两个位置  起点(建筑位置) - 终点(资源位置)
     protected GenerateBElementSpawnPoint(): Vec2[] {
+
+        var resBuildNameArr: string[] = ["woodBox"]
+        if (resBuildNameArr.indexOf(this.key) == -1) {
+            return;
+        }
+
+
+
         var maxtri = gridManager.Instance.getGridMatrix;
 
         var parentLayer = this.node.parent.parent.getChildByName("effectLayer")
@@ -367,16 +386,16 @@ export class buildBase extends base {
 
 
             //图形调试-------------------------------------------------------------
-            var obj = instantiate(editorManager.Instance.edtorNode)
-            parentLayer.addChild(obj)
-            obj.position = gridManager.Instance.gridComponentArr[selectNode.x][selectNode.y].node.position;
-            obj.getComponent(Sprite).color = new Color(200, 100, 0, 225)
+            // var obj = instantiate(editorManager.Instance.edtorNode)
+            // parentLayer.addChild(obj)
+            // obj.position = gridManager.Instance.gridComponentArr[selectNode.x][selectNode.y].node.position;
+            // obj.getComponent(Sprite).color = new Color(200, 100, 0, 225)
             //---------------------------------------------------------------------
             //图形调试-------------------------------------------------------------
-            var obj2 = instantiate(editorManager.Instance.edtorNode)
-            parentLayer.addChild(obj2)
-            obj2.position = gridManager.Instance.gridComponentArr[aroundNode.x][aroundNode.y].node.position;
-            obj2.getComponent(Sprite).color = new Color(200, 100, 0, 225)
+            // var obj2 = instantiate(editorManager.Instance.edtorNode)
+            // parentLayer.addChild(obj2)
+            // obj2.position = gridManager.Instance.gridComponentArr[aroundNode.x][aroundNode.y].node.position;
+            // obj2.getComponent(Sprite).color = new Color(200, 100, 0, 225)
             //---------------------------------------------------------------------
             //[起点(建筑位置) - 终点(资源位置)]
             return [selectNode, aroundNode];

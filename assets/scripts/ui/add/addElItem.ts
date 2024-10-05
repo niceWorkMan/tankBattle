@@ -1,4 +1,4 @@
-import { _decorator, Button, Color, Component, ImageAsset, Label, Node, resources, Sprite, SpriteFrame, Texture2D, Vec2 } from 'cc';
+import { _decorator, Button, Color, Component, ImageAsset, Label, Node, resources, Sprite, SpriteFrame, Texture2D, Vec2, Vec3 } from 'cc';
 import { addElementManager } from './addElementManager';
 import { UIManager } from '../../UIManager';
 import { gridManager } from '../../gridManager';
@@ -62,6 +62,8 @@ export class addElItem extends Component {
                     UIManager.Instance.optionBuildData.component.clearObGrids();
                     //消除UI
                     UIManager.Instance.addMenu.clear();
+
+                    this.node.worldPosition
                 }
                 break;
             case "accept":
