@@ -1,18 +1,20 @@
 import { _decorator, Component, Node, Vec2 } from 'cc';
 import { obstaleBase } from './obstaleBase';
 import { UIManager } from '../UIManager';
+import { digresType } from '../common/digresType';
 const { ccclass, property } = _decorator;
 
 @ccclass('tree')
 export class tree extends obstaleBase {
     constructor() {
         super();
+        //资源类型(木头)
+        this._digresType=digresType.wood;
     }
 
     start() {
 
     }
-
 
     public init(pos: Vec2): void {
         //调用父类方法

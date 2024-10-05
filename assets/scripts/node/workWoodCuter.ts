@@ -6,6 +6,7 @@ import { gridManager } from '../gridManager';
 import { tankManager } from '../tankManager';
 import { grid_c } from '../core/grid_c';
 import { buildType } from '../common/buildType';
+import { digresType } from '../common/digresType';
 const { ccclass, property } = _decorator;
 
 @ccclass('workWoodCuter')
@@ -17,6 +18,8 @@ export class workWoodCuter extends element {
         this._key = "workWoodCuter";
         //不属于建筑类型
         this.buildType = buildType.none;
+        //掘取资源类型(木头)
+        this._digresType = digresType.wood;
     }
     private animClip: Animation;
 
@@ -29,6 +32,62 @@ export class workWoodCuter extends element {
         this.getComponent(aStar).key = this._key
         //默认动画
         this.animClip = this.node.getComponent(Animation);
+    }
+
+    /**
+     * 掘取路线
+     * @param nextIndex 
+     * @param closeList 
+     */
+    digPathMove(nextIndex: number, closeList: grid_c[]) {
+        var star = this.getComponent(aStar);
+        star.nodeInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY);
+
+        var pointIndex: number = this._digBelongBuild.isStartOrEndPos(new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY));
+        var posStart = this._digBelongBuild.resPathPoints[pointIndex];
+        var posEnd = this._digBelongBuild.resPathPoints[1 - pointIndex];
+
+        if (pointIndex != null) {
+            switch (pointIndex) {
+                case 0:
+                    tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
+                        onComplete: () => {
+                            star.startGrid = gridManager.Instance.gridComponentArr[posStart.x][posStart.y];
+                            star.endGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
+                            star.finalGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
+                            //开始导航
+                            closeList.length = 0;
+                            star.startNav();
+                        }
+                    }).start()
+                    break;
+                case 1:
+                    tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
+                        onComplete: () => {
+                            var count = Math.floor(this._resFullNum / this._digSpeed);
+                            var i = 0;
+                            var intval = setInterval(() => {
+                                i++;
+                                if (i > 0) {
+                                    //清除
+                                    clearInterval(intval);
+
+                                    //设置结束点
+                                    star.startGrid = gridManager.Instance.gridComponentArr[posStart.x][posStart.y];
+                                    star.endGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
+                                    star.finalGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
+                                    //开始导航
+                                    closeList.length = 0;
+                                    star.startNav();
+                                }
+                            }, 500);
+                        }
+                    }).start()
+                    break;
+            }
+        } else {
+            console.error("没找到start end 点")
+        }
     }
 
     //移动核心逻辑
@@ -73,18 +132,17 @@ export class workWoodCuter extends element {
             console.log("错误的closeList长度");
 
         }
+
         //到达最后一个点,移动结束
         //到达最后一个点,移动结束
         if (nextIndex == closeList.length - 1) {
-           
             //判断是否真的移动到终点
             if (star.endGrid == star.finalGrid) {
-                  var twMove = tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex])}).start()
-                  
+                //核心调取
+                this.digPathMove(nextIndex, closeList);
             }
             else {
                 console.log("重新导航");
-                
                 //设置结束点为最终终点
                 star.endGrid = star.finalGrid
                 //继续导航
@@ -92,8 +150,6 @@ export class workWoodCuter extends element {
             }
             return;
         }
-
-        console.log("移动");
 
         //如果下一个目标点是障碍
         if (nextIndex + 1 <= closeList.length - 1) {
@@ -173,7 +229,7 @@ export class workWoodCuter extends element {
             if (star.endGrid == star.finalGrid) {
                 if (this.node) {
                     //this.destorySelf();
-                    
+
                 }
             }
             else {

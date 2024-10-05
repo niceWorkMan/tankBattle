@@ -5,7 +5,6 @@ import { UIManager } from '../UIManager';
 import { editorManager } from '../editorManager';
 import { gridManager } from '../gridManager';
 import { aStar } from '../core/aStar';
-import { grid } from '../grid';
 import { pool } from '../core/pool';
 import { enumTeam } from '../common/enumTeam';
 import { workWoodCuter } from '../node/workWoodCuter';
@@ -69,9 +68,11 @@ export class woodBox extends buildBase {
         var gridComponentArr = gridManager.Instance.gridComponentArr;
         var workerLayer = editorManager.Instance.node.getChildByName("workerLayer");
 
+        var config = editorManager.Instance.propertyConfig;
 
+        var workNum = 0;
         //生成工人 寻路
-        setInterval(() => {
+        var inter = setInterval(() => {
             var startGrid = gridComponentArr[posArr[0].x][posArr[0].y]
             var endGrid = gridComponentArr[posArr[1].x][posArr[1].y]
             //设置起始点终点
@@ -87,14 +88,33 @@ export class woodBox extends buildBase {
             star.startGrid = startGrid;
             star.endGrid = endGrid;
             star.finalGrid = endGrid;
-
             woodCuter.getComponent(aStar).nodeInGridCellIndex = new Vec2(startGrid.cellX, startGrid.cellY)
             woodCuter.position = gridManager.Instance.getPositionByCellIndex(startGrid.cellX, startGrid.cellY);
             woodCuter.scale = new Vec3(1, 1, 1);
 
+            //添加到集合
+            var woodCuterInstace: any = woodCuter.getComponent(config["workWoodCuter"].class);
+            if (this._workers.indexOf(woodCuterInstace) == -1) {
+                this._workers.push(woodCuterInstace);
+            }
+            //设置父建筑
+            woodCuterInstace._digBelongBuild = this;
+
+            //寻路
             setTimeout(() => {
                 star.startNav()
             }, 100);
+
+
+            //不生成测试
+            workNum++;
+            if (workNum > this._workerNumer) {
+                clearInterval(inter);
+            }
+
+            console.log("生成工人",workNum,this._workerNumer);
+            
+
         }, 1000);
     }
 }

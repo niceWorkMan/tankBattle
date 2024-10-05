@@ -1,5 +1,6 @@
 import { _decorator, Component, Node, Vec2 } from 'cc';
 import { editorManager } from '../editorManager';
+import { digresType } from '../common/digresType';
 const { ccclass, property } = _decorator;
 
 @ccclass('obstaleBase')
@@ -31,6 +32,13 @@ export class obstaleBase extends Component {
         this._cellX=pos.x;
         this._cellY=pos.y;
     }
+
+
+     //资源类型
+     protected _digresType:digresType=digresType.none;
+     public get dresType() : digresType {
+         return this._digresType;
+     }
 
 
 

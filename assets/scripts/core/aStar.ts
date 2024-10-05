@@ -303,27 +303,30 @@ export class aStar extends Component {
         };
         //远点过滤
         this.removefarGrid(this._closeList);
+
         //头尾加入
-        if (this.closeList.length > 0) {
-            this.closeList.unshift(this.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY])
-            this.closeList.push(this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY])
-        }
-        else {
-            //console.warn("当前路径无法到达终点");
-            //主要的重新导航在这里，直接找不到路径就换路径
-            setTimeout(() => {
-                if (this.tk) {
-                    //如果当前有敌人格子可用
-                    var usefulGrid = this.findEnemyUsedGrid();
-                    //console.log("当前查询的可用格子:");
-                    if (usefulGrid != null) {
-                        //将结束格子设置为 敌人附近可用格子
-                        this.endGrid = this.gManager.gridComponentArr[usefulGrid.cellX][usefulGrid.cellY];
+        this.closeList.unshift(this.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY])
+        this.closeList.push(this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY])
+
+        //只有首尾
+        if (this.closeList.length == 2) {
+            //首位不相连 重新导航
+            if (!this.isNeigber(new Vec2(this.startGrid.cellX, this.startGrid.cellY), new Vec2(this.endGrid.cellX, this.endGrid.cellY))) {
+                setTimeout(() => {
+                    if (this.tk) {
+                        //如果当前有敌人格子可用
+                        var usefulGrid = this.findEnemyUsedGrid();
+                        //console.log("当前查询的可用格子:");
+                        if (usefulGrid != null) {
+                            //将结束格子设置为 敌人附近可用格子
+                            this.endGrid = this.gManager.gridComponentArr[usefulGrid.cellX][usefulGrid.cellY];
+                        }
+                        this.startNav();
                     }
-                    this.startNav();
-                }
-            }, this.tk.waitObsTime * 1000);
-            return;
+                }, this.tk.waitObsTime * 1000);
+                return;
+            }
+           
         }
         //重新设置Parent和Next
         //显示路径
@@ -350,6 +353,12 @@ export class aStar extends Component {
 
         }
 
+    }
+
+    isNeigber(startPos: Vec2, endPos: Vec2) {
+        var a = startPos.x == endPos.x && Math.abs(startPos.y - endPos.y) == 1;
+        var b = startPos.y == endPos.y && Math.abs(startPos.x - endPos.x) == 1
+        return a || b;
     }
 
 

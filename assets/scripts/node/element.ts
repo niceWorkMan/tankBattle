@@ -1,11 +1,11 @@
-import { _decorator, BoxCollider2D, Collider2D, Color, Component, Contact2DType, IPhysics2DContact, Node, Sprite, Tween, Vec2, Vec3 } from 'cc';
+import { _decorator, BoxCollider2D, Collider2D, Color, Node, Sprite, Tween, Vec2, Vec3 } from 'cc';
 import { aStar } from '../core/aStar';
 import { gridManager } from '../gridManager';
 import { tankManager } from '../tankManager';
-import { enumTeam } from '../common/enumTeam';
 import { grid_c } from '../core/grid_c';
-import { buildType } from '../common/buildType';
 import { base } from './base';
+import { digresType } from '../common/digresType';
+import { buildBase } from '../building/buildBase';
 const { ccclass, property } = _decorator;
 
 @ccclass('element')
@@ -15,6 +15,43 @@ export class element extends base {
     }
 
     protected nodeCollider: Collider2D;
+
+
+    //自然资源----------------------------------------------
+    /**
+     * 拥有资源数量
+     */
+    protected _resNum: number = 0;
+    public get resNum(): number {
+        return this._resNum
+    }
+    public set resNum(v: number) {
+        this._resNum = v;
+    }
+
+    /**
+     * 资源满载数量 默认5
+     */
+    protected _resFullNum = 5;
+    /**
+     * 采矿速度
+     */
+    protected _digSpeed = 1;
+    /**
+     * 掘取资源类型
+     */
+    protected _digresType: digresType = digresType.none;
+    public get dresType(): digresType {
+        return this._digresType;
+    }
+
+    //掘取所属建筑
+    protected _digBelongBuild:buildBase=null;
+    //-----------------------------------------------------
+
+
+
+
     start() {
         this.initComponent();
     }
@@ -135,7 +172,7 @@ export class element extends base {
 
 
     //销毁 element元素的
-     protected destorySelf() {
+    protected destorySelf() {
         this.sleep = true;
 
         if (this.lastTweenMove) {

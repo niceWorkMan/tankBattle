@@ -3,24 +3,49 @@ import { base } from '../node/base';
 import { grid } from '../grid';
 import { gridManager } from '../gridManager';
 import { editorManager } from '../editorManager';
-import { tree } from '../obstale/tree';
+import { obstaleBase } from '../obstale/obstaleBase';
 const { ccclass, property } = _decorator;
 
 @ccclass('buildBase')
 export class buildBase extends base {
-
+    //初始化数据
     protected _data: any;
-
 
     //塔基占位
     protected towerObstale: boolean = false;
 
-    protected towerOb
+    //工人
+    protected _workers: base[] = [];
+    public get workers(): base[] {
+        return this._workers;
+    }
+
+    /**
+     * 默认最大数量3个工人
+     */
+    protected _workerNumer:number=3;
+
+    //当前建筑对应采集资源对象
+    protected _digResTarget: obstaleBase = null;
+    public get digResTarget(): obstaleBase {
+        return this._digResTarget;
+    }
+
 
 
     //选中动画
     protected _tweenSelect: any;
 
+    /**
+     * 掘取资源首位点
+     */
+    protected _resPathPoints: Vec2[] = [];
+    public get resPathPoints(): Vec2[] {
+        return this._resPathPoints;
+    }
+    public set resPathPoints(v: Vec2[]) {
+        this._resPathPoints = v;
+    }
 
     //是否已经被放置
     private _isPlace: boolean = false;
@@ -28,6 +53,7 @@ export class buildBase extends base {
         if (v) {
             var posArr = this.GenerateBElementSpawnPoint();
             this.buildStartWork(posArr)
+            this._resPathPoints = posArr;
         }
         this._isPlace = v;
     }
@@ -35,12 +61,21 @@ export class buildBase extends base {
         return this._isPlace
     }
 
-
-
-
-    public get value(): string {
-        return
+    //开始还是结束
+    public isStartOrEndPos(cuPos: Vec2): number {
+        if (this._resPathPoints.length == 2) {
+            for (var i = 0; i < this._resPathPoints.length; i++) {
+                if (this._resPathPoints[i].x == cuPos.x && this._resPathPoints[i].y == cuPos.y) {
+                    return i;
+                }
+            }
+        } else {
+            return null;
+        }
     }
+
+
+
 
     //放置记录占位
     public _signGrids: grid[] = [];
@@ -241,6 +276,8 @@ export class buildBase extends base {
 
         var MaxDis = 100;
         var selectNode: any = null;
+        //查到的对象资源
+        var resTarget: obstaleBase = null;
 
         objs.forEach(element => {
             var sum = Math.pow(Math.abs(element.cellX - this.cellX), 2) + Math.pow(Math.abs(element.cellY - this.cellY), 2)
@@ -248,8 +285,15 @@ export class buildBase extends base {
             if (dis < MaxDis) {
                 selectNode = element;
                 MaxDis = dis;
+                //资源对象
+                resTarget = element;
             }
         });
+        //设置资源对象
+        this._digResTarget = resTarget;
+
+        console.log("设置资源对象:", this._digResTarget.node.name);
+
 
         //图形调试-------------------------------------------------------------
         // var obj = instantiate(editorManager.Instance.edtorNode)
@@ -294,16 +338,16 @@ export class buildBase extends base {
             var resAroundGrids: Vec2[] = [];
             for (var i = res.x - 1; i <= res.x + 1; i++) {
                 for (var j = res.y - 1; j <= res.y + 1; j++) {
-                    if ((i >= 0 && i < maxtri.row) && (j >= 0 && j < maxtri.colum)&&!(i==res.x&&j==res.y)&&!(i!=res.x&&j!=res.y)) {
+                    if ((i >= 0 && i < maxtri.row) && (j >= 0 && j < maxtri.colum) && !(i == res.x && j == res.y) && !(i != res.x && j != res.y)) {
                         if (gridManager.Instance.gridComponentArr[i][j].isStatic == false) {
                             resAroundGrids.push(new Vec2(gridManager.Instance.gridComponentArr[i][j].cellX, gridManager.Instance.gridComponentArr[i][j].cellY));
-                       
+
                             //图形调试-------------------------------------------------------------
                             // var obj2 = instantiate(editorManager.Instance.edtorNode)
                             // parentLayer.addChild(obj2)
                             // obj2.position = gridManager.Instance.gridComponentArr[i][j].node.position;
                             // obj2.getComponent(Sprite).color = new Color(200, 100, 0, 225)
-                             //--------------------------------------------------------------------
+                            //--------------------------------------------------------------------
                         }
                     }
                 }
