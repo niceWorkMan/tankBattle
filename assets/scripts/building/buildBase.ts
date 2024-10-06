@@ -20,6 +20,15 @@ export class buildBase extends base {
         return this._workers;
     }
 
+
+    protected onDestroy(): void {
+        for(var i=0;i<this._workers.length;i++){
+            if(this._workers[i]){
+                this._workers[i].destroyTarget();
+            }
+        }
+    }
+
     /**
      * 默认最大数量3个工人
      */
@@ -60,6 +69,8 @@ export class buildBase extends base {
     public get isPlace(): boolean {
         return this._isPlace
     }
+    
+
 
     //开始还是结束
     public isStartOrEndPos(cuPos: Vec2): number {
@@ -319,7 +330,7 @@ export class buildBase extends base {
 
 
     //生成 两个位置  起点(建筑位置) - 终点(资源位置)
-    protected GenerateBElementSpawnPoint(): Vec2[] {
+    public GenerateBElementSpawnPoint(): Vec2[] {
 
         var resBuildNameArr: string[] = ["woodBox"]
         if (resBuildNameArr.indexOf(this.key) == -1) {

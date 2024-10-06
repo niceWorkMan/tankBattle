@@ -12,6 +12,7 @@ import { buildBase } from '../building/buildBase';
 import { userData } from '../common/userData';
 import { UIManager } from '../UIManager';
 import { attentionDigRes } from '../ui/attention/attentionDigRes';
+import { woodBox } from '../building/woodBox';
 const { ccclass, property } = _decorator;
 
 @ccclass('workWoodCuter')
@@ -45,6 +46,9 @@ export class workWoodCuter extends element {
      * @param closeList 
      */
     digPathMove(nextIndex: number, closeList: grid_c[]) {
+        if (this.sleep) {
+            return;
+        }
         //资源位置
         var resPosition = this._digBelongBuild.digResTarget.node.position;
         //建筑位置
@@ -64,18 +68,22 @@ export class workWoodCuter extends element {
                 case 0:
                     tween(this.node).to(this.moveSpeed, { position: new Vec3((lastPos.x + buildPos.x) / 2, (lastPos.y + buildPos.y) / 2, lastPos.z) }, {
                         onComplete: () => {
+                            if(!this._digBelongBuild.node){
+                                return;
+                            }
+
                             star.startGrid = gridManager.Instance.gridComponentArr[posStart.x][posStart.y];
                             star.endGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
                             star.finalGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
 
 
-                            var attentionUI=UIManager.Instance.node.getChildByName("AttentionUI");
+                            var attentionUI = UIManager.Instance.node.getChildByName("AttentionUI");
                             //获得木材资源
                             userData.Instance.woodNum += this._digSpeed;
-                            var att= instantiate(UIManager.Instance.attentionDigResPrefab);
+                            var att = instantiate(UIManager.Instance.attentionDigResPrefab);
                             attentionUI.addChild(att);
-                            att.position=new Vec3(this._digBelongBuild.node.position.x+40,this._digBelongBuild.node.position.y,this._digBelongBuild.node.position.z);
-                            att.getComponent(attentionDigRes).initAttention("wood",this._digSpeed);
+                            att.position = new Vec3(this._digBelongBuild.node.position.x + 40, this._digBelongBuild.node.position.y, this._digBelongBuild.node.position.z);
+                            att.getComponent(attentionDigRes).initAttention("wood", this._digSpeed);
 
                             //开始导航
                             closeList.length = 0;
@@ -111,8 +119,67 @@ export class workWoodCuter extends element {
                     break;
             }
         } else {
-            console.error("没找到start end 点")
+            // //重新生成一个导航
+            var wb: woodBox = this._digBelongBuild.node.getComponent(woodBox)
+            wb.reSpawnOne();
+            //删除自己
+            this.destroyTarget();
+            console.warn("没找到start end 点")
         }
+    }
+
+    /**
+     * 不移动直接获取资源
+     */
+    public digOneGrid() {
+        this.node.active = true;
+        if (this.sleep) {
+            return;
+        }
+
+        //资源位置
+        var resPosition = this._digBelongBuild.digResTarget.node.position;
+        //建筑位置
+        var buildPos = this._digBelongBuild.node.position;
+
+        var startPos = new Vec3((this.node.position.x + buildPos.x) / 2, (this.node.position.y + buildPos.y) / 2, this.node.position.z)
+        var endPos = new Vec3((this.node.position.x + resPosition.x) / 2, (this.node.position.y + resPosition.y) / 2, this.node.position.z)
+
+        this.node.position = startPos;
+        var attentionUI = UIManager.Instance.node.getChildByName("AttentionUI");
+
+        var moveEnd = () => {
+            tween(this.node).to(this.moveSpeed, { position: endPos }, {
+                onComplete: () => {
+                    if (this.sleep) {
+                        return;
+                    }
+                    var att = instantiate(UIManager.Instance.attentionDigResPrefab);
+                    attentionUI.addChild(att);
+                    att.position = new Vec3(this._digBelongBuild.node.position.x + 40, this._digBelongBuild.node.position.y, this._digBelongBuild.node.position.z);
+                    att.getComponent(attentionDigRes).initAttention("wood", this._digSpeed);
+                    //更新数据
+                    userData.Instance.woodNum += this._digSpeed;
+                    //--------------------
+                    moveStart();
+                }
+            }).start();
+        }
+
+        var moveStart = () => {
+            if (this.sleep) {
+                return;
+            }
+            tween(this.node).to(this.moveSpeed, { position: startPos }, {
+                onComplete: () => {
+                    moveEnd();
+                }
+            }).start();
+        }
+ 
+        //移动到结尾位置
+        moveEnd();
+
     }
 
     //移动核心逻辑
@@ -196,7 +263,6 @@ export class workWoodCuter extends element {
                     return;
                 }
                 //位移
-                console.log("nextIndex:", nextIndex);
 
                 var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
                 var targetRot = radian * (180 / Math.PI);
@@ -213,7 +279,6 @@ export class workWoodCuter extends element {
                     } if (closeList[nextIndex].cellX - closeList[nextIndex - 1].cellX == -1) {
                         this.animClip.play('boy01_left');
                     }
-                    console.log(closeList[nextIndex].cellY - closeList[nextIndex - 1].cellY, closeList[nextIndex].cellX - closeList[nextIndex - 1].cellX);
                 }
 
 
@@ -273,6 +338,7 @@ export class workWoodCuter extends element {
 
 
     }
+
 
 
     //碰撞检测函数

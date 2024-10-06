@@ -19,10 +19,15 @@ export class obstaleBase extends Component {
     public get cellY() : number {
         return this._cellY
     }
+
     
     
 
-
+    /**
+     * 是否显示
+     * @param pos 
+     * @param isAllow 
+     */
     protected isAllow(pos:Vec2,isAllow){
         var editor=editorManager.Instance;
         editor.spawnEditors([new Vec2(pos.x,pos.y)],isAllow);

@@ -5,6 +5,9 @@ import { tankManager } from '../tankManager';
 import { element } from '../node/element';
 import { grid_c } from './grid_c';
 import { util } from '../common/util';
+import { editorManager } from '../editorManager';
+import { workWoodCuter } from '../node/workWoodCuter';
+import { woodBox } from '../building/woodBox';
 
 const { ccclass, property } = _decorator;
 
@@ -84,15 +87,52 @@ export class aStar extends Component {
         //重置数据
         this.resetGridArr();
         this.tManager.synCurrentState(this);
+        var gArr = gridManager.Instance.gridComponentArr
         //同步基础网格状态
         //寻路
-        if (this.nodeInGridCellIndex) {
+        if (this.nodeInGridCellIndex && gArr[this.nodeInGridCellIndex.x][this.nodeInGridCellIndex.y].isObstacle == false && gArr[this.endGrid.cellX][this.endGrid.cellY].isObstacle == false) {
             this.startGrid.cellX = this.nodeInGridCellIndex.x;
             this.startGrid.cellY = this.nodeInGridCellIndex.y;
+        }
+        else {
+            switch (this.node.name) {
+                case "workWoodCuter":
+                    var cls = editorManager.Instance.propertyConfig["workWoodCuter"].class;
+                    var act: workWoodCuter = this.node.getComponent(cls);
+                    var woodb = act.digBelongBuild.getComponent(woodBox);
+                    var pArray: Vec2[] = woodb.GenerateBElementSpawnPoint();
+                    //设置首尾
+                    woodb.resPathPoints = pArray;
+                    if (pArray.length == 2) {
+                        console.log("重新找定位点成功");
+
+                        this.nodeInGridCellIndex = pArray[0];
+                        this.startGrid.cellX = this.nodeInGridCellIndex.x;
+                        this.startGrid.cellY = this.nodeInGridCellIndex.y;
+
+                        this.endGrid.cellX = pArray[1].x;
+                        this.endGrid.cellY = pArray[1].y;
+
+                        this.finalGrid.cellX = pArray[1].x;
+                        this.finalGrid.cellY = pArray[1].y;
+                    }
+                    else {
+                        alert("cuowu 22")
+                    }
+                    break;
+                default:
+                    //重新导航
+                    setTimeout(() => {
+                        this.startNav();
+                    }, 500);
+            }
         }
 
         this.getPriceMixNeighborGrid(this.gridNodeArr[this.startGrid.cellX][this.startGrid.cellY], this.gridNodeArr[this.endGrid.cellX][this.endGrid.cellY])
     }
+
+
+
 
 
     //同步网格状态
@@ -326,7 +366,7 @@ export class aStar extends Component {
                 }, this.tk.waitObsTime * 1000);
                 return;
             }
-           
+
         }
         //重新设置Parent和Next
         //显示路径

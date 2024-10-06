@@ -47,6 +47,10 @@ export class element extends base {
 
     //掘取所属建筑
     protected _digBelongBuild:buildBase=null;
+    public get digBelongBuild() : buildBase {
+        return this._digBelongBuild;
+    }
+    
     //-----------------------------------------------------
 
 
