@@ -1,4 +1,4 @@
-import { _decorator, Animation, Collider2D, Color, Component, Contact2DType, IPhysics2DContact, Node, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Animation, Collider2D, Color, Component, Contact2DType, instantiate, IPhysics2DContact, Node, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { element } from './element';
 import { grid } from '../grid';
 import { aStar } from '../core/aStar';
@@ -7,6 +7,11 @@ import { tankManager } from '../tankManager';
 import { grid_c } from '../core/grid_c';
 import { buildType } from '../common/buildType';
 import { digresType } from '../common/digresType';
+import { editorManager } from '../editorManager';
+import { buildBase } from '../building/buildBase';
+import { userData } from '../common/userData';
+import { UIManager } from '../UIManager';
+import { attentionDigRes } from '../ui/attention/attentionDigRes';
 const { ccclass, property } = _decorator;
 
 @ccclass('workWoodCuter')
@@ -40,29 +45,48 @@ export class workWoodCuter extends element {
      * @param closeList 
      */
     digPathMove(nextIndex: number, closeList: grid_c[]) {
+        //资源位置
+        var resPosition = this._digBelongBuild.digResTarget.node.position;
+        //建筑位置
+        var buildPos = this._digBelongBuild.node.position;
+
+
+
         var star = this.getComponent(aStar);
         star.nodeInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY);
 
         var pointIndex: number = this._digBelongBuild.isStartOrEndPos(new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY));
         var posStart = this._digBelongBuild.resPathPoints[pointIndex];
         var posEnd = this._digBelongBuild.resPathPoints[1 - pointIndex];
-
+        var lastPos = this.node.getComponent(aStar).getPosition(closeList[nextIndex]);
         if (pointIndex != null) {
             switch (pointIndex) {
                 case 0:
-                    tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
+                    tween(this.node).to(this.moveSpeed, { position: new Vec3((lastPos.x + buildPos.x) / 2, (lastPos.y + buildPos.y) / 2, lastPos.z) }, {
                         onComplete: () => {
                             star.startGrid = gridManager.Instance.gridComponentArr[posStart.x][posStart.y];
                             star.endGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
                             star.finalGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
+
+
+                            var attentionUI=UIManager.Instance.node.getChildByName("AttentionUI");
+                            //获得木材资源
+                            userData.Instance.woodNum += this._digSpeed;
+                            var att= instantiate(UIManager.Instance.attentionDigResPrefab);
+                            attentionUI.addChild(att);
+                            att.position=new Vec3(this._digBelongBuild.node.position.x+40,this._digBelongBuild.node.position.y,this._digBelongBuild.node.position.z);
+                            att.getComponent(attentionDigRes).initAttention("wood",this._digSpeed);
+
                             //开始导航
                             closeList.length = 0;
                             star.startNav();
+
+
                         }
                     }).start()
                     break;
                 case 1:
-                    tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
+                    tween(this.node).to(this.moveSpeed, { position: new Vec3((lastPos.x + resPosition.x) / 2, (lastPos.y + resPosition.y) / 2, lastPos.z) }, {
                         onComplete: () => {
                             var count = Math.floor(this._resFullNum / this._digSpeed);
                             var i = 0;
@@ -71,11 +95,12 @@ export class workWoodCuter extends element {
                                 if (i > 0) {
                                     //清除
                                     clearInterval(intval);
-
                                     //设置结束点
                                     star.startGrid = gridManager.Instance.gridComponentArr[posStart.x][posStart.y];
                                     star.endGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
                                     star.finalGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
+                                    //树
+
                                     //开始导航
                                     closeList.length = 0;
                                     star.startNav();
@@ -171,6 +196,28 @@ export class workWoodCuter extends element {
                     return;
                 }
                 //位移
+                console.log("nextIndex:", nextIndex);
+
+                var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
+                var targetRot = radian * (180 / Math.PI);
+
+                if (nextIndex - 1 >= 0) {
+                    if (closeList[nextIndex].cellY - closeList[nextIndex - 1].cellY == 1) {
+                        this.animClip.play('boy01_up');
+                    }
+                    if (closeList[nextIndex].cellY - closeList[nextIndex - 1].cellY == -1) {
+                        this.animClip.play('boy01_down');
+                    }
+                    if (closeList[nextIndex].cellX - closeList[nextIndex - 1].cellX == 1) {
+                        this.animClip.play('boy01_right');
+                    } if (closeList[nextIndex].cellX - closeList[nextIndex - 1].cellX == -1) {
+                        this.animClip.play('boy01_left');
+                    }
+                    console.log(closeList[nextIndex].cellY - closeList[nextIndex - 1].cellY, closeList[nextIndex].cellX - closeList[nextIndex - 1].cellX);
+                }
+
+
+
                 var twMove = tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
                     onUpdate: () => {
                     },
@@ -189,35 +236,6 @@ export class workWoodCuter extends element {
                         //攻击源坦克
                         twMove.removeSelf();
                         if (nextIndex + 1 <= closeList.length - 1) {
-                            //车辆转弯   
-                            var radian = Math.atan2(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY, closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX);
-                            var targetRot = radian * (180 / Math.PI);
-                            if (this.node.eulerAngles.z !== targetRot) {
-                                // switch (targetRot) {
-                                //     case -90:
-                                //         this.animClip.play('boy01_down');
-                                //         break;
-                                //     case 90:
-                                //         this.animClip.play('boy01_up');
-                                //         break;
-                                //     case 0:
-                                //         this.animClip.play('boy01_right');
-                                //         break
-                                //     case 180:
-                                //         this.animClip.play('boy01_left');
-                                // }
-                                if(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY>0){
-                                    this.animClip.play('boy01_up');
-                                }
-                                else if(closeList[nextIndex + 1].cellY - closeList[nextIndex].cellY<0){
-                                    this.animClip.play('boy01_down');
-                                }
-                                else if(closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX>0){
-                                    this.animClip.play('boy01_right');
-                                } else if(closeList[nextIndex + 1].cellX - closeList[nextIndex].cellX<0){
-                                    this.animClip.play('boy01_left');
-                                }
-                            }
                             //继续移动
                             nextIndex++;
                             this.tweenMove(nextIndex, closeList);

@@ -12,6 +12,8 @@ export class UIManager extends Component {
     @property(Prefab) buildPanel: Prefab;
     //添加BuildUI
     @property(Prefab) addbuildUIPrefab: Prefab;
+    //提示挖掘资源新增数
+    @property(Prefab) attentionDigResPrefab: Prefab;
 
 
     @property(SpriteFrame) rect_alpha0: SpriteFrame
@@ -236,6 +238,13 @@ export class UIManager extends Component {
 
     update(deltaTime: number) {
 
+    }
+
+    public resNumUpdate(data){
+        var root=this.node.getChildByName("resNum");
+        var woodNum:Label=root.getChildByName("woodNum").getComponent(Label);
+
+        woodNum.string=data["woodNum"]+"";
     }
 }
 
