@@ -91,8 +91,7 @@ export class aStar extends Component {
         //同步基础网格状态
         //寻路
         if (this.nodeInGridCellIndex && gArr[this.nodeInGridCellIndex.x][this.nodeInGridCellIndex.y].isObstacle == false && gArr[this.endGrid.cellX][this.endGrid.cellY].isObstacle == false) {
-            this.startGrid.cellX = this.nodeInGridCellIndex.x;
-            this.startGrid.cellY = this.nodeInGridCellIndex.y;
+            this.startGrid = gArr[this.nodeInGridCellIndex.x][this.nodeInGridCellIndex.y];
         }
         else {
             switch (this.node.name) {
@@ -107,14 +106,9 @@ export class aStar extends Component {
                         console.log("重新找定位点成功");
 
                         this.nodeInGridCellIndex = pArray[0];
-                        this.startGrid.cellX = this.nodeInGridCellIndex.x;
-                        this.startGrid.cellY = this.nodeInGridCellIndex.y;
-
-                        this.endGrid.cellX = pArray[1].x;
-                        this.endGrid.cellY = pArray[1].y;
-
-                        this.finalGrid.cellX = pArray[1].x;
-                        this.finalGrid.cellY = pArray[1].y;
+                        this.startGrid = gArr[this.nodeInGridCellIndex.x][this.nodeInGridCellIndex.y];
+                        this.endGrid = gArr[pArray[1].x][pArray[1].y];
+                        this.finalGrid = gArr[pArray[1].x][pArray[1].y];
                     }
                     else {
                         alert("cuowu 22")

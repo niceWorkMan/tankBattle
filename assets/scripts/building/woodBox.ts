@@ -39,7 +39,7 @@ export class woodBox extends buildBase {
                 }
                 //存储
                 UIManager.Instance.optionBuildData = this.getOptionBuildData();
-                //动画
+                //动画 必须在清除之后调用
                 this.selectAnim(true);
             }
         })

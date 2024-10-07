@@ -40,9 +40,6 @@ export class tArrow extends buildBase {
             e.bubbles = false;
             //生成操作菜单
             UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["levelUp", "repair", "delect", "cancel"]), false)
-            //动画
-            this.selectAnim(true);
-            //存储
             //清除上一个选中动画
             if (UIManager.Instance.optionBuildData) {
                 UIManager.Instance.optionBuildData.component.clearAnim();
@@ -50,7 +47,9 @@ export class tArrow extends buildBase {
                 if (UIManager.Instance.optionBuildData.component._isPlace == false) {
                     UIManager.Instance.buildUIClear();
                 }
-            }
+            }    
+            //动画 播放必须在清除后面
+            this.selectAnim(true);
             //存储
             UIManager.Instance.optionBuildData = this.getOptionBuildData();
 

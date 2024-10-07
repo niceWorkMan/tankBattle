@@ -119,7 +119,7 @@ export class workWoodCuter extends element {
                     break;
             }
         } else {
-            // //重新生成一个导航
+            //重新生成一个导航
             var wb: woodBox = this._digBelongBuild.node.getComponent(woodBox)
             wb.reSpawnOne();
             //删除自己

@@ -22,8 +22,8 @@ export class buildBase extends base {
 
 
     protected onDestroy(): void {
-        for(var i=0;i<this._workers.length;i++){
-            if(this._workers[i]){
+        for (var i = 0; i < this._workers.length; i++) {
+            if (this._workers[i]) {
                 this._workers[i].destroyTarget();
             }
         }
@@ -69,7 +69,7 @@ export class buildBase extends base {
     public get isPlace(): boolean {
         return this._isPlace
     }
-    
+
 
 
     //开始还是结束
@@ -221,12 +221,17 @@ export class buildBase extends base {
             var cls = editorManager.Instance.propertyConfig["tBase"].class;
             var com: any = this.node.parent.getComponent(cls);
             com.towerObstale = false;
+        } else {
+            //一般站位处理
+            this._signGrids.forEach(element => {
+                element.isStatic = false;
+                element.isObstacle = false;
+            });
+            this._signGrids.length = 0
         }
-        //一般站位处理
-        this._signGrids.forEach(element => {
-            element.isStatic = false;
-            element.isObstacle = false;
-        });
+
+        //占位数组为空
+        //this._signGrids.length=0;
         //移除动画
         if (this._tweenSelect) {
             this._tweenSelect.stop();

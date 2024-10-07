@@ -13,17 +13,10 @@ export class grid extends Component {
     public get cellX(): number {
         return this._cellX;
     }
-    public set cellX(v: number) {
-        this._cellX = v;
-    }
-
 
     private _cellY: number;
     public get cellY(): number {
         return this._cellY;
-    }
-    public set cellY(v: number) {
-        this._cellY = v;
     }
 
     //运动产生的障碍的父对象（产生障碍的对象）
@@ -113,6 +106,8 @@ export class grid extends Component {
         if (this.isStatic == false) {
             //没有正在建造的
             if (!UIManager.Instance.optionBuildData) {
+                console.log("当前位置:",this.cellX,this.cellY);
+                
                 UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]));
             }
             //存在正在建造的对象
@@ -125,6 +120,8 @@ export class grid extends Component {
                         UIManager.Instance.buildUIClear();
                     }
                 }
+
+                console.log("当前位置2:",this.cellX,this.cellY);
                 //新建菜单
                 UIManager.Instance.addBuildUI(new Vec2(this.cellX, this.cellY), UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]));
             }
