@@ -703,10 +703,6 @@
       "__uuid__": "fa8a0437-d431-4782-9118-12a38726529a",
       "__expectedType__": "cc.Prefab"
     },
-    "tree": {
-      "__uuid__": "d0401ca3-f78d-4485-9a2b-acf8887ecfad",
-      "__expectedType__": "cc.Prefab"
-    },
     "gSprite": {
       "__uuid__": "9bc58e74-c33e-4bee-a210-dee74f87f118@f9941",
       "__expectedType__": "cc.SpriteFrame"
@@ -789,6 +785,10 @@
     },
     "obs_tree": {
       "__uuid__": "d0401ca3-f78d-4485-9a2b-acf8887ecfad",
+      "__expectedType__": "cc.Prefab"
+    },
+    "obs_ore": {
+      "__uuid__": "21456dc4-f3e5-4e9d-944e-696e116c8092",
       "__expectedType__": "cc.Prefab"
     },
     "build_woodbox": {

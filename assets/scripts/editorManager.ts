@@ -11,6 +11,7 @@ import { boy01 } from './node/boy01';
 import { pig } from './node/pig';
 import { bulletTank } from './bullet/bulletTank';
 import { workWoodCuter } from './node/workWoodCuter';
+import { ore } from './obstale/ore';
 const { ccclass, property } = _decorator;
 
 @ccclass('editorManager')
@@ -18,6 +19,7 @@ export class editorManager extends Component {
     @property(Prefab) edtorNode: Prefab;
 
     @property(Prefab) obs_tree: Prefab;
+    @property(Prefab) obs_ore: Prefab;
 
     @property(Prefab) build_woodbox: Prefab;
     @property(Prefab) tower_base: Prefab;
@@ -53,9 +55,13 @@ export class editorManager extends Component {
     initComponent() {
         this._propertyConfig = {
             //障碍物
-            "tree": {
+            "tree": {//树
                 "prefab": this.obs_tree,
                 "class": tree
+            },
+            "ore": {//矿
+                "prefab": this.obs_ore,
+                "class": ore
             },
             //建筑
             "tBase": {

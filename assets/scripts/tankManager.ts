@@ -11,6 +11,7 @@ import { woodBox } from './building/woodBox';
 import { editorManager } from './editorManager';
 import { base } from './node/base';
 import { buildType } from './common/buildType';
+import { ore } from './obstale/ore';
 const { ccclass, property } = _decorator;
 
 @ccclass('tankManager')
@@ -84,7 +85,9 @@ export class tankManager extends Component {
 
 
     //树木
-    private _tress: Node[] = [];
+    private _trees: Node[] = [];
+    //矿石
+    private _ores: Node[] = [];
 
 
 
@@ -288,15 +291,31 @@ export class tankManager extends Component {
         var obstaleLayer: Node = this.node.getChildByName("obstaleLayer");
         for (var i = 0; i < 15; i++) {
             for (var j = 3; j < 22; j++) {
-                if (Math.random() > 0.9) {
-                    this._gManager.gridComponentArr[i][j].setObstacle(true);
-                    this._gManager.gridComponentArr[i][j].isStatic = true;
-                    var trees: Node = instantiate(this._gManager.tree);
-                    obstaleLayer.addChild(trees);
-                    //初始化树的数据
-                    trees.getComponent(tree).init(new Vec2(i, j))
-                    this._tress.push(trees);
-                    trees.position = this._gManager.gridComponentArr[i][j].node.getPosition();
+                if (Math.random() > 0.85) {
+                    //树
+                    if (Math.random() < 0.7) {
+                        this._gManager.gridComponentArr[i][j].setObstacle(true);
+                        this._gManager.gridComponentArr[i][j].isStatic = true;
+                        var tr: Node = instantiate(editorManager.Instance.obs_tree);
+                        obstaleLayer.addChild(tr);
+                        //初始化树的数据
+                        tr.getComponent(tree).init(new Vec2(i, j))
+                        this._trees.push(tr);
+                        tr.position = this._gManager.gridComponentArr[i][j].node.getPosition();
+                    }
+                    //矿
+                    else{
+                        this._gManager.gridComponentArr[i][j].setObstacle(true);
+                        this._gManager.gridComponentArr[i][j].isStatic = true;
+                        var stone: Node = instantiate(editorManager.Instance.obs_ore);
+                        obstaleLayer.addChild(stone);
+                        //初始化树的数据
+                        stone.getComponent(ore).init(new Vec2(i, j))
+                        this._ores.push(stone);
+                        stone.position = this._gManager.gridComponentArr[i][j].node.getPosition();
+                    }
+
+
                 }
             }
         }
