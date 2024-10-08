@@ -68,7 +68,7 @@ export class workWoodCuter extends element {
                 case 0:
                     tween(this.node).to(this.moveSpeed, { position: new Vec3((lastPos.x + buildPos.x) / 2, (lastPos.y + buildPos.y) / 2, lastPos.z) }, {
                         onComplete: () => {
-                            if(!this._digBelongBuild.node){
+                            if (!this._digBelongBuild.node) {
                                 return;
                             }
 
@@ -94,8 +94,11 @@ export class workWoodCuter extends element {
                     }).start()
                     break;
                 case 1:
+                    console.log("锯木0");
                     tween(this.node).to(this.moveSpeed, { position: new Vec3((lastPos.x + resPosition.x) / 2, (lastPos.y + resPosition.y) / 2, lastPos.z) }, {
                         onComplete: () => {
+                            console.log("锯木1");
+                            //运动
                             var count = Math.floor(this._resFullNum / this._digSpeed);
                             var i = 0;
                             var intval = setInterval(() => {
@@ -114,6 +117,13 @@ export class workWoodCuter extends element {
                                     star.startNav();
                                 }
                             }, 500);
+
+                            //锯木
+                            console.log("锯木2");
+                            
+                            var cls = editorManager.Instance.propertyConfig["tree"].class
+                            var t: any = this._digBelongBuild.digResTarget.getComponent(cls)
+                            t.playDigEffect();
                         }
                     }).start()
                     break;
@@ -176,7 +186,7 @@ export class workWoodCuter extends element {
                 }
             }).start();
         }
- 
+
         //移动到结尾位置
         moveEnd();
 

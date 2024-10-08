@@ -24,7 +24,7 @@ export class obstaleBase extends Component {
     
 
     /**
-     * 是否显示
+     * 是否显示选中 格子框
      * @param pos 
      * @param isAllow 
      */
@@ -43,6 +43,17 @@ export class obstaleBase extends Component {
      protected _digresType:digresType=digresType.none;
      public get dresType() : digresType {
          return this._digresType;
+     }
+
+
+     /**
+      * 开采效果节点
+      */
+     protected _effect:Node=null;
+     /**
+      * 播放开采动画
+      */
+     public playDigEffect(){
      }
 
 

@@ -303,6 +303,10 @@
       "__uuid__": "a45fb01f-6743-4b3f-9871-444ed1c97f48@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
+    "dianJuPrefa": {
+      "__uuid__": "dc696d11-5ff8-418f-82b0-b698e4bd80d7",
+      "__expectedType__": "cc.Prefab"
+    },
     "_id": ""
   },
   {
