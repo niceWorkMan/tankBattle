@@ -11,8 +11,16 @@ export class buildBase extends base {
     //初始化数据
     protected _data: any;
 
+    //采集目标Key
+    protected _targetKey:string;
+    public get targetKey() : string {
+        return this._targetKey;
+    }
+    
+
     //塔基占位
     protected towerObstale: boolean = false;
+
 
     //工人
     protected _workers: base[] = [];
@@ -60,7 +68,7 @@ export class buildBase extends base {
     private _isPlace: boolean = false;
     public set isPlace(v: boolean) {
         if (v) {
-            var posArr = this.GenerateBElementSpawnPoint();
+            var posArr = this.GenerateBElementSpawnPoint(this._targetKey);
             this.buildStartWork(posArr)
             this._resPathPoints = posArr;
         }
@@ -335,9 +343,10 @@ export class buildBase extends base {
 
 
     //生成 两个位置  起点(建筑位置) - 终点(资源位置)
-    public GenerateBElementSpawnPoint(): Vec2[] {
+    public GenerateBElementSpawnPoint(classkey: string): Vec2[] {
 
-        var resBuildNameArr: string[] = ["woodBox"]
+        var resBuildNameArr: string[] = ["woodBox", "oreBox"]
+        //不属于采集类建筑
         if (resBuildNameArr.indexOf(this.key) == -1) {
             return;
         }
@@ -348,7 +357,7 @@ export class buildBase extends base {
 
         var parentLayer = this.node.parent.parent.getChildByName("effectLayer")
 
-        var res = this.getNearestResGrid("tree");
+        var res = this.getNearestResGrid(classkey);
         if (res) {
             var points: Vec2[] = this.getBuildNeighborFreeGrid();
             var MaxDis = 100;

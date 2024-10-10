@@ -795,6 +795,10 @@
       "__uuid__": "aa3e2248-10de-4d27-8445-733e1be7f24f",
       "__expectedType__": "cc.Prefab"
     },
+    "build_orebox": {
+      "__uuid__": "255f1f7f-6c9d-4994-90a0-42af54e1a2cf",
+      "__expectedType__": "cc.Prefab"
+    },
     "tower_base": {
       "__uuid__": "6c93a8ab-c72e-41b7-8a9c-aa1bbd522b92",
       "__expectedType__": "cc.Prefab"
@@ -823,7 +827,7 @@
       "__uuid__": "f175ea97-486c-49a5-a3ad-3ea44a4d9be1",
       "__expectedType__": "cc.Prefab"
     },
-    "wk_woodCuter": {
+    "wk_woker": {
       "__uuid__": "1f84fe3b-6601-444b-8d3c-aced7672fef1",
       "__expectedType__": "cc.Prefab"
     },

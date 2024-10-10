@@ -15,13 +15,13 @@ import { attentionDigRes } from '../ui/attention/attentionDigRes';
 import { woodBox } from '../building/woodBox';
 const { ccclass, property } = _decorator;
 
-@ccclass('workWoodCuter')
-export class workWoodCuter extends element {
+@ccclass('worker')
+export class worker extends element {
 
     constructor() {
         super();
         //初始化config的key
-        this._key = "workWoodCuter";
+        this._key = "worker";
         //不属于建筑类型
         this.buildType = buildType.none;
         //掘取资源类型(木头)
@@ -49,6 +49,8 @@ export class workWoodCuter extends element {
         if (this.sleep) {
             return;
         }
+        //类
+        var cls = editorManager.Instance.propertyConfig[this._digBelongBuild.targetKey].class
         //资源位置
         var resPosition = this._digBelongBuild.digResTarget.node.position;
         //建筑位置
@@ -88,8 +90,6 @@ export class workWoodCuter extends element {
                             //开始导航
                             closeList.length = 0;
                             star.startNav();
-
-
                         }
                     }).start()
                     break;
@@ -119,9 +119,6 @@ export class workWoodCuter extends element {
                             }, 500);
 
                             //锯木
-                            console.log("锯木2");
-                            
-                            var cls = editorManager.Instance.propertyConfig["tree"].class
                             var t: any = this._digBelongBuild.digResTarget.getComponent(cls)
                             t.playDigEffect();
                         }
@@ -130,7 +127,7 @@ export class workWoodCuter extends element {
             }
         } else {
             //重新生成一个导航
-            var wb: woodBox = this._digBelongBuild.node.getComponent(woodBox)
+            var wb:any = this._digBelongBuild.node.getComponent(cls)
             wb.reSpawnOne();
             //删除自己
             this.destroyTarget();

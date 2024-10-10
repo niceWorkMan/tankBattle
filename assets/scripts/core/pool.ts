@@ -40,7 +40,7 @@ export class pool extends Component {
 
 
     //人物对象池
-    private _elPool = { tank: [], pig: [], boy01: [], workWoodCuter:[]};
+    private _elPool = { tank: [], pig: [], boy01: [], worker:[]};
 
     //生成对象
     public spawnActor(name: string, parent: Node): any {

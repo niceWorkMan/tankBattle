@@ -6,8 +6,8 @@ import { element } from '../node/element';
 import { grid_c } from './grid_c';
 import { util } from '../common/util';
 import { editorManager } from '../editorManager';
-import { workWoodCuter } from '../node/workWoodCuter';
 import { woodBox } from '../building/woodBox';
+import { worker } from '../node/worker';
 
 const { ccclass, property } = _decorator;
 
@@ -95,14 +95,15 @@ export class aStar extends Component {
         }
         else {
             switch (this.node.name) {
-                case "workWoodCuter":
-                    var cls = editorManager.Instance.propertyConfig["workWoodCuter"].class;
-                    var act: workWoodCuter = this.node.getComponent(cls);
+                case "worker":
+                    var cls = editorManager.Instance.propertyConfig["worker"].class;
+                    var act: worker = this.node.getComponent(cls);
                     var woodb = act.digBelongBuild.getComponent(woodBox);
-                    var pArray: Vec2[] = woodb.GenerateBElementSpawnPoint();
+                    var pArray: Vec2[] = woodb.GenerateBElementSpawnPoint(woodb.targetKey);
                     //设置首尾
                     woodb.resPathPoints = pArray;
-                    if (pArray.length == 2) {
+                    if (pArray.length == 2) {``
+                        
                         console.log("重新找定位点成功");
 
                         this.nodeInGridCellIndex = pArray[0];

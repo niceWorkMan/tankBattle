@@ -1,24 +1,23 @@
-import { _decorator, Collider2D, Component, instantiate, IPhysics2DContact, math, Node, NodeEventType, Vec2, Vec3 } from 'cc';
-import { buildType } from '../common/buildType';
+import { _decorator, Collider2D, Component, IPhysics2DContact, math, Node, NodeEventType, Vec2, Vec3 } from 'cc';
 import { buildBase } from './buildBase';
-import { UIManager } from '../UIManager';
+import { pool } from '../core/pool';
 import { editorManager } from '../editorManager';
 import { gridManager } from '../gridManager';
-import { aStar } from '../core/aStar';
-import { pool } from '../core/pool';
 import { enumTeam } from '../common/enumTeam';
+import { aStar } from '../core/aStar';
+import { buildType } from '../common/buildType';
+import { UIManager } from '../UIManager';
 import { worker } from '../node/worker';
 const { ccclass, property } = _decorator;
 
-@ccclass('woodBox')
-export class woodBox extends buildBase {
-
+@ccclass('oreBox')
+export class oreBox extends buildBase {
     constructor() {
         super();
         //初始化config的key
-        this._key = "woodBox";
-        //采集目标是树
-        this._targetKey="tree";
+        this._key = "oreBox";
+        //采集目标是矿
+        this._targetKey = "ore";
         //建筑类型
         this._buildType = buildType.build;
     }
@@ -79,7 +78,7 @@ export class woodBox extends buildBase {
 
 
     //重新生成一个
-    public reSpawnOne(){
+    public reSpawnOne() {
         var posArr = this.GenerateBElementSpawnPoint(this.targetKey);
         this.spawnOne(posArr);
     }

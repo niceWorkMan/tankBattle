@@ -10,8 +10,9 @@ import { tank } from './node/tank';
 import { boy01 } from './node/boy01';
 import { pig } from './node/pig';
 import { bulletTank } from './bullet/bulletTank';
-import { workWoodCuter } from './node/workWoodCuter';
 import { ore } from './obstale/ore';
+import { worker } from './node/worker';
+import { oreBox } from './building/oreBox';
 const { ccclass, property } = _decorator;
 
 @ccclass('editorManager')
@@ -22,6 +23,7 @@ export class editorManager extends Component {
     @property(Prefab) obs_ore: Prefab;
 
     @property(Prefab) build_woodbox: Prefab;
+    @property(Prefab) build_orebox: Prefab;
     @property(Prefab) tower_base: Prefab;
     @property(Prefab) tower_arrow: Prefab;
 
@@ -32,7 +34,7 @@ export class editorManager extends Component {
     @property(Prefab) el_pig: Prefab;
     @property(Prefab) el_boy01: Prefab;
 
-    @property(Prefab) wk_woodCuter: Prefab;
+    @property(Prefab) wk_woker: Prefab;
 
 
     constructor() {
@@ -72,6 +74,10 @@ export class editorManager extends Component {
                 "prefab": this.build_woodbox,
                 "class": woodBox
             },
+            "oreBox": {
+                "prefab": this.build_orebox,
+                "class": oreBox
+            },
             "tArrow": {
                 "prefab": this.tower_arrow,
                 "class": tArrow
@@ -90,9 +96,9 @@ export class editorManager extends Component {
                 "class": pig,
             },
             //建筑工作者
-            "workWoodCuter": {
-                "prefab": this.wk_woodCuter,
-                "class": workWoodCuter,
+            "worker": {
+                "prefab": this.wk_woker,
+                "class": worker,
             },
             //子弹
             "bulletTank": {

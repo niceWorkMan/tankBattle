@@ -59,6 +59,15 @@
             }
         },
         {
+            "name": "oreBox",
+            "path": "image/build/oreBox",
+            "des": "采矿场",
+            "zw": {
+                "x": 2,
+                "y": 1
+            }
+        },
+        {
             "name": "tArrow",
             "path": "image/build/tArrow",
             "des": "箭塔",

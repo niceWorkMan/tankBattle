@@ -1,7 +1,8 @@
-import { _decorator, Component, Node, Sprite, SpriteFrame, Vec2 } from 'cc';
+import { _decorator, Component, instantiate, Node, Prefab, Sprite, SpriteFrame, tween, Vec2, Vec3 } from 'cc';
 import { obstaleBase } from './obstaleBase';
 import { digresType } from '../common/digresType';
 import { UIManager } from '../UIManager';
+import { editorManager } from '../editorManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('ore')
@@ -26,6 +27,9 @@ export class ore extends obstaleBase {
     @property(SpriteFrame) fe_res_small: SpriteFrame;
     @property(SpriteFrame) ag_res_small: SpriteFrame;
     @property(SpriteFrame) au_res_small: SpriteFrame;
+
+
+    @property(Prefab) GaoTouPrefa: Prefab
     constructor() {
         super();
         //资源类型(木头)
@@ -88,6 +92,28 @@ export class ore extends obstaleBase {
     update(deltaTime: number) {
 
     }
+
+
+    public playDigEffect(): void {
+        if (!this._effect) {
+            var obj = instantiate(this.GaoTouPrefa)
+            var effectLayer = editorManager.Instance.node.getChildByName("effectLayer")
+            effectLayer.addChild(obj)
+            obj.position = this.node.position;
+            this._effect = obj;
+
+            var cuPos = new Vec3(obj.position.x, obj.position.y, obj.position.z);
+
+            var tw = tween(obj).to(0.5, { position: new Vec3(cuPos.x - 6, cuPos.y, cuPos.z) }).to(0.5, { position: new Vec3(cuPos.x + 6, cuPos.y, cuPos.z) }).union().repeatForever().start();
+
+            setTimeout(() => {
+                obj.destroy();
+                this._effect = null;
+                tw.removeSelf();
+            }, 2000);
+        }
+    }
+
 }
 
 

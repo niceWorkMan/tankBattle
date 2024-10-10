@@ -1,13 +1,10 @@
-import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Label, log, Node, Pool, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Color, Component, EventKeyboard, EventTouch, Input, input, instantiate, KeyCode, Node, Prefab, quat, Quat, Sprite, tween, Vec2, Vec3 } from 'cc';
 import { gridManager } from './gridManager';
 import { aStar } from './core/aStar';
 import { tank } from './node/tank';
 import { enumTeam } from './common/enumTeam';
-import { element } from './node/element';
 import { pool } from './core/pool';
 import { tree } from './obstale/tree';
-import { grid } from './grid';
-import { woodBox } from './building/woodBox';
 import { editorManager } from './editorManager';
 import { base } from './node/base';
 import { buildType } from './common/buildType';

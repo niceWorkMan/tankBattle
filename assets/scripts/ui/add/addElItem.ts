@@ -38,7 +38,7 @@ export class addElItem extends Component {
         }
         switch (this._data.name) {
             case "hammer":
-                this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["woodBox", "last"]))
+                this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["woodBox", "oreBox", "last"]))
                 break;
             case "tBase":
 
@@ -97,7 +97,12 @@ export class addElItem extends Component {
             case "last":
                 this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]))
                 break;
+                
             case "woodBox":
+                //放置
+                this.placeBuild(this._data);
+                break;
+            case "oreBox":
                 //放置
                 this.placeBuild(this._data);
                 break;
