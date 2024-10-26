@@ -54,6 +54,8 @@ export class addElItem extends Component {
                     UIManager.Instance.optionBuildData.component.unPlaceAnim(false);
                 }
                 parent.clear();
+                //清空记录
+                UIManager.Instance.optionBuildData = null;
                 break;
             case "delect":
                 //消除对象
@@ -62,8 +64,8 @@ export class addElItem extends Component {
                     UIManager.Instance.optionBuildData.component.clearObGrids();
                     //消除UI
                     UIManager.Instance.addMenu.clear();
-
-                    this.node.worldPosition
+                    //清空记录
+                    UIManager.Instance.optionBuildData = null;
                 }
                 break;
             case "accept":
@@ -87,6 +89,8 @@ export class addElItem extends Component {
                     //清除
                     UIManager.Instance.optionBuildData.component.unPlaceAnim(false);
                     parent.clear();
+                    //清空记录
+                    UIManager.Instance.optionBuildData = null;
 
                 }
 
@@ -97,7 +101,7 @@ export class addElItem extends Component {
             case "last":
                 this.node.parent.getComponent(addElementManager).reInitAddUI(UIManager.Instance.getMenuArr(["hammer", "tBase", "cancel"]))
                 break;
-                
+
             case "woodBox":
                 //放置
                 this.placeBuild(this._data);

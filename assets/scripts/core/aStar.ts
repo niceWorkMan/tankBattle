@@ -95,25 +95,24 @@ export class aStar extends Component {
         }
         else {
             switch (this.node.name) {
-                case "worker":
-                    var cls = editorManager.Instance.propertyConfig["worker"].class;
-                    var act: worker = this.node.getComponent(cls);
-                    var woodb = act.digBelongBuild.getComponent(woodBox);
-                    var pArray: Vec2[] = woodb.GenerateBElementSpawnPoint(woodb.targetKey);
-                    //设置首尾
-                    woodb.resPathPoints = pArray;
-                    if (pArray.length == 2) {``
-                        
-                        console.log("重新找定位点成功");
-
-                        this.nodeInGridCellIndex = pArray[0];
-                        this.startGrid = gArr[this.nodeInGridCellIndex.x][this.nodeInGridCellIndex.y];
-                        this.endGrid = gArr[pArray[1].x][pArray[1].y];
-                        this.finalGrid = gArr[pArray[1].x][pArray[1].y];
-                    }
-                    else {
-                        alert("cuowu 22")
-                    }
+                case "worker000":
+                    alert("woodbox worker")
+                    // var cls = editorManager.Instance.propertyConfig["worker"].class;
+                    // var act: worker = this.node.getComponent(cls);
+                    // var woodb = act.digBelongBuild.getComponent(woodBox);
+                    // var pArray: Vec2[] = woodb.GenerateBElementSpawnPoint(woodb.targetKey);
+                    // //设置首尾
+                    // woodb.resPathPoints = pArray;
+                    // if (pArray.length == 2) {
+                    //     console.log("重新找定位点成功");
+                    //     this.nodeInGridCellIndex = pArray[0];
+                    //     this.startGrid = gArr[this.nodeInGridCellIndex.x][this.nodeInGridCellIndex.y];
+                    //     this.endGrid = gArr[pArray[1].x][pArray[1].y];
+                    //     this.finalGrid = gArr[pArray[1].x][pArray[1].y];
+                    // }
+                    // else {
+                    //     alert("cuowu 22")
+                    // }
                     break;
                 default:
                     //重新导航

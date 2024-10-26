@@ -276,7 +276,6 @@ export class buildBase extends base {
     //获取建筑周围空闲格子
     private getBuildNeighborFreeGrid() {
         var freeGrids: Vec2[] = [];
-        var parentLayer = this.node.parent.parent.getChildByName("effectLayer")
         var maxtri = gridManager.Instance.getGridMatrix;
         //搜索边界设置为5
         var limit = 5;
@@ -344,19 +343,12 @@ export class buildBase extends base {
 
     //生成 两个位置  起点(建筑位置) - 终点(资源位置)
     public GenerateBElementSpawnPoint(classkey: string): Vec2[] {
-
         var resBuildNameArr: string[] = ["woodBox", "oreBox"]
         //不属于采集类建筑
         if (resBuildNameArr.indexOf(this.key) == -1) {
             return;
         }
-
-
-
         var maxtri = gridManager.Instance.getGridMatrix;
-
-        var parentLayer = this.node.parent.parent.getChildByName("effectLayer")
-
         var res = this.getNearestResGrid(classkey);
         if (res) {
             var points: Vec2[] = this.getBuildNeighborFreeGrid();
@@ -431,6 +423,42 @@ export class buildBase extends base {
             return null;
         }
 
+    }
+
+    
+    public GetAroundOneGrid(selectNode:Vec2,res:Vec2){
+        var maxtri = gridManager.Instance.getGridMatrix;
+         //找目标格子四周空闲
+         var resAroundGrids: Vec2[] = [];
+         for (var i = res.x - 1; i <= res.x + 1; i++) {
+             for (var j = res.y - 1; j <= res.y + 1; j++) {
+                 if ((i >= 0 && i < maxtri.row) && (j >= 0 && j < maxtri.colum) && !(i == res.x && j == res.y) && !(i != res.x && j != res.y)) {
+                     if (gridManager.Instance.gridComponentArr[i][j].isStatic == false) {
+                         resAroundGrids.push(new Vec2(gridManager.Instance.gridComponentArr[i][j].cellX, gridManager.Instance.gridComponentArr[i][j].cellY));
+                     }
+                 }
+             }
+         }
+         var MaxAroundGridDis = 100;
+         //查询周围格子到建筑最短距离
+         var aroundNode: any = null;
+
+         console.log("MaxAroundGridDis:",resAroundGrids,selectNode);
+         
+         resAroundGrids.forEach(element => {
+             //空闲格子到资源点的距离
+             var sum = Math.pow(Math.abs(element.x - selectNode.x), 2) + Math.pow(Math.abs(element.y - selectNode.y), 2)
+             var dis = Math.sqrt(sum);
+             console.log("距离:",dis,dis < MaxAroundGridDis);
+             
+             if (dis < MaxAroundGridDis) {
+                 aroundNode = element;
+                 MaxAroundGridDis = dis;
+                 console.log("aroundNode:",aroundNode);
+                 
+             }
+         });
+         return aroundNode;
     }
 
 

@@ -14,14 +14,9 @@ const { ccclass, property } = _decorator;
 @ccclass('tankManager')
 export class tankManager extends Component {
 
-    //对象
-    @property(Prefab) bulletPrefab: Prefab;
-    @property(Prefab) tankPrefab: Prefab;
-    @property(Prefab) boy01Prefab: Prefab;
-    @property(Prefab) PigPrefab: Prefab;
+    //旗帜
+    @property(Prefab) qizhi:Prefab;
 
-
-    @property(Prefab) tl: Prefab;
 
     //特效
     @property(Prefab) expolisinPrefab: Prefab;
@@ -196,7 +191,7 @@ export class tankManager extends Component {
 
     spawnRotate() {
         //生成实例
-        var tankNode: Node = instantiate(this.tankPrefab);
+        var tankNode: Node = instantiate(editorManager.Instance.el_tank);
         this.node.addChild(tankNode);
         var tk: tank = tankNode.getComponent(tank);
         tween(tankNode).to(10, { eulerAngles: new Vec3(0, 0, 180) }, {

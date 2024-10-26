@@ -1,8 +1,9 @@
-import { _decorator, Component, instantiate, Node, Prefab, Sprite, SpriteFrame, tween, Vec2, Vec3 } from 'cc';
+import { _decorator, Component, instantiate, log, Node, Prefab, Sprite, SpriteFrame, tween, Vec2, Vec3 } from 'cc';
 import { obstaleBase } from './obstaleBase';
 import { digresType } from '../common/digresType';
 import { UIManager } from '../UIManager';
 import { editorManager } from '../editorManager';
+import { tankManager } from '../tankManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('ore')
@@ -78,18 +79,67 @@ export class ore extends obstaleBase {
             UIManager.Instance.clearBuildUI();
             //清除上一个
             if (UIManager.Instance.optionBuildData) {
-                //清除动画
+                //如果上个选中的是采矿场  则插旗子-------------------------------------------
+                if (UIManager.Instance.optionBuildData.key == "oreBox") {
+                    var obj = instantiate(tankManager.Instance.qizhi);
+                    var effectLayer = editorManager.Instance.node.getChildByName("effectLayer");
+                    effectLayer.addChild(obj);
+                    obj.position = this.node.position;
+                    //重新导航
+                    this.reNavWorker();
+                    //清除旗子UI 
+                    setTimeout(() => {
+                        obj.destroy();
+                    }, 2000);
+                }
+
+
+
+                //清除动画------------------------------------------------------------------
                 UIManager.Instance.optionBuildData.component.clearAnim();
                 //清除菜单
                 if (UIManager.Instance.optionBuildData.component._isPlace == false) {
                     UIManager.Instance.buildUIClear();
                 }
+                //清空记录
+                UIManager.Instance.optionBuildData = null;
+
             }
 
         }, this);
     }
 
     update(deltaTime: number) {
+
+    }
+
+    //重新导航
+    private reNavWorker() {
+        var cls = UIManager.Instance.optionBuildData.component;
+        if (cls) {
+            var starPos= new Vec2(cls.cellX,cls.cellY);
+            var endPos = cls.GetAroundOneGrid(starPos,new Vec2(this.cellX,this.cellY));
+
+            console.log("endPos:",endPos);
+            
+            if (endPos) {
+                if (cls.workers.length > 0) {
+                    console.error("没有可导航的Workers");
+                    for (var i = 0; i < cls.workers.length; i++) {
+                        console.log("上个导航点:",  cls.workers[i].digBelongBuild._resPathPoints);
+                        cls.workers[i].digBelongBuild._resPathPoints = [starPos,endPos];
+                        //
+                        console.log("重新道航点:", [starPos,endPos]);
+                    }
+                }
+                else {
+                    console.error("没有可导航的worker")
+                }
+            } else {
+                console.error("生成导航点位失败")
+            }
+        }
+
 
     }
 

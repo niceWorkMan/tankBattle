@@ -62,22 +62,33 @@ export class worker extends element {
         star.nodeInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY);
 
         var pointIndex: number = this._digBelongBuild.isStartOrEndPos(new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY));
-        var posStart = this._digBelongBuild.resPathPoints[pointIndex];
-        var posEnd = this._digBelongBuild.resPathPoints[1 - pointIndex];
+        //console.log("到达点:"+pointIndex);
+
+        var posStart; 
+        var posEnd;
         var lastPos = this.node.getComponent(aStar).getPosition(closeList[nextIndex]);
+
+        if (pointIndex == null) {
+            pointIndex = 0;
+            posStart = star.nodeInGridCellIndex;
+            posEnd =this._digBelongBuild.resPathPoints[1]
+        } else {
+            posStart = this._digBelongBuild.resPathPoints[pointIndex];
+            posEnd=this._digBelongBuild.resPathPoints[1 - pointIndex];
+        }
+
         if (pointIndex != null) {
             switch (pointIndex) {
                 case 0:
-                    tween(this.node).to(this.moveSpeed, { position: new Vec3((lastPos.x + buildPos.x) / 2, (lastPos.y + buildPos.y) / 2, lastPos.z) }, {
+                    this._tweenAnim = tween(this.node).to(this.moveSpeed, { position: new Vec3((lastPos.x + buildPos.x) / 2, (lastPos.y + buildPos.y) / 2, lastPos.z) }, {
                         onComplete: () => {
                             if (!this._digBelongBuild.node) {
                                 return;
                             }
-
                             star.startGrid = gridManager.Instance.gridComponentArr[posStart.x][posStart.y];
                             star.endGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
                             star.finalGrid = gridManager.Instance.gridComponentArr[posEnd.x][posEnd.y];
-
+                            star.nodeInGridCellIndex = new Vec2(star.startGrid.cellX, star.startGrid.cellY);
 
                             var attentionUI = UIManager.Instance.node.getChildByName("AttentionUI");
                             //获得木材资源
@@ -94,10 +105,9 @@ export class worker extends element {
                     }).start()
                     break;
                 case 1:
-                    console.log("锯木0");
-                    tween(this.node).to(this.moveSpeed, { position: new Vec3((lastPos.x + resPosition.x) / 2, (lastPos.y + resPosition.y) / 2, lastPos.z) }, {
+                    console.log("锯木");
+                    this._tweenAnim = tween(this.node).to(this.moveSpeed, { position: new Vec3((lastPos.x + resPosition.x) / 2, (lastPos.y + resPosition.y) / 2, lastPos.z) }, {
                         onComplete: () => {
-                            console.log("锯木1");
                             //运动
                             var count = Math.floor(this._resFullNum / this._digSpeed);
                             var i = 0;
@@ -127,7 +137,7 @@ export class worker extends element {
             }
         } else {
             //重新生成一个导航
-            var wb:any = this._digBelongBuild.node.getComponent(cls)
+            var wb: any = this._digBelongBuild.node.getComponent(cls)
             wb.reSpawnOne();
             //删除自己
             this.destroyTarget();
@@ -290,7 +300,7 @@ export class worker extends element {
 
 
 
-                var twMove = tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
+                this._tweenAnim = tween(this.node).to(this.moveSpeed, { position: this.node.getComponent(aStar).getPosition(closeList[nextIndex]) }, {
                     onUpdate: () => {
                     },
                     onComplete: () => {
@@ -306,7 +316,7 @@ export class worker extends element {
                         //设置当前tank坐标
                         star.nodeInGridCellIndex = new Vec2(closeList[nextIndex].cellX, closeList[nextIndex].cellY)
                         //攻击源坦克
-                        twMove.removeSelf();
+                        this._tweenAnim.removeSelf();
                         if (nextIndex + 1 <= closeList.length - 1) {
                             //继续移动
                             nextIndex++;

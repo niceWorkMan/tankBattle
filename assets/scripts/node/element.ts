@@ -73,6 +73,9 @@ export class element extends base {
     //移动
     protected tweenMove(nextIndex: number, closeList: grid_c[]) { };
 
+    //Tween动画
+    public _tweenAnim:Tween<Node>;
+
 
     //外部调用 继续移动
     public tweenMoveOn() {
